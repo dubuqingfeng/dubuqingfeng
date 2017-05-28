@@ -32,3 +32,6 @@ else: unix:!android: target.path = /opt/$${TARGET}/bin
 # i18n
 TARGET = dubuqingfeng
 TRANSLATIONS += $${TARGET}_ch.ts
+
+DISTFILES += \
+    dubuqingfeng_ch.qm

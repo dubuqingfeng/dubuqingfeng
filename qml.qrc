@@ -1,6 +1,15 @@
 <RCC>
     <qresource prefix="/">
         <file>main.qml</file>
-        <file>MainForm.ui.qml</file>
+        <file>images/sports.jpeg</file>
+        <file>Element.qml</file>
+        <file>images/read.jpeg</file>
+        <file>images/life.jpg</file>
+        <file>images/travel.jpeg</file>
+        <file>images/game.jpeg</file>
+        <file>images/financing.jpeg</file>
+        <file>images/learn.jpeg</file>
+        <file>images/work.jpeg</file>
+        <file>images/write.jpeg</file>
     </qresource>
 </RCC>
