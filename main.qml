@@ -40,7 +40,7 @@ Window {
 
         Element {
             source: "images/life.jpg"
-            text: "生 活"
+            text: "日 常"
             Layout.row: 1;
             Layout.column: 0;
         }
