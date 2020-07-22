@@ -2,4 +2,4 @@
 
 ### 是一种生活方式
 
-![](./images/dubuqingfeng.png)
+![](https://github.com/dubuqingfeng/dubuqingfeng/raw/master/images/dubuqingfeng.png)
