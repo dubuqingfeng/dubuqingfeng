@@ -66,6 +66,6 @@
 
 ### How To Find Me?
 
-[![Wechat](https://img.shields.io/badge/-Wechat-000?&logo=wechat)](weixin://dubuqingfeng)
+[![Wechat](https://img.shields.io/badge/Wechat-dubuqingfeng-000?&logo=wechat)](weixin://dubuqingfeng)
 [![Blog](https://img.shields.io/badge/-Blog-000)](https://dbqf.xyz)
 [![Zhihu](https://img.shields.io/badge/-%E7%9F%A5%E4%B9%8E-000?&logo=zhihu)](https://www.zhihu.com/people/du-bu-qing-feng)
