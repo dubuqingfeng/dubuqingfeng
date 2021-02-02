@@ -24,27 +24,19 @@
 
 ### Technologies
 
- Blockchain: 
-
-![Bitcoin](https://img.shields.io/badge/-Bitcoin-000?&logo=Bitcoin)
+ Blockchain:    ![Bitcoin](https://img.shields.io/badge/-Bitcoin-000?&logo=Bitcoin)
 ![Ethereum](https://img.shields.io/badge/-Ethereum-000?&logo=ethereum)
 ![Defi](https://img.shields.io/badge/-Defi-000)
 
- DevOps:
-
-![Docker](https://img.shields.io/badge/-Docker-000?&logo=Docker)
+ DevOps:    ![Docker](https://img.shields.io/badge/-Docker-000?&logo=Docker)
 ![Kubernetes](https://img.shields.io/badge/-Kubernetes-000?&logo=Kubernetes)
 ![AWS](https://img.shields.io/badge/-AWS-000?&logo=Amazon-AWS&logoColor=FF9900)
 ![CI/CD](https://img.shields.io/badge/-CI%2FCD-000?&logo=CircleCI&logoColor=888)
 ![Linux](https://img.shields.io/badge/-Linux-000?&logo=Linux&logoColor=FCC624)
 
- Computations:
+ Computations:    ![Flink](https://img.shields.io/badge/-Flink-000?&logo=Flink)
 
-![Flink](https://img.shields.io/badge/-Flink-000?&logo=Flink)
-
- Dev:
-
-![Flutter](https://img.shields.io/badge/-Flutter-000)
+ Dev:    ![Flutter](https://img.shields.io/badge/-Flutter-000)
 ![Backend](https://img.shields.io/badge/-Backend-000)
 ![Crawler](https://img.shields.io/badge/-Crawler-000)
 ![Android](https://img.shields.io/badge/-Android-000?&logo=Android)
@@ -52,23 +44,16 @@
 ![React](https://img.shields.io/badge/-React-000?&logo=React)
 ![Vue](https://img.shields.io/badge/-Vue-000?&logo=vue.js)
 
- Security:
-
-![Web](https://img.shields.io/badge/-Web-000)
+ Security:    ![Web](https://img.shields.io/badge/-Web-000)
 ![Android](https://img.shields.io/badge/-Android-000?&logo=Android)
 ![Bin](https://img.shields.io/badge/-Bin-000)
 
- Database:
-
-[![MySQL](https://img.shields.io/badge/-MySQL-000?style=flat-square&logo=mysql&logoColor=white)](https://mariadb.com/)
+ Database:    [![MySQL](https://img.shields.io/badge/-MySQL-000?style=flat-square&logo=mysql&logoColor=white)](https://mariadb.com/)
 [![Redis](https://img.shields.io/badge/-Redis-000?style=flat-square&logo=redis&logoColor=white)](https://redis.io/)
 ![ClickHouse](https://img.shields.io/badge/-ClickHouse-000)
 
- Other:
-
-![LaTeX](https://img.shields.io/badge/-LaTeX-000?)
+ Other:    ![LaTeX](https://img.shields.io/badge/-LaTeX-000?)
 ![Machine Learning](https://img.shields.io/badge/Machine-Learning-000?)
-
 
 ### Full Stack Projects
 
@@ -81,6 +66,6 @@
 
 ### How To Find Me?
 
-[![Wechat](https://img.shields.io/badge/-Wechat-000?&logo=wechat)](dubuqingfeng)
+[![Wechat](https://img.shields.io/badge/-Wechat-000?&logo=wechat)](weixin://dubuqingfeng)
 [![Blog](https://img.shields.io/badge/-Blog-000)](https://dbqf.xyz)
-
+[![Zhihu](https://img.shields.io/badge/-%E7%9F%A5%E4%B9%8E-000?&logo=zhihu)](https://www.zhihu.com/people/du-bu-qing-feng)
