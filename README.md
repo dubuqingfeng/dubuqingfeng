@@ -58,7 +58,7 @@
 ### Full Stack Projects
 
 + [![api-monitor(api监控)](https://img.shields.io/badge/API-Monitor-000?)](https://github.com/dubuqingfeng/api-monitor)
-+ [![stratum-server-monitor(StratumServer监控)](https://img.shields.io/badge/API-Monitor-000?)](https://github.com/dubuqingfeng/stratum-server-monitor)
++ [![stratum-server-monitor(StratumServer监控)](https://img.shields.io/badge/StratumServer-Monitor-000?)](https://github.com/dubuqingfeng/stratum-server-monitor)
 + [![sitenav(网址导航)](https://img.shields.io/badge/-SiteNav-000?)](https://sitenav.link)
 + [![Rubik's Cube Robot(解魔方机器人)](https://img.shields.io/badge/Robot-Rubik'sCube-000?)](https://github.com/DigDream/RubiksCubeRobot)
 + [![BitNodeCrawler(比特币节点信息爬虫)](https://img.shields.io/badge/Crawler-BitcoinNode-000?)](https://github.com/dubuqingfeng/bit-node-crawler)
