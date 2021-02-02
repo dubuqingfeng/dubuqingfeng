@@ -1,7 +1,11 @@
-[![Header](https://github.com/dubuqingfeng/dubuqingfeng/raw/master/images/dubuqingfeng.png)](https://www.adamalston.com/)
+![Header](https://github.com/dubuqingfeng/dubuqingfeng/raw/master/images/dubuqingfeng.png)
+
+![info](https://github-readme-stats.vercel.app/api?username=dubuqingfeng&show_icons=true&count_private=true&hide=prs&theme=default_repocard)
+
 
 ### Languages
 
+![Golang](https://img.shields.io/badge/-TypeScript-000?&logo=TypeScript&logoColor=007ACC)
 [![Python](https://img.shields.io/badge/-Python-000?&logo=python)](https://github.com/dubuqingfeng?tab=repositories&q=&type=&language=python)
 [![JavaScript](https://img.shields.io/badge/-JavaScript-000?&logo=JavaScript&logoColor=ddc508)](https://github.com/dubuqingfeng?tab=repositories&q=&type=&language=javascript)
 [![C](https://img.shields.io/badge/-C-000?&logo=C)](https://github.com/dubuqingfeng?tab=repositories&q=&type=&language=c)
