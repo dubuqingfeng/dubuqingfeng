@@ -1,10 +1,8 @@
 <img src="https://github.com/dubuqingfeng/dubuqingfeng/raw/master/images/dubuqingfeng.png"  alt="life" height="450" width="450" align="right" />
 
-### Hi there, I'm Dubuqingfeng🎉
+<img src="https://github-readme-stats.vercel.app/api?username=dubuqingfeng&show_icons=true&count_private=true&hide=prs&theme=default_repocard" alt="logo" height="200" width="400" align="left" />
 
-<img src="https://github-readme-stats.vercel.app/api?username=dubuqingfeng&show_icons=true&count_private=true&hide=prs&theme=default_repocard" alt="logo" height="200" width="460" align="left" />
-
-<img src="https://github-readme-stats.vercel.app/api/top-langs/?username=dubuqingfeng&layout=compact" alt="logo" height="240" width="460" align="left" />
+<img src="https://github-readme-stats.vercel.app/api/top-langs/?username=dubuqingfeng&layout=compact" alt="logo" height="200" width="400" align="left" />
 
 <img src="https://github-profile-trophy.vercel.app/?username=dubuqingfeng&theme=flat&column=7&margin-w=10" alt="logo" height="160" align="center" />
 
