@@ -79,7 +79,5 @@ Window {
             Layout.row: 2;
             Layout.column: 2;
         }
-
-
     }
 }

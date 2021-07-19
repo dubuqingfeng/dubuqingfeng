@@ -1,0 +1,2 @@
+- 准备
+  - [开始](/getting-started)
