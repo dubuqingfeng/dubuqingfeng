@@ -1,0 +1,27 @@
+@font-face {
+    font-family: 'webfont';
+    font-display: swap;
+    src: url('puhui.eot'); /* IE9 */
+    src: url('puhui.eot?#iefix') format('embedded-opentype'), /* IE6-IE8 */
+    url('puhui.woff2') format('woff2'),
+    url('puhui.woff') format('woff'), /* chrome、firefox */
+    url('puhui.ttf') format('truetype'), /* chrome、firefox、opera、Safari, Android, iOS 4.2+*/
+    url('puhui.svg#puhui') format('svg'); /* iOS 4.1- */
+}
+
+section.cover h1 .anchor span {
+    font-family: 'Lobster', cursive;
+    color: var(--theme-color);
+}
+
+section.cover h2 .anchor span {
+    /* font-family: 'Lobster', cursive;
+    font-size: 24px;
+    color: var(--theme-color); */
+    font-family: "webfont" !important;
+    font-size: 36px;
+    color: var(--theme-color);
+    font-style: normal;
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+}
