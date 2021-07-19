@@ -15,11 +15,8 @@ section.cover h1 .anchor span {
 }
 
 section.cover h2 .anchor span {
-    /* font-family: 'Lobster', cursive;
-    font-size: 24px;
-    color: var(--theme-color); */
     font-family: "webfont" !important;
-    font-size: 36px;
+    font-size: 40px;
     color: var(--theme-color);
     font-style: normal;
     -webkit-font-smoothing: antialiased;

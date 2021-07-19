@@ -8,7 +8,7 @@
 
 - 效率提升
 - 实验室
-- A public wiki
+- A Public Wiki
 
 [生活博客](https://xiaoye.me)
 [技术博客](https://dbqf.xyz)
