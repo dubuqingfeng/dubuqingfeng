@@ -6,10 +6,13 @@
     - [NAS](/devices/nas.md)
   - 软件环境
 
-- 平台
-  - [个人平台](/platforms/personal/)
-  - [爬虫平台](/platforms/crawlers/)
+- [平台](/platforms/)
   - [鸱鸮平台](/platforms/chixiao/)
   - [量化平台](/platforms/quant/)
+  - 爬虫平台
+  - 数据清洗
+  - 消息平台
+  - 知识平台
 
 - 计算
+  - 能力
