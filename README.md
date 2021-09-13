@@ -1,6 +1,6 @@
 <img src="https://github.com/dubuqingfeng/dubuqingfeng/raw/master/images/dubuqingfeng.png"  alt="life" height="450" width="450" align="right" />
 
-### Hi there, I'm 独步清风（dubuqingfeng）🎉
+### Hi there, I'm [独步清风（dubuqingfeng）](https://dubuqingfeng.xyz) 🎉
 
 <img src="https://github-readme-stats.vercel.app/api?username=dubuqingfeng&show_icons=true&count_private=true&hide=prs&theme=default_repocard" alt="logo" height="200" width="360" align="left" />
 
@@ -8,7 +8,7 @@
 
 <img src="https://github-profile-trophy.vercel.app/?username=dubuqingfeng&theme=flat&column=7&margin-w=10" alt="logo" height="160" align="center" />
 
-### Platform&Tools
+### Platform & Tools
 
 [![](https://img.shields.io/badge/macOS-Hackintosh-292e33?style=flat-square&logo=apple&logoColor=ffffff)](https://www.tonymacx86.com/)
 [![](https://img.shields.io/badge/Windows-10-2376bc?style=flat-square&logo=windows&logoColor=ffffff)](https://www.microsoft.com/windows/get-windows-10)
@@ -62,7 +62,7 @@
  Other:    ![LaTeX](https://img.shields.io/badge/-LaTeX-000?)
 ![Machine Learning](https://img.shields.io/badge/Machine-Learning-000?)
 
-### Full Stack Projects
+### Public Full Stack Projects
 
 + [![api-monitor(api监控)](https://img.shields.io/badge/API-Monitor-000?)](https://github.com/dubuqingfeng/api-monitor)
 + [![stratum-server-monitor(StratumServer监控)](https://img.shields.io/badge/StratumServer-Monitor-000?)](https://github.com/dubuqingfeng/stratum-server-monitor)
