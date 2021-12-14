@@ -69,6 +69,15 @@
 + [![sitenav(网址导航)](https://img.shields.io/badge/-SiteNav-000?)](https://sitenav.link)
 + [![Rubik's Cube Robot(解魔方机器人)](https://img.shields.io/badge/Robot-Rubik'sCube-000?)](https://github.com/DigDream/RubiksCubeRobot)
 + [![BitNodeCrawler(比特币节点信息爬虫)](https://img.shields.io/badge/Crawler-BitcoinNode-000?)](https://github.com/dubuqingfeng/bit-node-crawler)
++ [![awesome-blockchain-explorer](https://img.shields.io/badge/awesome-blockchain-explorer-000?)](https://github.com/dubuqingfeng/awesome-blockchain-explorer)
++ [![blockchain-testcases](https://img.shields.io/badge/blockchain-testcases-000?)](https://github.com/dubuqingfeng/blockchain-testcases)
++ More...
+
+### Private Projects
+
++ [![crawlers](https://img.shields.io/badge/Crawlers-000?)](https://github.com/dubuqingfeng/crawlers)
++ [![git-backup](https://img.shields.io/badge/Git-Backup-000?)](https://github.com/dubuqingfeng/git-backup)
++ [![BTCcom-work-cli](https://img.shields.io/badge/BTCcom-work-cli-000?)](https://github.com/dubuqingfeng/btccom-work-cli)
 + More...
 
 ### How To Find Me?
