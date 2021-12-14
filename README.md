@@ -71,13 +71,17 @@
 + [![BitNodeCrawler(比特币节点信息爬虫)](https://img.shields.io/badge/Crawler-BitcoinNode-000?)](https://github.com/dubuqingfeng/bit-node-crawler)
 + [![awesome-blockchain-explorer](https://img.shields.io/badge/awesome-explorer-000?)](https://github.com/dubuqingfeng/awesome-blockchain-explorer)
 + [![blockchain-testcases](https://img.shields.io/badge/blockchain-testcases-000?)](https://github.com/dubuqingfeng/blockchain-testcases)
++ [![PoolIncome-Crawler](https://img.shields.io/badge/PoolIncome-Crawler-000?)](https://github.com/dubuqingfeng/scrapy-pool-coin-income)
++ [![Dotfiles](https://img.shields.io/badge/Dotfiles-000?)](https://github.com/dubuqingfeng/dotfiles)
 + More...
 
 ### Private Projects
 
++ [![BitQuant](https://img.shields.io/badge/BitQuant-000?)](https://github.com/dubuqingfeng/BitQuant)
 + [![crawlers](https://img.shields.io/badge/Crawlers-000?)](https://github.com/dubuqingfeng/crawlers)
 + [![git-backup](https://img.shields.io/badge/Git-Backup-000?)](https://github.com/dubuqingfeng/git-backup)
 + [![BTCcom-work-cli](https://img.shields.io/badge/BTCcom-workcli-000?)](https://github.com/dubuqingfeng/btccom-work-cli)
++ [![Erc20-admin](https://img.shields.io/badge/erc20-admin-000?)](https://github.com/dubuqingfeng/erc20admin)
 + More...
 
 ### How To Find Me?
