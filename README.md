@@ -80,7 +80,7 @@
 + [![BitQuant](https://img.shields.io/badge/BitQuant-000?)](https://github.com/dubuqingfeng/BitQuant)
 + [![crawlers](https://img.shields.io/badge/Crawlers-000?)](https://github.com/dubuqingfeng/crawlers)
 + [![git-backup](https://img.shields.io/badge/Git-Backup-000?)](https://github.com/dubuqingfeng/git-backup)
-+ [![BTCcom-work-cli](https://img.shields.io/badge/BTCcom-workcli-000?)](https://github.com/dubuqingfeng/btccom-work-cli)
++ [![BTCcom-work-cli](https://img.shields.io/badge/BTC.com-workcli-000?)](https://github.com/dubuqingfeng/btccom-work-cli)
 + [![Erc20-admin](https://img.shields.io/badge/erc20-admin-000?)](https://github.com/dubuqingfeng/erc20admin)
 + More...
 
