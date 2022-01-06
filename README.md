@@ -1,10 +1,10 @@
-<img src="https://github.com/dubuqingfeng/dubuqingfeng/raw/master/images/dubuqingfeng.png"  alt="life" height="450" width="450" align="right" />
+<img src="https://github.com/dubuqingfeng/dubuqingfeng/raw/master/images/dubuqingfeng.png"  alt="life" height="430" width="430" align="right" />
 
 ### Hi there, I'm [独步清风（dubuqingfeng）](https://dubuqingfeng.xyz) 🎉
 
-<img src="https://github-readme-stats.vercel.app/api?username=dubuqingfeng&show_icons=true&count_private=true&hide=prs&theme=default_repocard" alt="logo" height="200" width="360" align="left" />
+<img src="https://github-readme-stats.vercel.app/api?username=dubuqingfeng&show_icons=true&count_private=true&hide=prs&theme=default_repocard" alt="logo" height="200" width="350" align="left" />
 
-<img src="https://github-readme-stats.vercel.app/api/top-langs/?username=dubuqingfeng&layout=compact" alt="logo" height="200" width="360" align="left" />
+<img src="https://github-readme-stats.vercel.app/api/top-langs/?username=dubuqingfeng&layout=compact" alt="logo" height="200" width="350" align="left" />
 
 <img src="https://github-profile-trophy.vercel.app/?username=dubuqingfeng&theme=flat&column=7&margin-w=10" alt="logo" height="160" align="center" />
 
@@ -69,6 +69,19 @@
 + [![sitenav(网址导航)](https://img.shields.io/badge/-SiteNav-000?)](https://sitenav.link)
 + [![Rubik's Cube Robot(解魔方机器人)](https://img.shields.io/badge/Robot-Rubik'sCube-000?)](https://github.com/DigDream/RubiksCubeRobot)
 + [![BitNodeCrawler(比特币节点信息爬虫)](https://img.shields.io/badge/Crawler-BitcoinNode-000?)](https://github.com/dubuqingfeng/bit-node-crawler)
++ [![awesome-blockchain-explorer](https://img.shields.io/badge/awesome-explorer-000?)](https://github.com/dubuqingfeng/awesome-blockchain-explorer)
++ [![blockchain-testcases](https://img.shields.io/badge/blockchain-testcases-000?)](https://github.com/dubuqingfeng/blockchain-testcases)
++ [![PoolIncome-Crawler](https://img.shields.io/badge/PoolIncome-Crawler-000?)](https://github.com/dubuqingfeng/scrapy-pool-coin-income)
++ [![Dotfiles](https://img.shields.io/badge/Dotfiles-000?)](https://github.com/dubuqingfeng/dotfiles)
++ More...
+
+### Private Projects
+
++ [![BitQuant](https://img.shields.io/badge/BitQuant-000?)](https://github.com/dubuqingfeng/BitQuant)
++ [![crawlers](https://img.shields.io/badge/Crawlers-000?)](https://github.com/dubuqingfeng/crawlers)
++ [![git-backup](https://img.shields.io/badge/Git-Backup-000?)](https://github.com/dubuqingfeng/git-backup)
++ [![BTCcom-work-cli](https://img.shields.io/badge/BTC.com-workcli-000?)](https://github.com/dubuqingfeng/btccom-work-cli)
++ [![Erc20-admin](https://img.shields.io/badge/erc20-admin-000?)](https://github.com/dubuqingfeng/erc20admin)
 + More...
 
 ### How To Find Me?
