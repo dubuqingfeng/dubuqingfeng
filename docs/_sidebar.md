@@ -1,6 +1,8 @@
 - 开始
   - [目录](/started/toc.md)
 
+- [简历](/resume)
+
 - 利器
   - 硬件设备
     - [NAS](/devices/nas.md)
