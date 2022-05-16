@@ -12,7 +12,7 @@
 
 [![](https://img.shields.io/badge/macOS-Hackintosh-292e33?style=flat-square&logo=apple&logoColor=ffffff)](https://www.tonymacx86.com/)
 [![](https://img.shields.io/badge/Windows-10-2376bc?style=flat-square&logo=windows&logoColor=ffffff)](https://www.microsoft.com/windows/get-windows-10)
-[![](https://img.shields.io/badge/iPhone-13%20Pro%20%20Max-000000?style=flat-square&logo=apple&logoColor=ffffff)](https://www.apple.com/)
+[![](https://img.shields.io/badge/iPhoneo%20%2013-Pro%20%20Max-000000?style=flat-square&logo=apple&logoColor=ffffff)](https://www.apple.com/)
 [![](https://img.shields.io/badge/Ubuntu-000000?style=flat-square&logo=ubuntu&logoColor=ffffff)](https://ubuntu.com/)
 
 ### Languages
@@ -35,12 +35,6 @@
 ![Ethereum](https://img.shields.io/badge/-Ethereum-000?&logo=ethereum)
 ![Defi](https://img.shields.io/badge/-Defi-000)
 
- DevOps:    ![Docker](https://img.shields.io/badge/-Docker-000?&logo=Docker)
-![Kubernetes](https://img.shields.io/badge/-Kubernetes-000?&logo=Kubernetes)
-![AWS](https://img.shields.io/badge/-AWS-000?&logo=Amazon-AWS&logoColor=FF9900)
-![CI/CD](https://img.shields.io/badge/-CI%2FCD-000?&logo=CircleCI&logoColor=888)
-![Linux](https://img.shields.io/badge/-Linux-000?&logo=Linux&logoColor=FCC624)
-
  Computations:    ![Flink](https://img.shields.io/badge/-Flink-000?&logo=Flink)
 
  Dev:    ![Flutter](https://img.shields.io/badge/-Flutter-000)
@@ -58,6 +52,12 @@
  Database:    [![MySQL](https://img.shields.io/badge/-MySQL-000?style=flat-square&logo=mysql&logoColor=white)](https://mariadb.com/)
 [![Redis](https://img.shields.io/badge/-Redis-000?style=flat-square&logo=redis&logoColor=white)](https://redis.io/)
 ![ClickHouse](https://img.shields.io/badge/-ClickHouse-000)
+
+ DevOps:    ![Docker](https://img.shields.io/badge/-Docker-000?&logo=Docker)
+![Kubernetes](https://img.shields.io/badge/-Kubernetes-000?&logo=Kubernetes)
+![AWS](https://img.shields.io/badge/-AWS-000?&logo=Amazon-AWS&logoColor=FF9900)
+![CI/CD](https://img.shields.io/badge/-CI%2FCD-000?&logo=CircleCI&logoColor=888)
+![Linux](https://img.shields.io/badge/-Linux-000?&logo=Linux&logoColor=FCC624)
 
  Other:    ![LaTeX](https://img.shields.io/badge/-LaTeX-000?)
 ![Machine Learning](https://img.shields.io/badge/Machine-Learning-000?)
