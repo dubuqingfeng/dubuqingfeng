@@ -11,7 +11,7 @@
 ### Platform & Tools
 
 [![](https://img.shields.io/badge/macOS-Hackintosh-292e33?style=flat-square&logo=apple&logoColor=ffffff)](https://www.tonymacx86.com/)
-[![](https://img.shields.io/badge/Windows-10-2376bc?style=flat-square&logo=windows&logoColor=ffffff)](https://www.microsoft.com/windows/get-windows-10)
+[![](https://img.shields.io/badge/Windows-11-2376bc?style=flat-square&logo=windows&logoColor=ffffff)](https://www.microsoft.com/windows/get-windows-11)
 [![](https://img.shields.io/badge/iPhoneo%20%2013-Pro%20%20Max-000000?style=flat-square&logo=apple&logoColor=ffffff)](https://www.apple.com/)
 [![](https://img.shields.io/badge/Ubuntu-000000?style=flat-square&logo=ubuntu&logoColor=ffffff)](https://ubuntu.com/)
 
