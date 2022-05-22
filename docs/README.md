@@ -67,9 +67,12 @@
 
 ### How To Find Me?
 
-[![Wechat](https://img.shields.io/badge/Wechat-dubuqingfeng-000?&logo=wechat)](weixin://dubuqingfeng)
 [![Tech's Blog](https://img.shields.io/badge/Tech-Blog-000)](https://dbqf.xyz)
 [![Life's Blog](https://img.shields.io/badge/Life-Blog-000)](https://xiaoye.me)
+
+
+[![Wechat](https://img.shields.io/badge/Wechat-dubuqingfeng-000?&logo=wechat)](weixin://dubuqingfeng)
+[![GitHub](https://img.shields.io/badge/-GitHub-000?&logo=github)](https://github.com/dubuqingfeng)
 [![Twitter](https://img.shields.io/badge/-Twitter-000?&logo=twitter)](https://twitter.com/dubuqingfeng)
 [![Weibo](https://img.shields.io/badge/-Weibo-000?&logo=weibo)](https://weibo.com/u/2918508621)
 [![Zhihu](https://img.shields.io/badge/-%E7%9F%A5%E4%B9%8E-000?&logo=zhihu)](https://www.zhihu.com/people/du-bu-qing-feng)
