@@ -1,10 +1,10 @@
-<img src="https://github.com/dubuqingfeng/dubuqingfeng/raw/master/images/dubuqingfeng.png"  alt="life" height="430" width="430" align="right" />
+<img src="https://github.com/dubuqingfeng/dubuqingfeng/raw/master/images/dubuqingfeng.png"  alt="life" height="400" width="400" align="right" />
 
 ## Hi there, I'm [独步清风（dubuqingfeng）](https://dubuqingfeng.xyz) 🎉
 
-<img src="https://github-readme-stats.vercel.app/api?username=dubuqingfeng&show_icons=true&count_private=true&hide=prs&theme=default_repocard" alt="logo" height="200" width="320" align="left" />
+<img src="https://github-readme-stats.vercel.app/api?username=dubuqingfeng&show_icons=true&count_private=true&hide=prs&theme=default_repocard" alt="logo" height="200" width="330" align="left" />
 
-<img src="https://github-readme-stats.vercel.app/api/top-langs/?username=dubuqingfeng&layout=compact" alt="logo" height="200" width="320" align="left" />
+<img src="https://github-readme-stats.vercel.app/api/top-langs/?username=dubuqingfeng&layout=compact" alt="logo" height="200" width="330" align="left" />
 
 <img src="https://github-profile-trophy.vercel.app/?username=dubuqingfeng&theme=flat&column=7&margin-w=10" alt="logo" height="160" align="center" />
 
@@ -73,28 +73,18 @@ Not good at Algorithm, Sooner or later we will be replaced by AI.
 + [![Dotfiles](https://img.shields.io/badge/Dotfiles-000?)](https://github.com/dubuqingfeng/dotfiles)
 + More...
 
-Monitor:
-
-[![api-monitor(api监控)](https://img.shields.io/badge/API-Monitor-000?)](https://github.com/dubuqingfeng/api-monitor)
+Monitor: [![api-monitor(api监控)](https://img.shields.io/badge/API-Monitor-000?)](https://github.com/dubuqingfeng/api-monitor)
 [![stratum-server-monitor(StratumServer监控)](https://img.shields.io/badge/StratumServer-Monitor-000?)](https://github.com/dubuqingfeng/stratum-server-monitor)
 
-Crawler:
-
-[![BitNodeCrawler(比特币节点信息爬虫)](https://img.shields.io/badge/Crawler-BitcoinNode-000?)](https://github.com/dubuqingfeng/bit-node-crawler)
+Crawler: [![BitNodeCrawler(比特币节点信息爬虫)](https://img.shields.io/badge/Crawler-BitcoinNode-000?)](https://github.com/dubuqingfeng/bit-node-crawler)
 [![Crawler-PoolIncome](https://img.shields.io/badge/Crawler-PoolIncome-000?)](https://github.com/dubuqingfeng/scrapy-pool-coin-income)
 
-Proxy:
+Proxy: [![BlockchainNode-Proxy](https://img.shields.io/badge/BlockchainNode-Proxy-000?)](https://github.com/dubuqingfeng/blockchain-node-proxy)
 
-[![BlockchainNode-Proxy](https://img.shields.io/badge/BlockchainNode-Proxy-000?)](https://github.com/dubuqingfeng/blockchain-node-proxy)
-
-Docker Image:
-
-[![Coin-Daemon](https://img.shields.io/badge/Coin-Daemon-000?)](https://github.com/dubuqingfeng/coin_daemons_docker)
+Docker Image: [![Coin-Daemon](https://img.shields.io/badge/Coin-Daemon-000?)](https://github.com/dubuqingfeng/coin_daemons_docker)
 [![Docker-Images](https://img.shields.io/badge/Docker-Images-000?)](https://github.com/dubuqingfeng/Docker-Images)
 
-Awesome:
-
-[![awesome-blockchain-explorer](https://img.shields.io/badge/awesome-explorer-000?)](https://github.com/dubuqingfeng/awesome-blockchain-explorer)
+Awesome: [![awesome-blockchain-explorer](https://img.shields.io/badge/awesome-explorer-000?)](https://github.com/dubuqingfeng/awesome-blockchain-explorer)
 [![awesome-code](https://img.shields.io/badge/awesome-code-000?)](https://github.com/dubuqingfeng/awesome-code)
 
 ## Private Projects
