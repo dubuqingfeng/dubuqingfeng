@@ -220,3 +220,13 @@ runtime.schedule() {
     //     if not found, poll network.
 }
 ```
+
+
+
+
+
+#### 调度策略
+
+
+
+https://github.com/lifei6671/interview-go/blob/master/base/go-scheduler.md

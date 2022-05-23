@@ -82,3 +82,8 @@ We consider a cycle to be: sweep termination, mark, mark termination, and sweep.
 
 https://qcrao91.gitbook.io/go/gc/gc
 
+
+
+Go 语言的 GC 实现分析
+
+https://xargin.com/impl-of-go-gc/
