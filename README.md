@@ -66,16 +66,35 @@ Not good at Algorithm, Sooner or later we will be replaced by AI.
 
 ### Public Full Stack Projects
 
-+ [![api-monitor(api监控)](https://img.shields.io/badge/API-Monitor-000?)](https://github.com/dubuqingfeng/api-monitor)
-+ [![stratum-server-monitor(StratumServer监控)](https://img.shields.io/badge/StratumServer-Monitor-000?)](https://github.com/dubuqingfeng/stratum-server-monitor)
 + [![sitenav(网址导航)](https://img.shields.io/badge/-SiteNav-000?)](https://sitenav.link)
 + [![Rubik's Cube Robot(解魔方机器人)](https://img.shields.io/badge/Robot-Rubik'sCube-000?)](https://github.com/DigDream/RubiksCubeRobot)
-+ [![BitNodeCrawler(比特币节点信息爬虫)](https://img.shields.io/badge/Crawler-BitcoinNode-000?)](https://github.com/dubuqingfeng/bit-node-crawler)
-+ [![awesome-blockchain-explorer](https://img.shields.io/badge/awesome-explorer-000?)](https://github.com/dubuqingfeng/awesome-blockchain-explorer)
 + [![blockchain-testcases](https://img.shields.io/badge/blockchain-testcases-000?)](https://github.com/dubuqingfeng/blockchain-testcases)
-+ [![Crawler-PoolIncome](https://img.shields.io/badge/Crawler-PoolIncome-000?)](https://github.com/dubuqingfeng/scrapy-pool-coin-income)
 + [![Dotfiles](https://img.shields.io/badge/Dotfiles-000?)](https://github.com/dubuqingfeng/dotfiles)
 + More...
+
+Awesome:
+
++ [![awesome-blockchain-explorer](https://img.shields.io/badge/awesome-explorer-000?)](https://github.com/dubuqingfeng/awesome-blockchain-explorer)
++ [![awesome-code](https://img.shields.io/badge/awesome-code-000?)](https://github.com/dubuqingfeng/awesome-code)
+
+Monitor:
+
++ [![api-monitor(api监控)](https://img.shields.io/badge/API-Monitor-000?)](https://github.com/dubuqingfeng/api-monitor)
++ [![stratum-server-monitor(StratumServer监控)](https://img.shields.io/badge/StratumServer-Monitor-000?)](https://github.com/dubuqingfeng/stratum-server-monitor)
+
+Crawler:
+
++ [![BitNodeCrawler(比特币节点信息爬虫)](https://img.shields.io/badge/Crawler-BitcoinNode-000?)](https://github.com/dubuqingfeng/bit-node-crawler)
++ [![Crawler-PoolIncome](https://img.shields.io/badge/Crawler-PoolIncome-000?)](https://github.com/dubuqingfeng/scrapy-pool-coin-income)
+
+Proxy:
+
++ [![BlockchainNode-Proxy](https://img.shields.io/badge/BlockchainNode-Proxy-000?)](https://github.com/dubuqingfeng/blockchain-node-proxy)
+
+Docker Image:
+
++ [![Coin-Daemon](https://img.shields.io/badge/Coin-Daemon-000?)](https://github.com/dubuqingfeng/coin_daemons_docker)
++ [![Docker-Images](https://img.shields.io/badge/Docker-Images-000?)](https://github.com/dubuqingfeng/Docker-Images)
 
 ### Private Projects
 
@@ -88,9 +107,12 @@ Not good at Algorithm, Sooner or later we will be replaced by AI.
 
 ### How To Find Me?
 
-[![Wechat](https://img.shields.io/badge/Wechat-dubuqingfeng-000?&logo=wechat)](weixin://dubuqingfeng)
+Resume: + [![Resume](https://img.shields.io/badge/Resume-000?)](https://github.com/dubuqingfeng/dubuqingfeng/blob/master/docs/Resume.pdf)
+
 [![Tech's Blog](https://img.shields.io/badge/Tech-Blog-000)](https://dbqf.xyz)
 [![Life's Blog](https://img.shields.io/badge/Life-Blog-000)](https://xiaoye.me)
+
+[![Wechat](https://img.shields.io/badge/Wechat-dubuqingfeng-000?&logo=wechat)](weixin://dubuqingfeng)
 [![Twitter](https://img.shields.io/badge/-Twitter-000?&logo=twitter)](https://twitter.com/dubuqingfeng)
 [![Weibo](https://img.shields.io/badge/-Weibo-000?&logo=weibo)](https://weibo.com/u/2918508621)
 [![Zhihu](https://img.shields.io/badge/-%E7%9F%A5%E4%B9%8E-000?&logo=zhihu)](https://www.zhihu.com/people/du-bu-qing-feng)
