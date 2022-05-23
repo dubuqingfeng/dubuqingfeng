@@ -29,6 +29,8 @@
 ![Dart](https://img.shields.io/badge/-Dart-000?&logo=Dart&logoColor=4479A1)
 ![Lua](https://img.shields.io/badge/-Lua-000?&logo=lua&logoColor=4479A1)
 
+Not good at Algorithm, Sooner or later we will be replaced by AI.
+
 ### Technologies
 
  Blockchain:    ![Bitcoin](https://img.shields.io/badge/-Bitcoin-000?&logo=Bitcoin)
