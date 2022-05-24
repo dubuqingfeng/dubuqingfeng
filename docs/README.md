@@ -2,14 +2,15 @@
 
 <img src="https://github.com/dubuqingfeng/dubuqingfeng/raw/master/images/dubuqingfeng.png"  alt="life" height="450" width="450"/>
 
-### Platform&Tools
+## Platform & Tools
 
 [![](https://img.shields.io/badge/macOS-Hackintosh-292e33?style=flat-square&logo=apple&logoColor=ffffff)](https://www.tonymacx86.com/)
 [![](https://img.shields.io/badge/Windows-11-2376bc?style=flat-square&logo=windows&logoColor=ffffff)](https://www.microsoft.com/windows/get-windows-11)
-[![](https://img.shields.io/badge/iPhone%20%2013-Xs%20%20Max-000000?style=flat-square&logo=apple&logoColor=ffffff)](https://www.apple.com/)
+[![](https://img.shields.io/badge/iPhone%20%2013-Pro%20%20Max-000000?style=flat-square&logo=apple&logoColor=ffffff)](https://www.apple.com/)
 [![](https://img.shields.io/badge/Ubuntu-000000?style=flat-square&logo=ubuntu&logoColor=ffffff)](https://ubuntu.com/)
+[![](https://img.shields.io/badge/iPad-Pro-000000?style=flat-square&logo=apple&logoColor=ffffff)](https://www.apple.com/)
 
-### Languages
+## Languages
 
 [![PHP](https://img.shields.io/badge/-PHP-000?&logo=php&logoColor=007ACC)](https://github.com/dubuqingfeng?tab=repositories&q=&type=&language=go)
 [![Golang](https://img.shields.io/badge/-Golang-000?&logo=Go&logoColor=007ACC)](https://github.com/dubuqingfeng?tab=repositories&q=&type=&language=php)
@@ -23,7 +24,9 @@
 ![Dart](https://img.shields.io/badge/-Dart-000?&logo=Dart&logoColor=4479A1)
 ![Lua](https://img.shields.io/badge/-Lua-000?&logo=lua&logoColor=4479A1)
 
-### Technologies
+Not good at Algorithm, Sooner or later we will be replaced by AI.
+
+## Technologies
 
  Blockchain:    ![Bitcoin](https://img.shields.io/badge/-Bitcoin-000?&logo=Bitcoin)
 ![Ethereum](https://img.shields.io/badge/-Ethereum-000?&logo=ethereum)
@@ -56,23 +59,49 @@
  Other:    ![LaTeX](https://img.shields.io/badge/-LaTeX-000?)
 ![Machine Learning](https://img.shields.io/badge/Machine-Learning-000?)
 
-### Full Stack Projects
+## Public Full Stack Projects
 
-+ [![api-monitor(api监控)](https://img.shields.io/badge/API-Monitor-000?)](https://github.com/dubuqingfeng/api-monitor)
-+ [![stratum-server-monitor(StratumServer监控)](https://img.shields.io/badge/StratumServer-Monitor-000?)](https://github.com/dubuqingfeng/stratum-server-monitor)
 + [![sitenav(网址导航)](https://img.shields.io/badge/-SiteNav-000?)](https://sitenav.link)
 + [![Rubik's Cube Robot(解魔方机器人)](https://img.shields.io/badge/Robot-Rubik'sCube-000?)](https://github.com/DigDream/RubiksCubeRobot)
-+ [![BitNodeCrawler(比特币节点信息爬虫)](https://img.shields.io/badge/Crawler-BitcoinNode-000?)](https://github.com/dubuqingfeng/bit-node-crawler)
++ [![blockchain-testcases](https://img.shields.io/badge/blockchain-testcases-000?)](https://github.com/dubuqingfeng/blockchain-testcases)
++ [![Dotfiles](https://img.shields.io/badge/Dotfiles-000?)](https://github.com/dubuqingfeng/dotfiles)
 + More...
 
-### How To Find Me?
+Monitor: [![api-monitor(api监控)](https://img.shields.io/badge/API-Monitor-000?)](https://github.com/dubuqingfeng/api-monitor)
+[![stratum-server-monitor(StratumServer监控)](https://img.shields.io/badge/StratumServer-Monitor-000?)](https://github.com/dubuqingfeng/stratum-server-monitor)
+
+Crawler: [![BitNodeCrawler(比特币节点信息爬虫)](https://img.shields.io/badge/Crawler-BitcoinNode-000?)](https://github.com/dubuqingfeng/bit-node-crawler)
+[![Crawler-PoolIncome](https://img.shields.io/badge/Crawler-PoolIncome-000?)](https://github.com/dubuqingfeng/scrapy-pool-coin-income)
+
+Proxy: [![BlockchainNode-Proxy](https://img.shields.io/badge/BlockchainNode-Proxy-000?)](https://github.com/dubuqingfeng/blockchain-node-proxy)
+
+Docker Image: [![Coin-Daemon](https://img.shields.io/badge/Coin-Daemon-000?)](https://github.com/dubuqingfeng/coin_daemons_docker)
+[![Docker-Images](https://img.shields.io/badge/Docker-Images-000?)](https://github.com/dubuqingfeng/Docker-Images)
+
+Awesome: [![awesome-blockchain-explorer](https://img.shields.io/badge/awesome-explorer-000?)](https://github.com/dubuqingfeng/awesome-blockchain-explorer)
+[![awesome-code](https://img.shields.io/badge/awesome-code-000?)](https://github.com/dubuqingfeng/awesome-code)
+
+## Private Projects
+
++ [![BitQuant](https://img.shields.io/badge/BitQuant-000?)](https://github.com/dubuqingfeng/BitQuant)
++ [![crawlers](https://img.shields.io/badge/Crawlers-000?)](https://github.com/dubuqingfeng/crawlers)
++ [![git-backup](https://img.shields.io/badge/Git-Backup-000?)](https://github.com/dubuqingfeng/git-backup)
++ [![BTCcom-work-cli](https://img.shields.io/badge/BTC.com-workcli-000?)](https://github.com/dubuqingfeng/btccom-work-cli)
++ [![Erc20-admin](https://img.shields.io/badge/erc20-admin-000?)](https://github.com/dubuqingfeng/erc20admin)
++ More...
+
+## Public Lives
+
++ Flink Forward Asia 2020, Realtime computing, From 0 to 1
+
+## How To Find Me?
+
+Resume: [![Resume](https://img.shields.io/badge/Resume-000?)](https://github.com/dubuqingfeng/dubuqingfeng/blob/master/docs/Resume.pdf)
 
 [![Tech's Blog](https://img.shields.io/badge/Tech-Blog-000)](https://dbqf.xyz)
 [![Life's Blog](https://img.shields.io/badge/Life-Blog-000)](https://xiaoye.me)
 
-
 [![Wechat](https://img.shields.io/badge/Wechat-dubuqingfeng-000?&logo=wechat)](weixin://dubuqingfeng)
-[![GitHub](https://img.shields.io/badge/-GitHub-000?&logo=github)](https://github.com/dubuqingfeng)
 [![Twitter](https://img.shields.io/badge/-Twitter-000?&logo=twitter)](https://twitter.com/dubuqingfeng)
 [![Weibo](https://img.shields.io/badge/-Weibo-000?&logo=weibo)](https://weibo.com/u/2918508621)
 [![Zhihu](https://img.shields.io/badge/-%E7%9F%A5%E4%B9%8E-000?&logo=zhihu)](https://www.zhihu.com/people/du-bu-qing-feng)
