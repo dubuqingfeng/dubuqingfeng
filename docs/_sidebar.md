@@ -3,6 +3,9 @@
 
 - [简历](/resume)
 
+  - [pdf](/resume)
+  - [png](/resume-pic)
+
 - 利器
   - 硬件设备
     - [NAS](/devices/nas.md)
