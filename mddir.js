@@ -175,7 +175,7 @@ if(folders[name] !== undefined){
         console.log('adding root folder');
         // before
         // markdownText += '|-- ' + startFolder + '\n';
-        markdownText += '' + startFolder + '\n';
+        markdownText += '+ ' + startFolder + '\n';
     } else {
         // before
         // markdownText += '|-- ' + folders[name].name + '\n';
