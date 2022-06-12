@@ -12,10 +12,11 @@
   - 软件环境
     - ubuntu
     - mac
+  - [Service](/devices/services.md)
 
 - [平台](/platforms/)
   - [量化平台](/platforms/quant/)
   - [爬虫平台](https://github.com/crawlab-team/crawlab)
   - 数据清洗
   - 消息平台
-  - 知识平台
+  - [知识平台](/platforms/wiki/)

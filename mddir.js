@@ -18,7 +18,8 @@ var currentWorkingDirectory = process.cwd();
 
 var folderIgnoreList = [
     '.git',
-    'node_modules'
+    'node_modules',
+    '_media'
 ];
 
 // getFolders 获取文件 / 文件夹列表
@@ -146,6 +147,7 @@ var addFileName = function(dirname, name, indent){
     // before
     // markdownText += '|-- ' + name + '\n';
     dirname = dirname.replace('/workspaces/dubuqingfeng', '.');
+    dirname = dirname.replace('./docs', '');
     name = name.replace('.md', '');
     markdownText += '+ [' + name + '](' + dirname + '/' + name  + ')' + '\n';
 };
@@ -193,14 +195,14 @@ if(folders[name] !== undefined){
 };
 
 var generateMarkdown = function(){
-addFolderName(key, 1);
+    addFolderName(key, 1);
 
-addSiblingfolderConnections();
+    addSiblingfolderConnections();
 
-fs.writeFile(currentWorkingDirectory + '/' + outputFileName, markdownText, function(err){
-    if (err) return;
-    // console.log(outputFileName +  '>' + outputText);
-});
+    fs.writeFile(currentWorkingDirectory + '/' + outputFileName, markdownText, function(err){
+        if (err) return;
+        // console.log(outputFileName +  '>' + outputText);
+    });
 };
 
 String.prototype.replaceAt=function(index, character) {
