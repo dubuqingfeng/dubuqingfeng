@@ -9,13 +9,22 @@ import {
   contactMeData,
   languagesMenuData,
   blockchainMenuData,
+  databaseMenuData,
+  frameworkMenuData,
+  devopsMenuData,
+  securityMenuData,
+  othersMenuData,
   languagesGridList,
   blockchainGridList,
+  databaseGridList,
+  frameworkGridList,
+  devOpsGridList,
+  securityGridList,
   othersGridList,
-  othersMenuData,
 } from "@site/src/data";
 import GridList from "@site/src/components/GridList";
 import styles from "./styles.module.css";
+
 import favicon from "@site/static/img/favicon/favicon.jpeg";
 import github from "@site/static/img/icon/github.png";
 import gmail from "@site/static/img/icon/gmail.png";
@@ -74,31 +83,31 @@ export default function Home(): JSX.Element {
 
                 {/* database */}
                 <div className={clsx(styles.listTitle, styles.marginTop)}>
-                  Database
+                  {databaseMenuData.title}
                 </div>
-                <GridList data={othersGridList} />
+                <GridList data={databaseGridList} />
 
                 {/* devops */}
                 <div className={clsx(styles.listTitle, styles.marginTop)}>
-                  DevOps
+                  {devopsMenuData.title}
                 </div>
-                <GridList data={othersGridList} />
+                <GridList data={devOpsGridList} />
 
                 {/* security */}
                 <div className={clsx(styles.listTitle, styles.marginTop)}>
-                  Security
+                  {securityMenuData.title}
                 </div>
-                <GridList data={othersGridList} />
+                <GridList data={securityGridList} />
 
                 {/* framework */}
                 <div className={clsx(styles.listTitle, styles.marginTop)}>
-                  Framework
+                  {frameworkMenuData.title}
                 </div>
-                <GridList data={othersGridList} />
+                <GridList data={frameworkGridList} />
 
                 {/* others */}
                 <div className={clsx(styles.listTitle, styles.marginTop)}>
-                  Others
+                  {othersMenuData.title}
                 </div>
                 <GridList data={othersGridList} />
               </div>
