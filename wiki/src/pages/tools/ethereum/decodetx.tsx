@@ -128,7 +128,7 @@ export default function DecodeTX() {
                     "button--sm",
                     styles.heroTextAreaButton
                 )}
-                onClick={ handlePushTx }
+                onClick={ handleSubmit }
                 >
                 Publish
             </Link>

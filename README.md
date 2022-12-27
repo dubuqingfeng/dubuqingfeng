@@ -1,6 +1,6 @@
 <img src="https://github.com/dubuqingfeng/dubuqingfeng/raw/master/images/dubuqingfeng.png"  alt="life" height="360" width="360" align="right" />
 
-### Hi there, I'm [独步清风ccc（dubuqingfeng）](https://dubuqingfeng.xyz) 🎉
+### Hi there, I'm [独步清风（dubuqingfeng）](https://dubuqingfeng.xyz) 🎉
 
 <img src="https://github-readme-stats.vercel.app/api?username=dubuqingfeng&show_icons=true&count_private=true&hide=prs&theme=default_repocard" alt="logo" height="150" width="330" align="left" />
 
