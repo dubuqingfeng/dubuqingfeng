@@ -53,7 +53,7 @@ const config = {
           // Please change this to your repo.
           // Remove this to remove the "edit this page" links.
           editUrl:
-            'https://github.com/facebook/docusaurus/tree/main/packages/create-docusaurus/templates/shared/',
+            'https://github.com/dubuqingfeng/dubuqingfeng/tree/master/wiki/',
         },
         theme: {
           customCss: require.resolve('./src/css/custom.css'),
@@ -75,16 +75,32 @@ const config = {
       },
       navbar: {
         title: 'dubuqingfeng',
-        // logo: {
-        //   alt: 'My Site Logo',
-        //   src: 'img/logo.svg',
-        // },
         items: [
           {
             type: 'doc',
             docId: 'intro',
             position: 'left',
             label: 'Tutorial',
+          },
+          {
+            position: "left",
+            label: "Tools",
+            items: [
+              {
+                href: "https://json.cn",
+                label: "json",
+              },
+            ],
+          },
+          {
+            position: "left",
+            label: "Ethereum",
+            items: [
+              {
+                label: "Decode Transaction",
+                to: "/tools/ethereum/decodetx",
+              },
+            ],
           },
           {
             href: 'https://github.com/dubuqingfeng',
@@ -145,6 +161,11 @@ const config = {
         darkTheme: darkCodeTheme,
       },
     }),
+    plugins: [
+      [
+        require.resolve('./src/plugins/customWebpack5Plugin.js'), {}
+      ],
+    ],
 };
 
 module.exports = config;

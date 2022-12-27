@@ -162,7 +162,7 @@ function HomepageHeader({ isMobileDevice }: HomepageHeaderProps): JSX.Element {
                 "button--sm",
                 styles.heroTextAreaButton
               )}
-              to="/docs/intro"
+              to="/docs/"
             >
               {TO_WIKI_BUTTON_TEXT}
             </Link>

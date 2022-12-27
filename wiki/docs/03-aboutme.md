@@ -1,12 +1,7 @@
-<img src="https://github.com/dubuqingfeng/dubuqingfeng/raw/master/images/dubuqingfeng.png"  alt="life" height="360" width="360" align="right" />
+# about me
+## Hi there, I'm 独步清风（dubuqingfeng）🎉
 
-### Hi there, I'm [独步清风ccc（dubuqingfeng）](https://dubuqingfeng.xyz) 🎉
-
-<img src="https://github-readme-stats.vercel.app/api?username=dubuqingfeng&show_icons=true&count_private=true&hide=prs&theme=default_repocard" alt="logo" height="150" width="330" align="left" />
-
-<img src="https://github-readme-stats.vercel.app/api/top-langs/?username=dubuqingfeng&layout=compact" alt="logo" height="200" width="330" align="left" />
-
-<img src="https://github-profile-trophy.vercel.app/?username=dubuqingfeng&theme=flat&column=7&margin-w=10" alt="logo" height="160" align="center" />
+<img src="https://github.com/dubuqingfeng/dubuqingfeng/raw/master/images/dubuqingfeng.png"  alt="life" height="450" width="450"/>
 
 ## Platform & Tools
 

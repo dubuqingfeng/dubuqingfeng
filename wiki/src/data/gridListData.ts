@@ -82,7 +82,6 @@ const languagesGridList: Array<GridItemType> = [
   gridItem(languagesData.css, "/docs/css", css),
   gridItem(languagesData.javascript, "/docs/javascript", javascript),
   gridItem(languagesData.typescript, "/docs/typescript", typescript),
-  gridItem(languagesData.python, "/docs/python", python),
   gridItem(languagesData.dart, "/docs/dart", dart),
   gridItem(languagesData.sql, "/docs/sql", sql),
   gridItem(languagesData.lua, "/docs/lua", lua),

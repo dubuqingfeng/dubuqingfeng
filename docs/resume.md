@@ -1,3 +1,0 @@
-```pdf
-	./Resume.pdf
-```
