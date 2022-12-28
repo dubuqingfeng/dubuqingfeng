@@ -9,3 +9,7 @@
     position: relative;
     overflow: hidden;
   }
+
+  .collapseSidebarButton_node_modules-\@docusaurus-theme-classic-lib-theme-DocSidebar-Desktop-CollapseButton-styles-module {
+    display: none;
+}

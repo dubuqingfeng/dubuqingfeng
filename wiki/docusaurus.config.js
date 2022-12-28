@@ -65,14 +65,14 @@ const config = {
   themeConfig:
     /** @type {import('@docusaurus/preset-classic').ThemeConfig} */
     ({
-      announcementBar: {
-        id: "support_us",
-        content:
-          "新版试运行...",
-        backgroundColor: "#fafbfc",
-        textColor: "#091E42",
-        isCloseable: true,
-      },
+      // announcementBar: {
+      //   id: "support_us",
+      //   content:
+      //     "新版试运行...",
+      //   backgroundColor: "#fafbfc",
+      //   textColor: "#091E42",
+      //   isCloseable: true,
+      // },
       navbar: {
         title: 'dubuqingfeng',
         items: [
@@ -80,7 +80,12 @@ const config = {
             type: 'doc',
             docId: 'intro',
             position: 'left',
-            label: 'Tutorial',
+            label: 'intro',
+          },
+          {
+            to: "/docs/wiki",
+            position: 'left',
+            label: 'wiki',
           },
           {
             position: "left",
@@ -99,6 +104,10 @@ const config = {
               {
                 label: "Decode Transaction",
                 to: "/tools/ethereum/decodetx",
+              },
+              {
+                label: "Publish Transaction",
+                to: "/tools/ethereum/publishtx",
               },
             ],
           },
@@ -162,9 +171,18 @@ const config = {
       },
     }),
     plugins: [
-      [
-        require.resolve('./src/plugins/customWebpack5Plugin.js'), {}
-      ],
+      require.resolve('./src/plugins/customWebpack5Plugin.js'),
+      async function myPlugin(context, options) {
+        return {
+          name: "docusaurus-tailwindcss",
+          configurePostCss(postcssOptions) {
+            // Appends TailwindCSS and AutoPrefixer.
+            postcssOptions.plugins.push(require("tailwindcss"));
+            postcssOptions.plugins.push(require("autoprefixer"));
+            return postcssOptions;
+          },
+        };
+      },
     ],
 };
 

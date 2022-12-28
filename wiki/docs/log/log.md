@@ -74,3 +74,7 @@ getchaintips
 
 
 https://chat.openai.com/
+
+2022.12.28
+
+shm_size postgresql

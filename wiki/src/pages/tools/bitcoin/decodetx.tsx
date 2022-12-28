@@ -7,54 +7,45 @@ import {
   ToolsSidebarData
 } from "@site/src/data";
 import PageSidebar from "@site/src/components/PageSidebar/index";
-import Link from "@docusaurus/Link";
 import MainStyles from '@docusaurus/theme-classic/lib/theme/DocPage/Layout/Main/styles.module.css';
 import DocPageStyles from '@docusaurus/theme-classic/lib/theme/DocPage/Layout/styles.module.css';
-import { toBuffer, bufferToHex, bigIntToBuffer } from '@ethereumjs/util';
-import { TransactionFactory } from '@ethereumjs/tx';
+import { Transaction } from 'bitcoinjs-lib';
+import { fromOutputScript } from 'bitcoinjs-lib/src/address';
 
 export default function DecodeTX() {
   function decodeTx(serializedTx) {
-      let buf = toBuffer(serializedTx);
-      var tx = TransactionFactory.fromSerializedData(buf);
-      console.log('tx', tx)
-      var rawTx = {
-          nonce: parseInt(tx.nonce.toString() || '0', 10),
-          gasLimit: parseInt(tx.gasLimit.toString(), 10),
-          to: tx.to.toString(),
-          value: parseInt(tx.value.toString() || '0', 10),
-          data: tx.data.toString('hex'),
-      };
-      if (tx.gasPrice) {
-        rawTx.gasPrice = parseInt(tx.gasPrice.toString(), 10);
-      }
-      if (tx.maxFeePerGas) {
-        rawTx.maxFeePerGas = parseInt(tx.maxFeePerGas.toString(), 10);
-      }
-      if (tx.maxPriorityFeePerGas) {
-        rawTx.maxPriorityFeePerGas = parseInt(tx.maxPriorityFeePerGas.toString(), 10);
-      }
-      let pubkey = tx.getSenderPublicKey();
-      if (pubkey) {
-        rawTx.pubkey = pubkey.toString('hex');
-      }
-      let sender = tx.getSenderAddress();
-      if (sender) {
-        rawTx.from = sender.toString();
-      }
-      if (tx.hash()) {
-        rawTx.hash = bufferToHex(tx.hash());
-      }
-      if (tx.r) {
-        rawTx = {
-          ...rawTx,    
-          r: bufferToHex(bigIntToBuffer(tx.r)),
-          v: bufferToHex(bigIntToBuffer(tx.v)),
-          s: bufferToHex(bigIntToBuffer(tx.s)),
-        }
-      }
-    
-      return rawTx
+    const tx = Transaction.fromHex(serializedTx);
+    var rawTx = {
+        hash: tx.getId(),
+        version: tx.version,
+        locktime: tx.locktime,
+        vin: tx.ins.map((input) => {
+            return {
+                txid: input.hash.reverse().toString('hex'),
+                vout: input.index,
+                scriptSig: {
+                    asm: input.script.toString('hex'),
+                    hex: input.script.toString('hex'),
+                },
+
+            }
+        }),
+        vout: tx.outs.map((output) => {
+            return {
+                value: output.value,
+                scriptPubKey: {
+                    asm: output.script.toString('hex'),
+                    hex: output.script.toString('hex'),
+                },
+                address: fromOutputScript(output.script).toString()
+            }
+        }),
+        weight: tx.weight(),
+        size: tx.byteLength(),
+        virtualSize: tx.virtualSize(),
+        hasWitnesses: tx.hasWitnesses()
+    };
+    return rawTx
   }
     function handleSubmit(e) {
         e.preventDefault();
@@ -70,17 +61,17 @@ export default function DecodeTX() {
         document.getElementById("outputarea").value = outputtext;
     }
   return (
-    <Layout title="Decode Ethereum Serialized Transaction" description="Decode Ethereum serialized transaction">
+    <Layout title="Decode Bitcoin Serialized Transaction" description="Decode Bitcoin serialized transaction">
       <div className={DocPageStyles.docPage}>
       <PageSidebar 
-        sidebar={ToolsSidebarData} path="/tools/ethereum/decodetx">
+        sidebar={ToolsSidebarData} path="/tools/bitcoin/decodetx">
       </PageSidebar>
       <main className={clsx(MainStyles.docMainContainer)}>
       <div className={clsx('container', 'padding-top--md', 'padding-bottom--lg')}>
   			<div>
               <div>
                 <Center>
-                    <h1 style={{ marginTop: "16px", }}>Decode Ethereum Serialized Transaction</h1>
+                    <h1 style={{ marginTop: "16px", }}>Decode Bitcoin Serialized Transaction</h1>
                 </Center>
               </div>
         </div>

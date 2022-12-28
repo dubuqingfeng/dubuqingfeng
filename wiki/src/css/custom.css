@@ -5,6 +5,9 @@
  */
 
 /* You can override the default Infima variables here. */
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
 
 /* Font */
 /* @import url("https://fonts.googleapis.com/css2?family=Source+Code+Pro&family=Yusei+Magic&family=ZCOOL+XiaoWei&display=swap"); */
