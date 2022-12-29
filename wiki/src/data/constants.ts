@@ -69,16 +69,6 @@ interface OthersMenuData {
   readonly flink: string;
   readonly latex: string;
   readonly machinelearning: string;
-
-  // readonly git: string;
-  // readonly github: string;
-  // readonly yaml: string;
-  // readonly powershell: string;
-  // readonly visual_studio_code: string;
-  // readonly visual_studio: string;
-  // readonly rider: string;
-  // readonly webstorm: string;
-  // readonly wechat_dev_tools: string;
 }
 
 // Languages
@@ -125,7 +115,6 @@ const SECURITY = "Security";
 const WEB = "Web";
 const ANDROID = "Android";
 const BIN = "Bin";
-// const SOLIDITY = "Solidity";
 
 // Framework
 const FRAMEWORK = "Framework";
@@ -133,51 +122,12 @@ const REACT = "React";
 const VUE = "Vue";
 const LARAVEL = "Laravel";
 const FLUTTER = "Flutter";
-// const ANDROID = "Android";
 
 // Others
 const OTHERS = "Others";
 const FLINK = "Flink";
 const LATEX = "LaTeX";
 const MACHINE_LEARNING = "Machine Learning";
-
-
-
-// const REACT = "React";
-// const DOCUSAURUS = "Docusaurus";
-// const TAILWIND = "Tailwind";
-// const SASS = "Sass";
-// const WEXIN_MINIPROGRAM = "微信小程序";
-// const NPM = "npm";
-// const YARN = "Yarn";
-// const VITE = "Vite";
-// const GRAPHQL = "GraphQL";
-
-// // Backend
-// const BACKEND = "Blockchain";
-// const CSHARP = "C#";
-// const NODE_JS = "Node.js";
-// const POSTGRESQL = "PostgreSQL";
-// const MICROSOFT_SQLSERVER = "Microsoft SQL Server"; // Microsoft SQL Server
-// const MONGODB = "MongoDB";
-// const COSMOSDB = "CosmosDB";
-// const REDIS = "Redis";
-// const DOCKER = "Docker";
-// const VERCEL = "Vercel";
-// const MICROSOFT_AZURE = "Microsoft Azure"; // Microsoft Azure
-
-// // 其他
-// const BLOCKCHAIN = "Blockchain";
-// const GIT = "Git";
-// const GITHUB = "GitHub";
-// const JSON = "JSON";
-// const YAML = "YAML";
-// const POWERSHELL = "PowerShell";
-// const VISUAL_STUDIO_CODE = "Visual Studio Code";
-// const VISUAL_STUDIO = "Visual Studio";
-// const RIDER = "Rider";
-// const WEBSTORM = "WebStorm";
-// const WECHAT_DEV_TOOLS = "微信开发者工具";
 
 interface ContactMeData {
   readonly github: string;
@@ -194,6 +144,8 @@ interface ContactMeData {
   readonly lifeBlog: string;
   readonly techBlog: string;
   readonly sitenav: string;
+  readonly internalNote: string;
+  readonly internalNas: string;
 }
 
 const languagesMenuData: LanguagesMenuData = {
@@ -280,6 +232,9 @@ const SITENAV_LINK = "https://sitenav.link";
 const LIFE_BLOG_LINK = "https://xiaoye.me";
 const TECH_BLOG_LINK = "https://dbqf.xyz";
 
+const NOTE_LINK = "http://note.lab";
+const NAS_LINK = "http://nas.lab";
+
 const contactMeData: ContactMeData = {
   github: GITHUB,
   telegram: TELEGRAM,
@@ -294,6 +249,8 @@ const contactMeData: ContactMeData = {
   sitenav: SITENAV_LINK,
   lifeBlog: LIFE_BLOG_LINK,
   techBlog: TECH_BLOG_LINK,
+  internalNote: NOTE_LINK,
+  internalNas: NAS_LINK,
 };
 
 export { languagesMenuData, blockchainMenuData, databaseMenuData, devopsMenuData, securityMenuData, frameworkMenuData, othersMenuData, contactMeData };

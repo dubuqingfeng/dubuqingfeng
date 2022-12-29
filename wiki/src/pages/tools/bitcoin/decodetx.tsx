@@ -9,7 +9,7 @@ import {
 import PageSidebar from "@site/src/components/PageSidebar/index";
 import MainStyles from '@docusaurus/theme-classic/lib/theme/DocPage/Layout/Main/styles.module.css';
 import DocPageStyles from '@docusaurus/theme-classic/lib/theme/DocPage/Layout/styles.module.css';
-import { Transaction } from 'bitcoinjs-lib';
+import { Transaction, script } from 'bitcoinjs-lib';
 import { fromOutputScript } from 'bitcoinjs-lib/src/address';
 
 export default function DecodeTX() {
@@ -26,17 +26,20 @@ export default function DecodeTX() {
                 scriptSig: {
                     asm: input.script.toString('hex'),
                     hex: input.script.toString('hex'),
-                },
-
+                },            
+                script: script.toASM(input.script),
+                sequence: input.sequence,
             }
         }),
         vout: tx.outs.map((output) => {
             return {
                 value: output.value,
                 scriptPubKey: {
-                    asm: output.script.toString('hex'),
+                    asm: script.toASM(output.script),
                     hex: output.script.toString('hex'),
+                    // type: script.classifyOutput(output.script),
                 },
+
                 address: fromOutputScript(output.script).toString()
             }
         }),

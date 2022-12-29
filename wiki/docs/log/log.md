@@ -78,3 +78,20 @@ https://chat.openai.com/
 2022.12.28
 
 shm_size postgresql
+
+群晖DSM默认占用80端口自动跳转5000的问题
+
+1. ssh into your Synology
+sudo -s
+2. cd /usr/syno/share/nginx
+3. Make a backup of server.mustache, DSM.mustache, WWWService.mustache
+cp server.mustache server.mustache.bak
+cp DSM.mustache DSM.mustache.bak
+cp WWWService.mustache WWWService.mustache.bak
+sed -i "s/80/8880/g" server.mustache
+sed -i "s/80/8880/g" DSM.mustache
+sed -i "s/80/8880/g" WWWService.mustache
+4. Optionally, you can also move 443 to 8881:
+sed -i "s/443/8881/g" server.mustache
+sed -i "s/443/8881/g" DSM.mustache
+sed -i "s/443/8881/g" WWWService.mustache

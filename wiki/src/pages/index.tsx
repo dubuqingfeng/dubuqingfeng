@@ -35,6 +35,8 @@ import zhihu from "@site/static/img/icon/zhihu.png";
 import sitenav from "@site/static/img/icon/sitenav.png";
 import techblog from "@site/static/img/icon/blog.png";
 import lifeblog from "@site/static/img/icon/lifeblog.png";
+import note from "@site/static/img/icon/note.png";
+import nas from "@site/static/img/icon/nas.png";
 
 import homeBackGround from "@site/static/img/background/home_background.jpeg";
 import homeBackGround1 from "@site/static/img/background/home_background1.jpeg";
@@ -200,6 +202,10 @@ function HomepageHeader({ isMobileDevice }: HomepageHeaderProps): JSX.Element {
             copySuccess={copySuccess}
           />
           <ContactMeBtn title={contactMeData.zhihu} src={zhihu} link="/" />
+        </div>
+        <div className={styles.navLinkIconArea}>
+          <ContactMeBtn title={contactMeData.internalNote} src={note} link={contactMeData.internalNote} />
+          <ContactMeBtn title={contactMeData.internalNas} src={nas} link={contactMeData.internalNas} />
         </div>
         {!isMobileDevice && (
           <>
