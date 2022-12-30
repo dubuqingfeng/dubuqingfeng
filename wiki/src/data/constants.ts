@@ -134,6 +134,7 @@ interface ContactMeData {
   readonly telegram: string;
   readonly gmail: string;
   readonly twitter: string;
+  readonly twitterLink: string;
   readonly wechat: string;
   readonly zhihu: string;
   readonly githubLink: string;
@@ -240,6 +241,7 @@ const contactMeData: ContactMeData = {
   telegram: TELEGRAM,
   gmail: GMAIL,
   twitter: TWITTER,
+  twitterLink: "https://twitter.com/dubuqingfeng",
   wechat: WECHAT,
   zhihu: ZHIHU,
   githubLink: GITHUB_LINK,

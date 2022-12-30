@@ -3,6 +3,7 @@
 note.lab
 nas.lab
 coder.lab
+talebook.lab
 
 ### 
 

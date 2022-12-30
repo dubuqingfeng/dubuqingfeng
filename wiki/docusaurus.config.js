@@ -9,7 +9,7 @@ const config = {
   title: 'Dubuqingfeng',
   tagline: '一个自我整理与实践的地方',
   customFields: {
-    subSubTitle: '效率提升 · 实验室 · A Public Wiki',
+    subSubTitle: '效率提升 · 实验室 · 公开 Wiki',
   },
   url: 'https://dubuqingfeng.xyz',
   baseUrl: '/',
