@@ -41,7 +41,7 @@ import nas from "@site/static/img/icon/nas.png";
 import homeBackGround from "@site/static/img/background/home_background.jpeg";
 import homeBackGround1 from "@site/static/img/background/home_background1.jpeg";
 import homeBackGround2 from "@site/static/img/background/home_background2.jpeg";
-import homeMobileBackGround from "@site/static/img/background/home_background2.jpeg";
+// import homeMobileBackGround from "@site/static/img/background/home_background2.jpeg";
 
 import PageProgressBar from "@site/src/components/PageProgressBar";
 import Notification from "@site/src/components/Notification";
@@ -69,9 +69,11 @@ export default function Home(): JSX.Element {
             title="Home"
             description="Description will go into a meta tag in <head />"
           >
-            { 
-              isMobileDevice ? <HomepageMobileHeader isMobileDevice={isMobileDevice} /> : <HomepageHeader isMobileDevice={isMobileDevice} />
-            }
+            {isMobileDevice ? (
+              <HomepageMobileHeader isMobileDevice={isMobileDevice} />
+            ) : (
+              <HomepageHeader isMobileDevice={isMobileDevice} />
+            )}
             <main>
               <div className={styles.mainContainer}>
                 {/* language */}
@@ -124,8 +126,9 @@ export default function Home(): JSX.Element {
   );
 }
 
-
-function HomepageMobileHeader({ isMobileDevice }: HomepageHeaderProps): JSX.Element {
+function HomepageMobileHeader({
+  isMobileDevice,
+}: HomepageHeaderProps): JSX.Element {
   const { siteConfig } = useDocusaurusContext();
   const TO_WIKI_BUTTON_TEXT = "Go to Wiki";
   const COPY_SUCCESS = "已复制到剪切板";
@@ -150,28 +153,82 @@ function HomepageMobileHeader({ isMobileDevice }: HomepageHeaderProps): JSX.Elem
         <div className={styles.heroTextArea}>
           <p className={styles.heroTextTitle}>{siteConfig.title}</p>
           <p className={styles.heroTextSubTitle}>{siteConfig.tagline}</p>
-          <p className={styles.heroTextSubSubTitle}>{siteConfig.customFields.subSubTitle}</p>
+          <p className={styles.heroTextSubSubTitle}>
+            {siteConfig.customFields.subSubTitle}
+          </p>
           <div className={styles.heroTextAreaButton}>
-            <Link className={clsx("button", "button--secondary", "button--sm", styles.heroTextAreaButton)} to="/docs/">
+            <Link
+              className={clsx(
+                "button",
+                "button--secondary",
+                "button--sm",
+                styles.heroTextAreaButton
+              )}
+              to="/docs/"
+            >
               {TO_WIKI_BUTTON_TEXT}
             </Link>
           </div>
         </div>
         <div className={styles.navLinkIconArea}>
-          <ContactMeBtn title={contactMeData.lifeBlog} src={lifeblog} link={contactMeData.lifeBlog} />
-          <ContactMeBtn title={contactMeData.techBlog} src={techblog} link={contactMeData.techBlog} />
-          <ContactMeBtn title={contactMeData.sitenav} src={sitenav} link={contactMeData.sitenav} />
+          <ContactMeBtn
+            title={contactMeData.lifeBlog}
+            src={lifeblog}
+            link={contactMeData.lifeBlog}
+          />
+          <ContactMeBtn
+            title={contactMeData.techBlog}
+            src={techblog}
+            link={contactMeData.techBlog}
+          />
+          <ContactMeBtn
+            title={contactMeData.sitenav}
+            src={sitenav}
+            link={contactMeData.sitenav}
+          />
         </div>
         <div className={styles.navLinkIconArea}>
-          <ContactMeBtn title={contactMeData.github} src={github} link={contactMeData.githubLink}/>
-          <ContactMeBtn title={contactMeData.telegram} src={telegram} link={contactMeData.telegramLink} />
-          <ContactMeBtn title={contactMeData.gmail} src={gmail} link={contactMeData.gmailAddress} isCopyBtn copySuccess={copySuccess} />
-          <ContactMeBtn title={contactMeData.twitter} src={twitter} link={contactMeData.twitterLink} />
-          <ContactMeBtn title={contactMeData.wechat} src={wechat} link={contactMeData.wechatAccount} isCopyBtn copySuccess={copySuccess} />
+          <ContactMeBtn
+            title={contactMeData.github}
+            src={github}
+            link={contactMeData.githubLink}
+          />
+          <ContactMeBtn
+            title={contactMeData.telegram}
+            src={telegram}
+            link={contactMeData.telegramLink}
+          />
+          <ContactMeBtn
+            title={contactMeData.gmail}
+            src={gmail}
+            link={contactMeData.gmailAddress}
+            isCopyBtn
+            copySuccess={copySuccess}
+          />
+          <ContactMeBtn
+            title={contactMeData.twitter}
+            src={twitter}
+            link={contactMeData.twitterLink}
+          />
+          <ContactMeBtn
+            title={contactMeData.wechat}
+            src={wechat}
+            link={contactMeData.wechatAccount}
+            isCopyBtn
+            copySuccess={copySuccess}
+          />
         </div>
         <div className={styles.navLinkIconArea}>
-          <ContactMeBtn title={contactMeData.internalNote} src={note} link={contactMeData.internalNote} />
-          <ContactMeBtn title={contactMeData.internalNas} src={nas} link={contactMeData.internalNas} />
+          <ContactMeBtn
+            title={contactMeData.internalNote}
+            src={note}
+            link={contactMeData.internalNote}
+          />
+          <ContactMeBtn
+            title={contactMeData.internalNas}
+            src={nas}
+            link={contactMeData.internalNas}
+          />
         </div>
         {!isMobileDevice && (
           <>
@@ -201,13 +258,16 @@ function HomepageHeader({ isMobileDevice }: HomepageHeaderProps): JSX.Element {
   let backgroundImage = homeBackGround;
   const randomNum = Math.floor(Math.random() * (10 - 1) + 1);
   // 1,2,3,4,5,6,7,8,9,10
-  if(randomNum >= 9) {
+  if (randomNum >= 9) {
     backgroundImage = homeBackGround1;
   } else if (randomNum >= 8) {
     backgroundImage = homeBackGround2;
   }
   return (
-      <header className={clsx(styles.heroBanner)} style={{ backgroundImage: `url(${backgroundImage})` }}>
+    <header
+      className={clsx(styles.heroBanner)}
+      style={{ backgroundImage: `url(${backgroundImage})` }}
+    >
       <div className={clsx(styles.heroTextContainer)}>
         {!isMobileDevice && (
           <div className={styles.avatarArea}>
@@ -217,28 +277,82 @@ function HomepageHeader({ isMobileDevice }: HomepageHeaderProps): JSX.Element {
         <div className={styles.heroTextArea}>
           <p className={styles.heroTextTitle}>{siteConfig.title}</p>
           <p className={styles.heroTextSubTitle}>{siteConfig.tagline}</p>
-          <p className={styles.heroTextSubSubTitle}>{siteConfig.customFields.subSubTitle}</p>
+          <p className={styles.heroTextSubSubTitle}>
+            {siteConfig.customFields.subSubTitle}
+          </p>
           <div className={styles.heroTextAreaButton}>
-            <Link className={clsx("button", "button--secondary", "button--sm", styles.heroTextAreaButton)} to="/docs/">
+            <Link
+              className={clsx(
+                "button",
+                "button--secondary",
+                "button--sm",
+                styles.heroTextAreaButton
+              )}
+              to="/docs/"
+            >
               {TO_WIKI_BUTTON_TEXT}
             </Link>
           </div>
         </div>
         <div className={styles.navLinkIconArea}>
-          <ContactMeBtn title={contactMeData.lifeBlog} src={lifeblog} link={contactMeData.lifeBlog} />
-          <ContactMeBtn title={contactMeData.techBlog} src={techblog} link={contactMeData.techBlog} />
-          <ContactMeBtn title={contactMeData.sitenav} src={sitenav} link={contactMeData.sitenav} />
+          <ContactMeBtn
+            title={contactMeData.lifeBlog}
+            src={lifeblog}
+            link={contactMeData.lifeBlog}
+          />
+          <ContactMeBtn
+            title={contactMeData.techBlog}
+            src={techblog}
+            link={contactMeData.techBlog}
+          />
+          <ContactMeBtn
+            title={contactMeData.sitenav}
+            src={sitenav}
+            link={contactMeData.sitenav}
+          />
         </div>
         <div className={styles.navLinkIconArea}>
-          <ContactMeBtn title={contactMeData.github} src={github} link={contactMeData.githubLink}/>
-          <ContactMeBtn title={contactMeData.telegram} src={telegram} link={contactMeData.telegramLink} />
-          <ContactMeBtn title={contactMeData.gmail} src={gmail} link={contactMeData.gmailAddress} isCopyBtn copySuccess={copySuccess} />
-          <ContactMeBtn title={contactMeData.twitter} src={twitter} link={contactMeData.twitterLink} />
-          <ContactMeBtn title={contactMeData.wechat} src={wechat} link={contactMeData.wechatAccount} isCopyBtn copySuccess={copySuccess} />
+          <ContactMeBtn
+            title={contactMeData.github}
+            src={github}
+            link={contactMeData.githubLink}
+          />
+          <ContactMeBtn
+            title={contactMeData.telegram}
+            src={telegram}
+            link={contactMeData.telegramLink}
+          />
+          <ContactMeBtn
+            title={contactMeData.gmail}
+            src={gmail}
+            link={contactMeData.gmailAddress}
+            isCopyBtn
+            copySuccess={copySuccess}
+          />
+          <ContactMeBtn
+            title={contactMeData.twitter}
+            src={twitter}
+            link={contactMeData.twitterLink}
+          />
+          <ContactMeBtn
+            title={contactMeData.wechat}
+            src={wechat}
+            link={contactMeData.wechatAccount}
+            isCopyBtn
+            copySuccess={copySuccess}
+          />
         </div>
         <div className={styles.navLinkIconArea}>
-          <ContactMeBtn title={contactMeData.internalNote} src={note} link={contactMeData.internalNote} />
-          <ContactMeBtn title={contactMeData.internalNas} src={nas} link={contactMeData.internalNas} />
+          <ContactMeBtn
+            title={contactMeData.internalNote}
+            src={note}
+            link={contactMeData.internalNote}
+          />
+          <ContactMeBtn
+            title={contactMeData.internalNas}
+            src={nas}
+            link={contactMeData.internalNas}
+          />
         </div>
         {!isMobileDevice && (
           <>

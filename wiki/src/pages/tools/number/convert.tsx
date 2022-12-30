@@ -54,7 +54,6 @@ export default function DecodeTX() {
         s: bufferToHex(bigIntToBuffer(tx.s)),
       };
     }
-
     return rawTx;
   }
   function handleSubmit(e) {
