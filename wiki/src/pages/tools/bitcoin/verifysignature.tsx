@@ -2,7 +2,7 @@ import React from "react";
 import clsx from "clsx";
 import Layout from "@theme/Layout";
 import Center from "@site/src/components/Center/center";
-import styles from "@site/src/pages/tools/ethereum/decodetx";
+import styles from "@site/src/pages/tools/blockchain/decodetx";
 import { ToolsSidebarData } from "@site/src/data";
 import PageSidebar from "@site/src/components/PageSidebar/index";
 import MainStyles from "@docusaurus/theme-classic/lib/theme/DocPage/Layout/Main/styles.module.css";

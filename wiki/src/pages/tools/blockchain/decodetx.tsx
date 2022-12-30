@@ -2,17 +2,57 @@ import React from "react";
 import clsx from "clsx";
 import Layout from "@theme/Layout";
 import Center from "@site/src/components/Center/center";
-import styles from "@site/src/pages/tools/ethereum/decodetx";
 import { ToolsSidebarData } from "@site/src/data";
 import PageSidebar from "@site/src/components/PageSidebar/index";
 import Link from "@docusaurus/Link";
+import Select from "react-select";
 import MainStyles from "@docusaurus/theme-classic/lib/theme/DocPage/Layout/Main/styles.module.css";
 import DocPageStyles from "@docusaurus/theme-classic/lib/theme/DocPage/Layout/styles.module.css";
 import { toBuffer, bufferToHex, bigIntToBuffer } from "@ethereumjs/util";
 import { TransactionFactory } from "@ethereumjs/tx";
+import { Transaction, script } from "bitcoinjs-lib";
+import { fromOutputScript } from "bitcoinjs-lib/src/address";
 
 export default function DecodeTX() {
-  function decodeTx(serializedTx) {
+  let select_coin = "";
+  function decodeBitcoinTx(serializedTx) {
+    const tx = Transaction.fromHex(serializedTx);
+    var rawTx = {
+      hash: tx.getId(),
+      version: tx.version,
+      locktime: tx.locktime,
+      vin: tx.ins.map((input) => {
+        return {
+          txid: input.hash.reverse().toString("hex"),
+          vout: input.index,
+          scriptSig: {
+            asm: input.script.toString("hex"),
+            hex: input.script.toString("hex"),
+          },
+          script: script.toASM(input.script),
+          sequence: input.sequence,
+        };
+      }),
+      vout: tx.outs.map((output) => {
+        return {
+          value: output.value,
+          scriptPubKey: {
+            asm: script.toASM(output.script),
+            hex: output.script.toString("hex"),
+            // type: script.classifyOutput(output.script),
+          },
+
+          address: fromOutputScript(output.script).toString(),
+        };
+      }),
+      weight: tx.weight(),
+      size: tx.byteLength(),
+      virtualSize: tx.virtualSize(),
+      hasWitnesses: tx.hasWitnesses(),
+    };
+    return rawTx;
+  }
+  function decodeEthereumTx(serializedTx) {
     let buf = toBuffer(serializedTx);
     var tx = TransactionFactory.fromSerializedData(buf);
     console.log("tx", tx);
@@ -59,10 +99,16 @@ export default function DecodeTX() {
   }
   function handleSubmit(e) {
     e.preventDefault();
+    console.log(select_coin);
     let serializedTx = document.getElementById("inputarea").value.trim();
     let outputtext = "";
     try {
-      const rawTx = decodeTx(serializedTx);
+      let rawTx = {};
+      if (select_coin === "ethereum") {
+        rawTx = decodeEthereumTx(serializedTx);
+      } else {
+        rawTx = decodeBitcoinTx(serializedTx);
+      }
       outputtext = JSON.stringify(rawTx, null, "  ");
     } catch (err) {
       console.log(err);
@@ -70,15 +116,23 @@ export default function DecodeTX() {
     }
     document.getElementById("outputarea").value = outputtext;
   }
+  function handleChange(selectedOption) {
+    select_coin = selectedOption.value;
+    console.log(`Option selected:`, selectedOption);
+  }
+  const options = [
+    { value: "bitcoin", label: "Bitcoin" },
+    { value: "ethereum", label: "Ethereum" },
+  ];
   return (
     <Layout
-      title="Decode Ethereum Serialized Transaction"
-      description="Decode Ethereum serialized transaction"
+      title="Decode Serialized Transaction"
+      description="Decode serialized transaction"
     >
       <div className={DocPageStyles.docPage}>
         <PageSidebar
           sidebar={ToolsSidebarData}
-          path="/tools/ethereum/decodetx"
+          path="/tools/blockchain/decodetx"
         ></PageSidebar>
         <main className={clsx(MainStyles.docMainContainer)}>
           <div
@@ -92,7 +146,7 @@ export default function DecodeTX() {
               <div>
                 <Center>
                   <h1 style={{ marginTop: "16px" }}>
-                    Decode Ethereum Serialized Transaction
+                    Decode Serialized Transaction
                   </h1>
                 </Center>
               </div>
@@ -112,13 +166,25 @@ export default function DecodeTX() {
               </div>
               <div style={{ marginTop: "16px" }}>
                 <Center>
-                  <button
-                    type="button"
-                    className="inline-flex justify-center rounded-md border border-transparent bg-indigo-600 py-2 px-4 text-sm font-medium text-white shadow-sm hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2"
-                    onClick={handleSubmit}
-                  >
-                    Decode
-                  </button>
+                  <div className="" style={{ marginRight: "16px" }}>
+                    <Select
+                      id="select-coin"
+                      className="basic-single"
+                      options={options}
+                      defaultValue={options[0]}
+                      defaultInputValue=""
+                      onChange={handleChange}
+                    />
+                  </div>
+                  <div style={{ marginLeft: "16px" }}>
+                    <button
+                      type="button"
+                      className="inline-flex justify-center rounded-md border border-transparent bg-indigo-600 py-2 px-4 text-sm font-medium text-white shadow-sm hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2"
+                      onClick={handleSubmit}
+                    >
+                      Decode
+                    </button>
+                  </div>
                 </Center>
               </div>
               <div style={{ marginTop: "16px", marginBottom: "16px" }}>
@@ -132,6 +198,19 @@ export default function DecodeTX() {
                     defaultValue={""}
                   />
                 </Center>
+              </div>
+              <div>
+                <p>
+                  注： <br></br>1. bitcoin 可以调用{" "}
+                  <code>decoderawtransaction</code>
+                  rpc
+                  <br></br>2. ethereum 可以调用
+                  <code>
+                    {" "}
+                    tx := &types.Transaction \n rawTxBytes, err :=
+                    hex.DecodeString(rawTx)
+                  </code>
+                </p>
               </div>
             </div>
           </div>

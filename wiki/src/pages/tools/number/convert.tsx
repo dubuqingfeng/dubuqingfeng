@@ -2,7 +2,7 @@ import React from "react";
 import clsx from "clsx";
 import Layout from "@theme/Layout";
 import Center from "@site/src/components/Center/center";
-import styles from "@site/src/pages/tools/ethereum/decodetx";
+import styles from "@site/src/pages/tools/blockchain/decodetx";
 import { ToolsSidebarData } from "@site/src/data";
 import PageSidebar from "@site/src/components/PageSidebar/index";
 import Link from "@docusaurus/Link";
@@ -13,48 +13,7 @@ import { TransactionFactory } from "@ethereumjs/tx";
 
 export default function DecodeTX() {
   function decodeTx(serializedTx) {
-    let buf = toBuffer(serializedTx);
-    var tx = TransactionFactory.fromSerializedData(buf);
-    console.log("tx", tx);
-    var rawTx = {
-      nonce: parseInt(tx.nonce.toString() || "0", 10),
-      gasLimit: parseInt(tx.gasLimit.toString(), 10),
-      to: tx.to.toString(),
-      value: parseInt(tx.value.toString() || "0", 10),
-      data: tx.data.toString("hex"),
-    };
-    if (tx.gasPrice) {
-      rawTx.gasPrice = parseInt(tx.gasPrice.toString(), 10);
-    }
-    if (tx.maxFeePerGas) {
-      rawTx.maxFeePerGas = parseInt(tx.maxFeePerGas.toString(), 10);
-    }
-    if (tx.maxPriorityFeePerGas) {
-      rawTx.maxPriorityFeePerGas = parseInt(
-        tx.maxPriorityFeePerGas.toString(),
-        10
-      );
-    }
-    let pubkey = tx.getSenderPublicKey();
-    if (pubkey) {
-      rawTx.pubkey = pubkey.toString("hex");
-    }
-    let sender = tx.getSenderAddress();
-    if (sender) {
-      rawTx.from = sender.toString();
-    }
-    if (tx.hash()) {
-      rawTx.hash = bufferToHex(tx.hash());
-    }
-    if (tx.r) {
-      rawTx = {
-        ...rawTx,
-        r: bufferToHex(bigIntToBuffer(tx.r)),
-        v: bufferToHex(bigIntToBuffer(tx.v)),
-        s: bufferToHex(bigIntToBuffer(tx.s)),
-      };
-    }
-    return rawTx;
+    return serializedTx;
   }
   function handleSubmit(e) {
     e.preventDefault();
@@ -90,9 +49,7 @@ export default function DecodeTX() {
             <div>
               <div>
                 <Center>
-                  <h1 style={{ marginTop: "16px" }}>
-                    Decode Ethereum Serialized Transaction
-                  </h1>
+                  <h1 style={{ marginTop: "16px" }}>Number Conversion</h1>
                 </Center>
               </div>
             </div>

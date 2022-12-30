@@ -2,8 +2,8 @@ import React from "react";
 import clsx from "clsx";
 import Layout from "@theme/Layout";
 import Center from "@site/src/components/Center/center";
-import styles from "@site/src/pages/tools/ethereum/decodetx";
-import Link from "@docusaurus/Link";
+import styles from "./select.module.css";
+import Select from "react-select";
 import Web3 from "web3";
 
 import { ToolsSidebarData } from "@site/src/data";
@@ -43,6 +43,11 @@ export default function PublishTX() {
     }
     document.getElementById("outputarea").value = outputtext;
   }
+  const options = [
+    { value: "bitcoin", label: "Bitcoin" },
+    { value: "ethereum", label: "Ethereum" },
+    { value: "polygon", label: "Polygon" },
+  ];
   return (
     <Layout
       title="Publish Ethereum Serialized Transaction"
@@ -78,23 +83,30 @@ export default function PublishTX() {
                     id="inputarea"
                     cols={100}
                     rows={20}
-                    defaultValue=""
-                  ></textarea>
+                    className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm"
+                    defaultValue={""}
+                  />
                 </Center>
               </div>
               <div style={{ marginTop: "16px" }}>
                 <Center>
-                  <Link
-                    className={clsx(
-                      "button",
-                      "button--secondary",
-                      "button--sm",
-                      styles.heroTextAreaButton
-                    )}
-                    onClick={handlePushTx}
-                  >
-                    Publish
-                  </Link>
+                  <div className="" style={{ marginRight: "16px" }}>
+                    <Select
+                      className="basic-single"
+                      options={options}
+                      defaultValue={options[0]}
+                      defaultInputValue=""
+                    />
+                  </div>
+                  <div style={{ marginLeft: "16px" }}>
+                    <button
+                      type="button"
+                      className="inline-flex justify-center rounded-md border border-transparent bg-indigo-600 py-2 px-4 text-sm font-medium text-white shadow-sm hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2"
+                      onClick={handlePushTx}
+                    >
+                      Publish
+                    </button>
+                  </div>
                 </Center>
               </div>
               <div style={{ marginTop: "16px", marginBottom: "16px" }}>
@@ -104,8 +116,9 @@ export default function PublishTX() {
                     id="outputarea"
                     cols={100}
                     rows={20}
-                    defaultValue=""
-                  ></textarea>
+                    className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm"
+                    defaultValue={""}
+                  />
                 </Center>
               </div>
             </div>

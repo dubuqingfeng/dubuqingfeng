@@ -99,15 +99,15 @@ const config = {
           },
           {
             position: "left",
-            label: "Ethereum",
+            label: "Blockchain",
             items: [
               {
                 label: "Decode Transaction",
-                to: "/tools/ethereum/decodetx",
+                to: "/tools/blockchain/decodetx",
               },
               {
                 label: "Publish Transaction",
-                to: "/tools/ethereum/publishtx",
+                to: "/tools/blockchain/publishtx",
               },
             ],
           },
