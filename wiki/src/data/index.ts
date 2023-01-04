@@ -23,3 +23,5 @@ export {
 export { ToolsSidebarData } from "./sidebarData";
 
 export { eip155data } from "./evmrpc";
+
+export { pushtxAPIData } from "./pushtx";

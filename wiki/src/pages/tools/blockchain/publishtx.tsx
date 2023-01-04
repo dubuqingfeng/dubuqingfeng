@@ -9,38 +9,87 @@ import { ToolsSidebarData } from "@site/src/data";
 import PageSidebar from "@site/src/components/PageSidebar/index";
 import MainStyles from "@docusaurus/theme-classic/lib/theme/DocPage/Layout/Main/styles.module.css";
 import DocPageStyles from "@docusaurus/theme-classic/lib/theme/DocPage/Layout/styles.module.css";
-import { eip155data } from "@site/src/data";
+import { eip155data, pushtxAPIData } from "@site/src/data";
 
 export default function PublishTX() {
-  let select_coin = "1";
+  let select_coin = "bitcoin";
+  function FormatString(str: string, ...val: string[]) {
+    for (let index = 0; index < val.length; index++) {
+      str = str.replace(`{${index}}`, val[index]);
+    }
+    return str;
+  }
   async function handlePushTx(e) {
     e.preventDefault();
     let serializedTx = document.getElementById("inputarea").value.trim();
     let outputtext = "";
     const node = eip155data[select_coin];
-    for (const [key, value] of Object.entries(node.rpcs)) {
-      let rpcurl = "";
-      if (typeof value == "string") {
-        rpcurl = value;
-      } else {
-        rpcurl = value.url;
+    if (node == null) {
+      let tx = serializedTx;
+      const node = pushtxAPIData[select_coin];
+      for (const [key, value] of Object.entries(node.api)) {
+        let body = value.body;
+        await fetch(value.url, {
+          method: "POST",
+          body: FormatString(body, tx),
+          headers: {
+            "Content-type": "application/json; charset=UTF-8",
+          },
+        })
+          .then((res) => res.json())
+          .then((result) => {
+            outputtext =
+              outputtext +
+              `${value.url} Push Tx Result: ${JSON.stringify(result)}\n\n`;
+            console.log(result);
+          })
+          .catch((err) => {
+            console.log(err.message);
+            outputtext =
+              outputtext + `${value.url} Push Tx Error: ${err.toString()}\n\n`;
+            outputtext =
+              outputtext +
+              `curl -X POST --header 'Content-Type: application/json' -d '${FormatString(
+                body,
+                tx
+              )}' ${value.url}\n\n`;
+          });
+        document.getElementById("outputarea").value = outputtext;
       }
-      const provider = new Web3.providers.HttpProvider(rpcurl);
-      const web3 = new Web3(provider || "ws://localhost:8545");
-      try {
-        const result = await web3.eth.sendSignedTransaction(serializedTx);
-        console.log(result);
-        outputtext =
-          outputtext + `${rpcurl} Push Tx Success: ${result.transactionHash}\n`;
-      } catch (err) {
-        console.log(err);
-        outputtext =
-          outputtext + `${rpcurl} Push Tx Error: ${err.toString()}\n`;
+    } else {
+      for (const [key, value] of Object.entries(node.rpcs)) {
+        let rpcurl = "";
+        if (typeof value == "string") {
+          rpcurl = value;
+        } else {
+          rpcurl = value.url;
+        }
+        const provider = new Web3.providers.HttpProvider(rpcurl);
+        const web3 = new Web3(provider || "ws://localhost:8545");
+        try {
+          const result = await web3.eth.sendSignedTransaction(serializedTx);
+          console.log(result);
+          outputtext =
+            outputtext +
+            `${rpcurl} Push Tx Success: ${result.transactionHash}\n`;
+        } catch (err) {
+          console.log(err);
+          outputtext =
+            outputtext + `${rpcurl} Push Tx Error: ${err.toString()}\n`;
+        }
+        document.getElementById("outputarea").value = outputtext;
       }
-      document.getElementById("outputarea").value = outputtext;
     }
   }
-  const options = [];
+  const options = [
+    { value: "bitcoin", label: "Bitcoin Mainnet", sort: 1100 },
+    { value: "bitcointestnet", label: "Bitcoin Testnet3", sort: 1050 },
+    { value: "dash", label: "Dash", sort: 1050 },
+    { value: "dogecoin", label: "Dogecoin", sort: 1060 },
+    { value: "litecoin", label: "Litecoin", sort: 1030 },
+    { value: "blockcypher", label: "BlockCypher Test", sort: 8 },
+  ];
+
   for (const [key, value] of Object.entries(eip155data)) {
     options.push({ value: value.chainId, label: value.name, sort: value.sort });
   }
