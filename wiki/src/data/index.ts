@@ -20,6 +20,6 @@ export {
   type GridItemType,
 } from "./gridListData";
 
-export {
-  ToolsSidebarData
-} from "./sidebarData";
+export { ToolsSidebarData } from "./sidebarData";
+
+export { eip155data } from "./evmrpc";

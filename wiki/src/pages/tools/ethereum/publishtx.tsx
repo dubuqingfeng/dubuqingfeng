@@ -62,13 +62,13 @@ export default function PublishTX() {
   }
   return (
     <Layout
-      title="Publish Serialized Transaction"
-      description="Publish serialized transaction"
+      title="Publish Ethereum Serialized Transaction"
+      description="Publish Ethereum serialized transaction"
     >
       <div className={DocPageStyles.docPage}>
         <PageSidebar
           sidebar={ToolsSidebarData}
-          path="/tools/blockchain/publishtx"
+          path="/tools/ethereum/publishtx"
         ></PageSidebar>
         <main className={clsx(MainStyles.docMainContainer)}>
           <div
@@ -82,7 +82,7 @@ export default function PublishTX() {
               <div>
                 <Center>
                   <h1 style={{ marginTop: "16px" }}>
-                    Publish Serialized Transaction
+                    Publish Ethereum EIP155 Serialized Transaction
                   </h1>
                 </Center>
               </div>

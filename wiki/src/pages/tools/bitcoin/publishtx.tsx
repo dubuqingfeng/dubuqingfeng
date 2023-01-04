@@ -40,10 +40,7 @@ export default function PublishTX() {
       document.getElementById("outputarea").value = outputtext;
     }
   }
-  const options = [];
-  for (const [key, value] of Object.entries(eip155data)) {
-    options.push({ value: value.chainId, label: value.name, sort: value.sort });
-  }
+  const options = [{ value: "1", label: "Bitcoin", sort: 1 }];
   options.sort(function (a, b) {
     if (a.sort === b.sort) {
       return 0;
@@ -62,13 +59,13 @@ export default function PublishTX() {
   }
   return (
     <Layout
-      title="Publish Serialized Transaction"
-      description="Publish serialized transaction"
+      title="Publish Bitcoin Serialized Transaction"
+      description="Publish Bitcoin serialized transaction"
     >
       <div className={DocPageStyles.docPage}>
         <PageSidebar
           sidebar={ToolsSidebarData}
-          path="/tools/blockchain/publishtx"
+          path="/tools/bitcoin/publishtx"
         ></PageSidebar>
         <main className={clsx(MainStyles.docMainContainer)}>
           <div
@@ -82,7 +79,7 @@ export default function PublishTX() {
               <div>
                 <Center>
                   <h1 style={{ marginTop: "16px" }}>
-                    Publish Serialized Transaction
+                    Publish Bitcoin Serialized Transaction
                   </h1>
                 </Center>
               </div>
