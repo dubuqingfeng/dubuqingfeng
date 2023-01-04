@@ -41,7 +41,8 @@ import nas from "@site/static/img/icon/nas.png";
 import homeBackGround from "@site/static/img/background/home_background.jpeg";
 import homeBackGround1 from "@site/static/img/background/home_background1.jpeg";
 import homeBackGround2 from "@site/static/img/background/home_background2.jpeg";
-// import homeMobileBackGround from "@site/static/img/background/home_background2.jpeg";
+import homeBackGround3 from "@site/static/img/background/home_background3.jpg";
+import homeMobileBackGround from "@site/static/img/background/home_mobile_background.jpg";
 
 import PageProgressBar from "@site/src/components/PageProgressBar";
 import Notification from "@site/src/components/Notification";
@@ -142,8 +143,13 @@ function HomepageMobileHeader({
       }, 4000);
   }
 
+  let backgroundImage = homeMobileBackGround;
+
   return (
-    <header className={clsx(styles.heroBannerMobile)}>
+    <header
+      className={clsx(styles.heroBannerMobile)}
+      style={{ backgroundImage: `url(${backgroundImage})` }}
+    >
       <div className={clsx(styles.heroTextContainer)}>
         {!isMobileDevice && (
           <div className={styles.avatarArea}>

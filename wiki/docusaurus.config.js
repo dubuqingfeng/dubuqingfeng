@@ -102,11 +102,11 @@ const config = {
             label: "Blockchain",
             items: [
               {
-                label: "Decode Transaction",
+                label: "Decode Tx",
                 to: "/tools/blockchain/decodetx",
               },
               {
-                label: "Publish Transaction",
+                label: "Publish Tx",
                 to: "/tools/blockchain/publishtx",
               },
             ],
@@ -137,15 +137,23 @@ const config = {
             ],
           },
           {
-            title: 'Community',
+            title: 'Internal',
             items: [
               {
-                label: 'Stack Overflow',
-                href: 'https://stackoverflow.com/questions/tagged/docusaurus',
+                label: 'Crawlab',
+                href: 'http://crawlab.lab',
               },
               {
-                label: 'Twitter',
-                href: 'https://twitter.com/dubuqingfeng',
+                label: 'Note',
+                href: 'http://note.lab',
+              },
+              {
+                label: 'NAS',
+                href: 'http://nas.lab',
+              },
+              {
+                label: 'Coder',
+                href: 'http://coder.lab',
               },
             ],
           },
@@ -163,7 +171,7 @@ const config = {
             ],
           },
         ],
-        copyright: `Copyright © ${new Date().getFullYear()} Dubuqingfeng Community, Inc.`,
+        copyright: `Copyright © ${new Date().getFullYear()} Dubuqingfeng, Inc.`,
       },
       prism: {
         theme: lightCodeTheme,
