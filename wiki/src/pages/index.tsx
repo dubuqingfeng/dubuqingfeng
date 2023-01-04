@@ -75,51 +75,6 @@ export default function Home(): JSX.Element {
             ) : (
               <HomepageHeader isMobileDevice={isMobileDevice} />
             )}
-            <main>
-              <div className={styles.mainContainer}>
-                {/* language */}
-                <div className={styles.listTitle}>
-                  {languagesMenuData.title}
-                </div>
-                <GridList data={languagesGridList} />
-
-                {/* blockchain */}
-                <div className={clsx(styles.listTitle, styles.marginTop)}>
-                  {blockchainMenuData.title}
-                </div>
-                <GridList data={blockchainGridList} />
-
-                {/* database */}
-                <div className={clsx(styles.listTitle, styles.marginTop)}>
-                  {databaseMenuData.title}
-                </div>
-                <GridList data={databaseGridList} />
-
-                {/* devops */}
-                <div className={clsx(styles.listTitle, styles.marginTop)}>
-                  {devopsMenuData.title}
-                </div>
-                <GridList data={devOpsGridList} />
-
-                {/* security */}
-                <div className={clsx(styles.listTitle, styles.marginTop)}>
-                  {securityMenuData.title}
-                </div>
-                <GridList data={securityGridList} />
-
-                {/* framework */}
-                <div className={clsx(styles.listTitle, styles.marginTop)}>
-                  {frameworkMenuData.title}
-                </div>
-                <GridList data={frameworkGridList} />
-
-                {/* others */}
-                <div className={clsx(styles.listTitle, styles.marginTop)}>
-                  {othersMenuData.title}
-                </div>
-                <GridList data={othersGridList} />
-              </div>
-            </main>
           </Layout>
         );
       }}
@@ -146,105 +101,147 @@ function HomepageMobileHeader({
   let backgroundImage = homeMobileBackGround;
 
   return (
-    <header
-      className={clsx(styles.heroBannerMobile)}
-      style={{ backgroundImage: `url(${backgroundImage})` }}
-    >
-      <div className={clsx(styles.heroTextContainer)}>
-        {!isMobileDevice && (
-          <div className={styles.avatarArea}>
-            <img src={favicon} alt="dubuqingfeng" />
+    <div style={{ backgroundImage: `url(${backgroundImage})` }}>
+      <header className={clsx(styles.heroBannerMobile)}>
+        <div className={clsx(styles.heroTextContainer)}>
+          {!isMobileDevice && (
+            <div className={styles.avatarArea}>
+              <img src={favicon} alt="dubuqingfeng" />
+            </div>
+          )}
+          <div className={styles.heroTextArea}>
+            <p className={styles.heroTextTitle}>{siteConfig.title}</p>
+            <p className={styles.heroTextSubTitle}>{siteConfig.tagline}</p>
+            <p className={styles.heroTextSubSubTitle}>
+              {siteConfig.customFields.subSubTitle}
+            </p>
+            <div className={styles.heroTextAreaButton}>
+              <Link
+                className={clsx(
+                  "button",
+                  "button--secondary",
+                  "button--sm",
+                  styles.heroTextAreaButton
+                )}
+                to="/docs/"
+              >
+                {TO_WIKI_BUTTON_TEXT}
+              </Link>
+            </div>
           </div>
-        )}
-        <div className={styles.heroTextArea}>
-          <p className={styles.heroTextTitle}>{siteConfig.title}</p>
-          <p className={styles.heroTextSubTitle}>{siteConfig.tagline}</p>
-          <p className={styles.heroTextSubSubTitle}>
-            {siteConfig.customFields.subSubTitle}
-          </p>
-          <div className={styles.heroTextAreaButton}>
-            <Link
-              className={clsx(
-                "button",
-                "button--secondary",
-                "button--sm",
-                styles.heroTextAreaButton
-              )}
-              to="/docs/"
-            >
-              {TO_WIKI_BUTTON_TEXT}
-            </Link>
+          <div className={styles.navLinkIconArea}>
+            <ContactMeBtn
+              title={contactMeData.lifeBlog}
+              src={lifeblog}
+              link={contactMeData.lifeBlog}
+            />
+            <ContactMeBtn
+              title={contactMeData.techBlog}
+              src={techblog}
+              link={contactMeData.techBlog}
+            />
+            <ContactMeBtn
+              title={contactMeData.sitenav}
+              src={sitenav}
+              link={contactMeData.sitenav}
+            />
           </div>
+          <div className={styles.navLinkIconArea}>
+            <ContactMeBtn
+              title={contactMeData.github}
+              src={github}
+              link={contactMeData.githubLink}
+            />
+            <ContactMeBtn
+              title={contactMeData.telegram}
+              src={telegram}
+              link={contactMeData.telegramLink}
+            />
+            <ContactMeBtn
+              title={contactMeData.gmail}
+              src={gmail}
+              link={contactMeData.gmailAddress}
+              isCopyBtn
+              copySuccess={copySuccess}
+            />
+            <ContactMeBtn
+              title={contactMeData.twitter}
+              src={twitter}
+              link={contactMeData.twitterLink}
+            />
+            <ContactMeBtn
+              title={contactMeData.wechat}
+              src={wechat}
+              link={contactMeData.wechatAccount}
+              isCopyBtn
+              copySuccess={copySuccess}
+            />
+          </div>
+          <div className={styles.navLinkIconArea}>
+            <ContactMeBtn
+              title={contactMeData.internalNote}
+              src={note}
+              link={contactMeData.internalNote}
+            />
+            <ContactMeBtn
+              title={contactMeData.internalNas}
+              src={nas}
+              link={contactMeData.internalNas}
+            />
+          </div>
+          {!isMobileDevice && (
+            <>
+              <ArrowDownBtn />
+              <PageProgressBar />
+            </>
+          )}
+          <Notification show={show} title={COPY_SUCCESS} changeShow={setShow} />
         </div>
-        <div className={styles.navLinkIconArea}>
-          <ContactMeBtn
-            title={contactMeData.lifeBlog}
-            src={lifeblog}
-            link={contactMeData.lifeBlog}
-          />
-          <ContactMeBtn
-            title={contactMeData.techBlog}
-            src={techblog}
-            link={contactMeData.techBlog}
-          />
-          <ContactMeBtn
-            title={contactMeData.sitenav}
-            src={sitenav}
-            link={contactMeData.sitenav}
-          />
+      </header>
+      <main>
+        <div className={styles.mainContainer}>
+          {/* language */}
+          <div className={styles.listTitle}>{languagesMenuData.title}</div>
+          <GridList data={languagesGridList} />
+
+          {/* blockchain */}
+          <div className={clsx(styles.listTitle, styles.marginTop)}>
+            {blockchainMenuData.title}
+          </div>
+          <GridList data={blockchainGridList} />
+
+          {/* database */}
+          <div className={clsx(styles.listTitle, styles.marginTop)}>
+            {databaseMenuData.title}
+          </div>
+          <GridList data={databaseGridList} />
+
+          {/* devops */}
+          <div className={clsx(styles.listTitle, styles.marginTop)}>
+            {devopsMenuData.title}
+          </div>
+          <GridList data={devOpsGridList} />
+
+          {/* security */}
+          <div className={clsx(styles.listTitle, styles.marginTop)}>
+            {securityMenuData.title}
+          </div>
+          <GridList data={securityGridList} />
+
+          {/* framework */}
+          <div className={clsx(styles.listTitle, styles.marginTop)}>
+            {frameworkMenuData.title}
+          </div>
+          <GridList data={frameworkGridList} />
+
+          {/* others */}
+          <div className={clsx(styles.listTitle, styles.marginTop)}>
+            {othersMenuData.title}
+          </div>
+          <GridList data={othersGridList} />
         </div>
-        <div className={styles.navLinkIconArea}>
-          <ContactMeBtn
-            title={contactMeData.github}
-            src={github}
-            link={contactMeData.githubLink}
-          />
-          <ContactMeBtn
-            title={contactMeData.telegram}
-            src={telegram}
-            link={contactMeData.telegramLink}
-          />
-          <ContactMeBtn
-            title={contactMeData.gmail}
-            src={gmail}
-            link={contactMeData.gmailAddress}
-            isCopyBtn
-            copySuccess={copySuccess}
-          />
-          <ContactMeBtn
-            title={contactMeData.twitter}
-            src={twitter}
-            link={contactMeData.twitterLink}
-          />
-          <ContactMeBtn
-            title={contactMeData.wechat}
-            src={wechat}
-            link={contactMeData.wechatAccount}
-            isCopyBtn
-            copySuccess={copySuccess}
-          />
-        </div>
-        <div className={styles.navLinkIconArea}>
-          <ContactMeBtn
-            title={contactMeData.internalNote}
-            src={note}
-            link={contactMeData.internalNote}
-          />
-          <ContactMeBtn
-            title={contactMeData.internalNas}
-            src={nas}
-            link={contactMeData.internalNas}
-          />
-        </div>
-        {!isMobileDevice && (
-          <>
-            <ArrowDownBtn />
-            <PageProgressBar />
-          </>
-        )}
-        <Notification show={show} title={COPY_SUCCESS} changeShow={setShow} />
-      </div>
-    </header>
+      </main>
+    </div>
   );
 }
 
@@ -270,105 +267,150 @@ function HomepageHeader({ isMobileDevice }: HomepageHeaderProps): JSX.Element {
     backgroundImage = homeBackGround2;
   }
   return (
-    <header
-      className={clsx(styles.heroBanner)}
-      style={{ backgroundImage: `url(${backgroundImage})` }}
-    >
-      <div className={clsx(styles.heroTextContainer)}>
-        {!isMobileDevice && (
-          <div className={styles.avatarArea}>
-            <img src={favicon} alt="dubuqingfeng" />
+    <div>
+      <header
+        className={clsx(styles.heroBanner)}
+        style={{ backgroundImage: `url(${backgroundImage})` }}
+      >
+        <div className={clsx(styles.heroTextContainer)}>
+          {!isMobileDevice && (
+            <div className={styles.avatarArea}>
+              <img src={favicon} alt="dubuqingfeng" />
+            </div>
+          )}
+          <div className={styles.heroTextArea}>
+            <p className={styles.heroTextTitle}>{siteConfig.title}</p>
+            <p className={styles.heroTextSubTitle}>{siteConfig.tagline}</p>
+            <p className={styles.heroTextSubSubTitle}>
+              {siteConfig.customFields.subSubTitle}
+            </p>
+            <div className={styles.heroTextAreaButton}>
+              <Link
+                className={clsx(
+                  "button",
+                  "button--secondary",
+                  "button--sm",
+                  styles.heroTextAreaButton
+                )}
+                to="/docs/"
+              >
+                {TO_WIKI_BUTTON_TEXT}
+              </Link>
+            </div>
           </div>
-        )}
-        <div className={styles.heroTextArea}>
-          <p className={styles.heroTextTitle}>{siteConfig.title}</p>
-          <p className={styles.heroTextSubTitle}>{siteConfig.tagline}</p>
-          <p className={styles.heroTextSubSubTitle}>
-            {siteConfig.customFields.subSubTitle}
-          </p>
-          <div className={styles.heroTextAreaButton}>
-            <Link
-              className={clsx(
-                "button",
-                "button--secondary",
-                "button--sm",
-                styles.heroTextAreaButton
-              )}
-              to="/docs/"
-            >
-              {TO_WIKI_BUTTON_TEXT}
-            </Link>
+          <div className={styles.navLinkIconArea}>
+            <ContactMeBtn
+              title={contactMeData.lifeBlog}
+              src={lifeblog}
+              link={contactMeData.lifeBlog}
+            />
+            <ContactMeBtn
+              title={contactMeData.techBlog}
+              src={techblog}
+              link={contactMeData.techBlog}
+            />
+            <ContactMeBtn
+              title={contactMeData.sitenav}
+              src={sitenav}
+              link={contactMeData.sitenav}
+            />
           </div>
+          <div className={styles.navLinkIconArea}>
+            <ContactMeBtn
+              title={contactMeData.github}
+              src={github}
+              link={contactMeData.githubLink}
+            />
+            <ContactMeBtn
+              title={contactMeData.telegram}
+              src={telegram}
+              link={contactMeData.telegramLink}
+            />
+            <ContactMeBtn
+              title={contactMeData.gmail}
+              src={gmail}
+              link={contactMeData.gmailAddress}
+              isCopyBtn
+              copySuccess={copySuccess}
+            />
+            <ContactMeBtn
+              title={contactMeData.twitter}
+              src={twitter}
+              link={contactMeData.twitterLink}
+            />
+            <ContactMeBtn
+              title={contactMeData.wechat}
+              src={wechat}
+              link={contactMeData.wechatAccount}
+              isCopyBtn
+              copySuccess={copySuccess}
+            />
+          </div>
+          <div className={styles.navLinkIconArea}>
+            <ContactMeBtn
+              title={contactMeData.internalNote}
+              src={note}
+              link={contactMeData.internalNote}
+            />
+            <ContactMeBtn
+              title={contactMeData.internalNas}
+              src={nas}
+              link={contactMeData.internalNas}
+            />
+          </div>
+          {!isMobileDevice && (
+            <>
+              <ArrowDownBtn />
+              <PageProgressBar />
+            </>
+          )}
+          <Notification show={show} title={COPY_SUCCESS} changeShow={setShow} />
         </div>
-        <div className={styles.navLinkIconArea}>
-          <ContactMeBtn
-            title={contactMeData.lifeBlog}
-            src={lifeblog}
-            link={contactMeData.lifeBlog}
-          />
-          <ContactMeBtn
-            title={contactMeData.techBlog}
-            src={techblog}
-            link={contactMeData.techBlog}
-          />
-          <ContactMeBtn
-            title={contactMeData.sitenav}
-            src={sitenav}
-            link={contactMeData.sitenav}
-          />
+      </header>
+      <main>
+        <div className={styles.mainContainer}>
+          {/* language */}
+          <div className={styles.listTitle}>{languagesMenuData.title}</div>
+          <GridList data={languagesGridList} />
+
+          {/* blockchain */}
+          <div className={clsx(styles.listTitle, styles.marginTop)}>
+            {blockchainMenuData.title}
+          </div>
+          <GridList data={blockchainGridList} />
+
+          {/* database */}
+          <div className={clsx(styles.listTitle, styles.marginTop)}>
+            {databaseMenuData.title}
+          </div>
+          <GridList data={databaseGridList} />
+
+          {/* devops */}
+          <div className={clsx(styles.listTitle, styles.marginTop)}>
+            {devopsMenuData.title}
+          </div>
+          <GridList data={devOpsGridList} />
+
+          {/* security */}
+          <div className={clsx(styles.listTitle, styles.marginTop)}>
+            {securityMenuData.title}
+          </div>
+          <GridList data={securityGridList} />
+
+          {/* framework */}
+          <div className={clsx(styles.listTitle, styles.marginTop)}>
+            {frameworkMenuData.title}
+          </div>
+          <GridList data={frameworkGridList} />
+
+          {/* others */}
+          <div className={clsx(styles.listTitle, styles.marginTop)}>
+            {othersMenuData.title}
+          </div>
+          <GridList data={othersGridList} />
         </div>
-        <div className={styles.navLinkIconArea}>
-          <ContactMeBtn
-            title={contactMeData.github}
-            src={github}
-            link={contactMeData.githubLink}
-          />
-          <ContactMeBtn
-            title={contactMeData.telegram}
-            src={telegram}
-            link={contactMeData.telegramLink}
-          />
-          <ContactMeBtn
-            title={contactMeData.gmail}
-            src={gmail}
-            link={contactMeData.gmailAddress}
-            isCopyBtn
-            copySuccess={copySuccess}
-          />
-          <ContactMeBtn
-            title={contactMeData.twitter}
-            src={twitter}
-            link={contactMeData.twitterLink}
-          />
-          <ContactMeBtn
-            title={contactMeData.wechat}
-            src={wechat}
-            link={contactMeData.wechatAccount}
-            isCopyBtn
-            copySuccess={copySuccess}
-          />
-        </div>
-        <div className={styles.navLinkIconArea}>
-          <ContactMeBtn
-            title={contactMeData.internalNote}
-            src={note}
-            link={contactMeData.internalNote}
-          />
-          <ContactMeBtn
-            title={contactMeData.internalNas}
-            src={nas}
-            link={contactMeData.internalNas}
-          />
-        </div>
-        {!isMobileDevice && (
-          <>
-            <ArrowDownBtn />
-            <PageProgressBar />
-          </>
-        )}
-        <Notification show={show} title={COPY_SUCCESS} changeShow={setShow} />
-      </div>
-    </header>
+      </main>
+    </div>
   );
 }
 
