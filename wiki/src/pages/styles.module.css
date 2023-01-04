@@ -36,6 +36,11 @@
   margin-bottom: 30px;
 }
 
+.heroTextMobileArea {
+  color: black;
+  margin-bottom: 30px;
+}
+
 .heroTextTitle {
   font-size: 1.5rem;
   margin: 0;
