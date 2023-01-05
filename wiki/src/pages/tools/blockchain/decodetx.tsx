@@ -207,7 +207,7 @@ export default function DecodeTX() {
                   <br></br>2. ethereum 可以调用
                   <code>
                     {" "}
-                    tx := &types.Transaction \n rawTxBytes, err :=
+                    tx := &types.Transaction rawTxBytes, err :=
                     hex.DecodeString(rawTx)
                   </code>
                 </p>

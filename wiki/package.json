@@ -36,6 +36,7 @@
     "@docusaurus/module-type-aliases": "^2.2.0",
     "@tsconfig/docusaurus": "^1.0.6",
     "bitcoinjs-lib": "^6.1.0",
+    "bitcoinjs-message": "^2.2.0",
     "buffer": "^6.0.3",
     "typescript": "^4.8.3",
     "web3": "^1.8.1"

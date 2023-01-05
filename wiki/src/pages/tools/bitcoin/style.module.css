@@ -1,0 +1,5 @@
+@media (min-width: 640px)
+address {
+    font-size: 0.875rem;
+    line-height: 2rem;
+}

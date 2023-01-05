@@ -24,6 +24,11 @@ const ToolsSidebarData = [
         href: "/tools/bitcoin/publishtx",
         label: "Publish Tx",
       },
+      {
+        type: "link",
+        href: "/tools/bitcoin/verifysignature",
+        label: "Verify Signature",
+      },
     ],
   },
   {
