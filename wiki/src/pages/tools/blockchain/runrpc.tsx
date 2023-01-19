@@ -6,6 +6,7 @@ import Select from "react-select";
 import CreatableSelect from "react-select/creatable";
 import Web3 from "web3";
 
+import useIsBrowser from "@docusaurus/useIsBrowser";
 import { RunRPCSidebarData } from "@site/src/data";
 import PageSidebar from "@site/src/components/PageSidebar/index";
 import MainStyles from "@docusaurus/theme-classic/lib/theme/DocPage/Layout/Main/styles.module.css";
@@ -57,6 +58,8 @@ export default function RunRPC() {
   let select_coin = "bitcoin";
   let defaultOption;
   let select_rpc_url = "";
+
+  const isBrowser = useIsBrowser();
 
   function FormatString(str: string, ...val: string[]) {
     for (let index = 0; index < val.length; index++) {
@@ -274,16 +277,21 @@ export default function RunRPC() {
     }
     defaultSecondOption = secondOptions[0];
     select_rpc_url = defaultSecondOption.value;
-    if (window.localStorage) {
-      var storage = window.localStorage;
-      storage.setItem("select_coin", select_coin);
+
+    if (isBrowser) {
+      if (window.localStorage) {
+        var storage = window.localStorage;
+        storage.setItem("select_coin", select_coin);
+      }
     }
   }
 
-  if (window.localStorage) {
-    var storage = window.localStorage;
-    select_coin = storage.getItem("select_coin");
-    defaultOption = options.find((item) => item.value == select_coin);
+  if (isBrowser) {
+    if (window.localStorage) {
+      var storage = window.localStorage;
+      select_coin = storage.getItem("select_coin");
+      defaultOption = options.find((item) => item.value == select_coin);
+    }
   }
   if (defaultOption == undefined) {
     defaultOption = options[0];
@@ -299,10 +307,14 @@ export default function RunRPC() {
     let serializedTx = document.getElementById("inputarea").value.trim();
     navigator.clipboard.writeText(serializedTx);
   }
+  let nodeParam = "";
+  let rpcMethod = "";
 
-  // 获取参数
-  let nodeParam = new URLSearchParams(window.location.search).get("node") ?? "";
-  let rpcMethod = new URLSearchParams(window.location.search).get("rpc") ?? "";
+  if (isBrowser) {
+    const search = window.location.search;
+    nodeParam = new URLSearchParams(search).get("node") ?? "";
+    rpcMethod = new URLSearchParams(search).get("rpc") ?? "";
+  }
   nodeParam = nodeParam ? nodeParam.toLowerCase() : "";
   rpcMethod = rpcMethod ? rpcMethod.toLowerCase() : "";
 
