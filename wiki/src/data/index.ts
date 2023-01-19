@@ -22,6 +22,8 @@ export {
 
 export { ToolsSidebarData } from "./sidebarData";
 
+export { RunRPCSidebarData } from "./rpc";
+
 export { eip155data } from "./evmrpc";
 
 export { pushtxAPIData } from "./pushtx";

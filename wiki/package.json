@@ -20,6 +20,7 @@
     "@ethereumjs/tx": "^4.0.2",
     "@ethereumjs/util": "^8.0.3",
     "@mdx-js/react": "^1.6.22",
+    "@open-rpc/client-js": "^1.8.1",
     "autoprefixer": "^10.4.13",
     "clsx": "^1.2.1",
     "eslint": "^8.30.0",

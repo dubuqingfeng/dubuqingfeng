@@ -109,6 +109,10 @@ const config = {
                 label: "Publish Tx",
                 to: "/tools/blockchain/publishtx",
               },
+              {
+                label: "Run RPC",
+                to: "/tools/blockchain/runrpc?node=ethereum&rpc=eth_blockNumber",
+              },
             ],
           },
           {
