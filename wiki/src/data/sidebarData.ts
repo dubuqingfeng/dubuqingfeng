@@ -29,6 +29,11 @@ const ToolsSidebarData = [
         href: "/tools/bitcoin/verifysignature",
         label: "Verify Signature",
       },
+      {
+        type: "link",
+        href: "/tools/bitcoin/decodetx",
+        label: "Decode Tx",
+      },
     ],
   },
   {
@@ -39,6 +44,11 @@ const ToolsSidebarData = [
         type: "link",
         href: "/tools/ethereum/publishtx",
         label: "Publish Tx",
+      },
+      {
+        type: "link",
+        href: "/tools/ethereum/decodetx",
+        label: "Decode Tx",
       },
     ],
   },
