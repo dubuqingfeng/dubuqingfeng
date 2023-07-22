@@ -104,15 +104,22 @@ export default function DecodeTX() {
     let outputtext = "";
     try {
       let rawTx = {};
+
       if (select_coin === "ethereum") {
         rawTx = decodeEthereumTx(serializedTx);
       } else {
-        rawTx = decodeBitcoinTx(serializedTx);
+        // 如果以 0x 开头，就以 ethereum 解码
+        if (serializedTx.startsWith("0x")) {
+          select_coin = "ethereum";
+          rawTx = decodeEthereumTx(serializedTx);
+        } else {
+          rawTx = decodeBitcoinTx(serializedTx);
+        }
       }
       outputtext = JSON.stringify(rawTx, null, "  ");
     } catch (err) {
       console.log(err);
-      outputtext = `Decode Error: ${err.toString()}`;
+      outputtext = `Decode Tx Error: ${err.toString()}`;
     }
     document.getElementById("outputarea").value = outputtext;
   }
