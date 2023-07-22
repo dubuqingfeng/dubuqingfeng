@@ -110,7 +110,6 @@ export default function DecodeTX() {
       } else {
         // 如果以 0x 开头，就以 ethereum 解码
         if (serializedTx.startsWith("0x")) {
-          select_coin = "ethereum";
           rawTx = decodeEthereumTx(serializedTx);
         } else {
           rawTx = decodeBitcoinTx(serializedTx);
