@@ -23,6 +23,7 @@
 ![TypeScript](https://img.shields.io/badge/-TypeScript-000?&logo=TypeScript&logoColor=007ACC)
 ![SQL](https://img.shields.io/badge/-SQL-000?&logo=MySQL&logoColor=4479A1)
 ![Dart](https://img.shields.io/badge/-Dart-000?&logo=Dart&logoColor=4479A1)
+![Rust](https://img.shields.io/badge/-Rust-000?&logo=rust&logoColor=4479A1)
 ![Lua](https://img.shields.io/badge/-Lua-000?&logo=lua&logoColor=4479A1)
 
 Not good at Algorithm, Sooner or later we will be replaced by AI.

@@ -1,11 +1,11 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 import go from "@site/static/img/skills-icon/go.png";
 
-import markdown from "@site/static/img/skills-icon/markdown.png";
 import html from "@site/static/img/skills-icon/html.png";
 import css from "@site/static/img/skills-icon/css.png";
 import javascript from "@site/static/img/skills-icon/javascript.png";
 import typescript from "@site/static/img/skills-icon/typescript.png";
+import rust from "@site/static/img/skills-icon/rust.png";
 import dart from "@site/static/img/skills-icon/dart.png";
 import sql from "@site/static/img/skills-icon/sql.png";
 import lua from "@site/static/img/skills-icon/lua.png";
@@ -77,11 +77,12 @@ const languagesGridList: Array<GridItemType> = [
   gridItem(languagesData.php, "/docs/php", php),
   gridItem(languagesData.python, "/docs/python", python),
 
-  gridItem(languagesData.markdown, "/docs/markdown", markdown),
+  gridItem(languagesData.rust, "/docs/rust", rust),
   gridItem(languagesData.html, "/docs/html", html),
   gridItem(languagesData.css, "/docs/css", css),
   gridItem(languagesData.javascript, "/docs/javascript", javascript),
   gridItem(languagesData.typescript, "/docs/typescript", typescript),
+  // gridItem(languagesData.markdown, "/docs/markdown", markdown),
   gridItem(languagesData.dart, "/docs/dart", dart),
   gridItem(languagesData.sql, "/docs/sql", sql),
   gridItem(languagesData.lua, "/docs/lua", lua),

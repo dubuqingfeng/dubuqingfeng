@@ -12,6 +12,7 @@ interface LanguagesMenuData {
   readonly javascript: string;
   readonly typescript: string;
   readonly dart: string;
+  readonly rust: string;
   readonly sql: string;
   readonly lua: string;
   readonly solidity: string;
@@ -84,6 +85,7 @@ const CSS = "CSS";
 const JAVASCRIPT = "JavaScript"; 
 const TYPESCRIPT = "TypeScript";
 const DART = "Dart";
+const RUST = "Rust";
 const SQL = "SQL";
 const LUA = "Lua";
 const SOLIDITY = "Solidity";
@@ -159,6 +161,7 @@ const languagesMenuData: LanguagesMenuData = {
   javascript: JAVASCRIPT,
   typescript: TYPESCRIPT,
   dart: DART,
+  rust: RUST,
   sql: SQL,
   lua: LUA,
   solidity: SOLIDITY,
