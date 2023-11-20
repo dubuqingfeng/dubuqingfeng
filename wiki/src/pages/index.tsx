@@ -264,6 +264,9 @@ function HomepageHeader({ isMobileDevice }: HomepageHeaderProps): JSX.Element {
   } else if (randomNum >= 8) {
     backgroundImage = homeBackGround2;
   }
+  // 获取 query 参数
+  const urlParams = new URLSearchParams(window.location.search);
+  const isInternal = urlParams.get("isinternal");
   return (
     <header
       className={clsx(styles.heroBanner)}
@@ -343,18 +346,22 @@ function HomepageHeader({ isMobileDevice }: HomepageHeaderProps): JSX.Element {
             copySuccess={copySuccess}
           />
         </div>
-        <div className={styles.navLinkIconArea}>
-          <ContactMeBtn
-            title={contactMeData.internalNote}
-            src={note}
-            link={contactMeData.internalNote}
-          />
-          <ContactMeBtn
-            title={contactMeData.internalNas}
-            src={nas}
-            link={contactMeData.internalNas}
-          />
-        </div>
+        {
+          isInternal == "true" && (
+            <div className={styles.navLinkIconArea}>
+              <ContactMeBtn
+                title={contactMeData.internalNote}
+                src={note}
+                link={contactMeData.internalNote}
+              />
+              <ContactMeBtn
+                title={contactMeData.internalNas}
+                src={nas}
+                link={contactMeData.internalNas}
+              />
+            </div>
+          )
+        }
         {!isMobileDevice && (
           <>
             <ArrowDownBtn />

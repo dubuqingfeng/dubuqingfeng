@@ -26,11 +26,13 @@ export default function PublishTX() {
     const node = pushtxAPIData[select_coin];
     for (const [key, value] of Object.entries(node.api)) {
       let body = value.body;
+      // if value has content-type
+      let contenttype = value["content-type"];
       await fetch(value.url, {
         method: "POST",
         body: FormatString(body, tx),
         headers: {
-          "Content-type": "application/json; charset=UTF-8",
+          "Content-type": contenttype,
         },
       })
         .then((res) => res.json())

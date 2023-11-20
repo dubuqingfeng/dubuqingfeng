@@ -98,7 +98,7 @@ Awesome: [![awesome-blockchain-explorer](https://img.shields.io/badge/awesome-ex
 
 ## How To Find Me?
 
-Resume: [![Resume](https://img.shields.io/badge/Resume-000?)](https://github.com/dubuqingfeng/dubuqingfeng/blob/master/docs/Resume.pdf)
+Resume: [![Resume](https://img.shields.io/badge/Resume-000?)](https://github.com/dubuqingfeng/dubuqingfeng/blob/master/wiki/static/resume.pdf)
 
 [![Tech's Blog](https://img.shields.io/badge/Tech-Blog-000)](https://dbqf.xyz)
 [![Life's Blog](https://img.shields.io/badge/Life-Blog-000)](https://xiaoye.me)
