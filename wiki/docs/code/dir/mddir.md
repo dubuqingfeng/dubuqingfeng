@@ -1,3 +1,6 @@
+
+
+```javascript
 #!/usr/bin/env node
 // base https://github.com/JohnByrneRepo/mddir/blob/master/src/mddir.js
 
@@ -264,3 +267,4 @@ fs.readdir(searchPath, function(err, list){
     folders[key].parsed = true;
 });
 getFolders(searchPath); 
+```

@@ -1,3 +1,5 @@
+
+```python
 import requests
 
 
@@ -50,3 +52,4 @@ for item in result['coins']:
     if item['name'] in coins:
         if item['network_vs_rentable_ratio'] > 0.4:
             print(item)
+```

@@ -21,7 +21,7 @@ const config = {
   // GitHub pages deployment config.
   // If you aren't using GitHub pages, you don't need these.
   organizationName: 'dubuqingfeng', // Usually your GitHub org/user name.
-  projectName: 'dubuqingfeng', // Usually your repo name.
+  projectName: 'Dubuqingfeng', // Usually your repo name.
   deploymentBranch: 'master',
   trailingSlash: false,
 
@@ -31,6 +31,16 @@ const config = {
   i18n: {
     defaultLocale: 'zh-Hans',
     locales: ['zh-Hans'],
+    // defaultLocale: 'en-US',
+    // locales: ['en-US', 'zh-Hans'],
+    // localeConfigs: {
+    //     'en-US': {
+    //         label: 'English',
+    //     },
+    //     'zh-Hans': {
+    //         label: '简体中文',
+    //     },
+    // },
   },
   themes: ["@docusaurus/theme-live-codeblock"],
 
@@ -74,18 +84,18 @@ const config = {
       //   isCloseable: true,
       // },
       navbar: {
-        title: 'dubuqingfeng',
+        title: 'Dubuqingfeng',
         items: [
           {
             type: 'doc',
             docId: 'intro',
             position: 'left',
-            label: 'intro',
+            label: 'Intro',
           },
           {
             to: "/docs/wiki",
             position: 'left',
-            label: 'wiki',
+            label: 'Wiki',
           },
           {
             position: "left",
@@ -120,6 +130,10 @@ const config = {
             label: 'GitHub',
             position: 'right',
           },
+          // {
+          //   type: 'localeDropdown',
+          //   position: 'right',
+          // },
         ],
       },
       docs: {
@@ -135,8 +149,8 @@ const config = {
             title: 'Docs',
             items: [
               {
-                label: 'Tutorial',
-                to: '/docs/intro',
+                label: 'Intro',
+                to: '/docs',
               },
             ],
           },

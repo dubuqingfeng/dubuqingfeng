@@ -56,7 +56,7 @@ with open("output.csv","w") as csvfile:
 
 ```
 
-```
+```python
 #!/usr/bin/env python
 # coding=utf-8
 import requests
