@@ -71,18 +71,18 @@ function gridItem(
 }
 
 const languagesGridList: Array<GridItemType> = [
-  gridItem(languagesData.go, "/docs/go", go),
-  gridItem(languagesData.cpp, "/docs/cpp", cpp),
-  gridItem(languagesData.java, "/docs/java", java),
-  gridItem(languagesData.php, "/docs/php", php),
-  gridItem(languagesData.python, "/docs/python", python),
+  gridItem(languagesData.go, "/docs/wiki/programming/go", go),
+  gridItem(languagesData.cpp, "/docs/wiki/programming/cpp", cpp),
+  gridItem(languagesData.java, "/docs/wiki/programming/java", java),
+  gridItem(languagesData.php, "/docs/wiki/programming/php", php),
+  gridItem(languagesData.python, "/docs/wiki/programming/python", python),
 
-  gridItem(languagesData.rust, "/docs/rust", rust),
-  gridItem(languagesData.html, "/docs/html", html),
-  gridItem(languagesData.css, "/docs/css", css),
-  gridItem(languagesData.javascript, "/docs/javascript", javascript),
-  gridItem(languagesData.typescript, "/docs/typescript", typescript),
-  // gridItem(languagesData.markdown, "/docs/markdown", markdown),
+  gridItem(languagesData.rust, "/docs/wiki/programming/rust", rust),
+  gridItem(languagesData.html, "/docs/wiki/programming/html", html),
+  gridItem(languagesData.css, "/docs/wiki/programming/css", css),
+  gridItem(languagesData.javascript, "/docs/wiki/programming/javascript", javascript),
+  gridItem(languagesData.typescript, "/docs/wiki/programming/typescript", typescript),
+
   gridItem(languagesData.dart, "/docs/dart", dart),
   gridItem(languagesData.sql, "/docs/sql", sql),
   gridItem(languagesData.lua, "/docs/lua", lua),
@@ -91,8 +91,8 @@ const languagesGridList: Array<GridItemType> = [
 ];
 
 const blockchainGridList: Array<GridItemType> = [
-  gridItem(blockchainData.bitcoin, "/docs/bitcoin", bitcoin),
-  gridItem(blockchainData.ethereum, "/docs/ethereum", ethereum),
+  gridItem(blockchainData.bitcoin, "/docs/wiki/blockchain/bitcoin", bitcoin),
+  gridItem(blockchainData.ethereum, "/docs/wiki/blockchain/ethereum", ethereum),
   gridItem(blockchainData.defi, "/docs/defi", defi),
 ];
 
