@@ -1,10 +1,10 @@
 
 
-2022.12.01
+## 12.01
 
 https://github.com/halfrost/LeetCode-Go
 
-2022.12.02
+## 12.02
 
 https://github.com/citp/BlockSci
 
@@ -18,13 +18,13 @@ https://twitter.com/yishi_oh/status/1595797129704144899
 
 https://github.com/bitcoin/bips/blob/master/bip-0350.mediawiki
 
-2022.12.03
+## 12.03
 
 getchaintips
 
 https://chat.openai.com/
 
-2022.12.28
+## 12.28
 
 shm_size postgresql
 
