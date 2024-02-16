@@ -362,6 +362,12 @@ export default function RunRPC() {
             <Select
               className="basic-single"
               options={options}
+              styles={{
+                option: provided => ({
+                  ...provided,
+                  color: 'black'
+                }),
+              }}
               defaultValue={defaultOption}
               defaultInputValue=""
               onChange={handleChange}

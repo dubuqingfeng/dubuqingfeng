@@ -12,6 +12,7 @@ import { toBuffer, bufferToHex, bigIntToBuffer } from "@ethereumjs/util";
 import { TransactionFactory } from "@ethereumjs/tx";
 import { Transaction, script } from "bitcoinjs-lib";
 import { fromOutputScript } from "bitcoinjs-lib/src/address";
+import { useColorMode } from "@docusaurus/theme-common";
 
 export default function DecodeTX() {
   let select_coin = "";
@@ -177,6 +178,12 @@ export default function DecodeTX() {
                       id="select-coin"
                       className="basic-single"
                       options={options}
+                      styles={{
+                        option: provided => ({
+                          ...provided,
+                          color: 'black'
+                        }),
+                      }}
                       defaultValue={options[0]}
                       defaultInputValue=""
                       onChange={handleChange}

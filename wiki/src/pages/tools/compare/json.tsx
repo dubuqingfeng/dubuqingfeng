@@ -138,16 +138,6 @@ export default function CompareCode() {
                   <h1 style={{ marginTop: "16px", marginRight: "16px" }}>
                     Compare JSON
                   </h1>
-                  {/* <div className="" style={{ marginLeft: "16px" }}>
-                    <Select
-                      id="select-coin"
-                      className="basic-single"
-                      options={options}
-                      defaultValue={options[0]}
-                      defaultInputValue=""
-                      onChange={handleChange}
-                    />
-                  </div> */}
                 </Center>
               </div>
             </div>

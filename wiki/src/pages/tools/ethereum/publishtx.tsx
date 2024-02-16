@@ -105,6 +105,12 @@ export default function PublishTX() {
                   <div className="" style={{ marginRight: "16px" }}>
                     <Select
                       className="basic-single"
+                      styles={{
+                        option: provided => ({
+                          ...provided,
+                          color: 'black'
+                        }),
+                      }}
                       options={options}
                       defaultValue={options[0]}
                       defaultInputValue=""

@@ -126,6 +126,12 @@ export default function PublishTX() {
                     <Select
                       className="basic-single"
                       options={options}
+                      styles={{
+                        option: provided => ({
+                          ...provided,
+                          color: 'black'
+                        }),
+                      }}
                       defaultValue={options[0]}
                       defaultInputValue=""
                       onChange={handleChange}
