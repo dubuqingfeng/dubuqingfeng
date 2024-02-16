@@ -1,0 +1,60 @@
+/**
+ * Copyright (c) Facebook, Inc. and its affiliates.
+ *
+ * This source code is licensed under the MIT license found in the
+ * LICENSE file in the root directory of this source tree.
+ */
+
+@media (min-width: 1280px){
+  .container{
+    max-width: 1380px;
+  }
+}
+
+.centerMainContainer {
+  display: flex;
+  width: 100%;
+}
+
+@media (min-width: 997px) {
+  .centerMainContainer {
+    flex-grow: 1;
+    /* max-width: calc(100% - var(--doc-sidebar-width)); */
+  }
+}
+
+.diffViewContainer {
+  padding: 0;
+}
+
+.diffViewContainer pre {
+  padding: 0;
+  background-color: transparent;
+  font: inherit;
+  font-family: "JetBrains Mono", monospace !important;
+  font-size: 12px;
+}
+
+.diffViewContainer td {
+  padding: 1px 1px 1px 1px;
+  border: 0;
+}
+
+.diffViewContainer .buttonless button {
+  display: none;
+}
+
+.diffViewContainer .prism-code {
+  font: inherit;
+  float: left;
+  min-width: 100%;
+  padding: 0;
+}
+
+.diffViewContainer .codeBlockLines {
+  font: inherit;
+  /* rtl:ignore */
+  float: left;
+  min-width: 100%;
+  padding: 0;
+}

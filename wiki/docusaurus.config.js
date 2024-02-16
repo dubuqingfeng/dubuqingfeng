@@ -102,6 +102,18 @@ const config = {
                 href: "https://json.cn",
                 label: "json",
               },
+              {
+                label: "Compare Text",
+                to: "/tools/compare/text",
+              },
+              {
+                label: "Compare Code",
+                to: "/tools/compare/code",
+              },
+              {
+                label: "Compare JSON",
+                to: "/tools/compare/json",
+              },
             ],
           },
           {
