@@ -128,11 +128,6 @@ const eip155data = {
         trackingDetails: privacyStatement.bitstack,
       },
       {
-        url: "https://eth-rpc.gateway.pokt.network",
-        tracking: "none",
-        trackingDetails: privacyStatement.pokt,
-      },
-      {
         url: "https://eth-mainnet-public.unifra.io",
         tracking: "unspecified",
       },

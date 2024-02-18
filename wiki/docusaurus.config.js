@@ -1,8 +1,7 @@
 // @ts-check
 // Note: type annotations allow type checking and IDEs autocompletion
 
-const lightCodeTheme = require('prism-react-renderer/themes/github');
-const darkCodeTheme = require('prism-react-renderer/themes/dracula');
+const { themes } = require('prism-react-renderer');
 
 /** @type {import('@docusaurus/types').Config} */
 const config = {
@@ -42,7 +41,7 @@ const config = {
     //     },
     // },
   },
-  themes: ["@docusaurus/theme-live-codeblock"],
+  themes: ["docusaurus-theme-openapi-docs"],
 
   presets: [
     [
@@ -65,6 +64,7 @@ const config = {
         theme: {
           customCss: require.resolve('./src/css/custom.css'),
         },
+        debug: true,
       }),
     ],
   ],
@@ -84,8 +84,9 @@ const config = {
         title: 'Dubuqingfeng',
         items: [
           {
-            type: 'doc',
-            docId: 'intro',
+            to: "/docs",
+            // type: 'doc',
+            // docId: 'intro',
             position: 'left',
             label: 'Intro',
           },
@@ -100,7 +101,7 @@ const config = {
             items: [
               {
                 href: "https://json.cn",
-                label: "json",
+                label: "JSON",
               },
               {
                 label: "Compare Text",
@@ -201,8 +202,9 @@ const config = {
         copyright: `Copyright © ${new Date().getFullYear()} Dubuqingfeng, Inc.`,
       },
       prism: {
-        theme: lightCodeTheme,
-        darkTheme: darkCodeTheme,
+        theme: themes.github,
+        darkTheme: themes.dracula,
+        additionalLanguages: ['bash', 'diff', 'json'],
       },
     }),
     plugins: [
@@ -218,6 +220,52 @@ const config = {
           },
         };
       },
+      [
+        require.resolve("@cmfcmf/docusaurus-search-local"),
+        {
+          // Options here
+        },
+      ],
+      [
+        'docusaurus-plugin-content-gists',
+        {
+          id: "gists", // plugin id
+          enabled: false,
+          verbose: true,
+          personalAccessToken: process.env.GITHUB_PERSONAL_ACCESS_TOKEN || 'token',
+        },
+      ],
+      [
+        '@docusaurus/plugin-content-docs',
+        {
+          id: 'openapi-classic',
+          path: 'openapi',
+          routeBasePath: 'openapi',
+          docItemComponent: "@theme/ApiItem" // Derived from docusaurus-theme-openapi-docs
+          // sidebarPath: './sidebarsCommunity.js',
+          // ... other options
+        },
+      ],
+      [
+        'docusaurus-plugin-openapi-docs',
+        {
+          id: "openapi", // plugin id
+          docsPluginId: "openapi-classic", // id of plugin-content-docs or preset for rendering docs
+          config: {
+            petstore: { // the <id> referenced when running CLI commands
+              specPath: "src/openapi/petstore.yaml", // path to OpenAPI spec, URLs supported
+              outputDir: "openapi/petstore", // output directory for generated files
+              sidebarOptions: { // optional, instructs plugin to generate sidebar.js
+                groupPathsBy: "tag", // group sidebar items by operation "tag"
+              },
+            },
+            burgers: {
+              specPath: "src/openpai/food/openapi.yaml",
+              outputDir: "openapi/food/burgers",
+            }
+          }
+        },
+      ]
     ],
 };
 

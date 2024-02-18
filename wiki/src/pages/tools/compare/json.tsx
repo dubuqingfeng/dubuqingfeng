@@ -4,12 +4,10 @@ import Layout from "@theme/Layout";
 import Center from "@site/src/components/Center/center";
 import MainStyles from "./styles.module.css";
 import Select from "react-select";
-import DocPageStyles from "@docusaurus/theme-classic/lib/theme/DocPage/Layout/styles.module.css";
+import DocPageStyles from "@docusaurus/theme-classic/lib/theme/DocRoot/Layout/styles.module.css";
 import ReactDiffViewer, { DiffMethod } from "react-diff-viewer-continued";
 import { useColorMode } from "@docusaurus/theme-common";
-import Highlight, { Prism } from "prism-react-renderer";
-import dracula from "prism-react-renderer/themes/dracula";
-import vsLight from "prism-react-renderer/themes/vsLight";
+import { Highlight, Prism, themes } from "prism-react-renderer";
 
 const defaultDiffView = (str: string): any => {
   if (!str) return;
@@ -18,7 +16,7 @@ const defaultDiffView = (str: string): any => {
 
 const ReactThemeDiffViewer = ({ oldValue, newValue }) => {
   const { colorMode, setColorMode } = useColorMode();
-  const theme = colorMode === "dark" ? dracula : vsLight;
+  const theme = colorMode === "dark" ? themes.dracula : themes.vsLight;
   const syntaxHighlight = (str: string): any => {
     if (!str) return;
     return (

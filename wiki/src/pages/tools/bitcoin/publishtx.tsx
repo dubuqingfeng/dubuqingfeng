@@ -6,8 +6,8 @@ import Select from "react-select";
 
 import { ToolsSidebarData } from "@site/src/data";
 import PageSidebar from "@site/src/components/PageSidebar/index";
-import MainStyles from "@docusaurus/theme-classic/lib/theme/DocPage/Layout/Main/styles.module.css";
-import DocPageStyles from "@docusaurus/theme-classic/lib/theme/DocPage/Layout/styles.module.css";
+import MainStyles from "@docusaurus/theme-classic/lib/theme/DocRoot/Layout/Main/styles.module.css";
+import DocRootStyles from "@docusaurus/theme-classic/lib/theme/DocRoot/Layout/styles.module.css";
 import { pushtxAPIData } from "@site/src/data";
 
 export default function PublishTX() {
@@ -85,7 +85,7 @@ export default function PublishTX() {
       title="Publish Bitcoin Serialized Transaction"
       description="Publish Bitcoin serialized transaction"
     >
-      <div className={DocPageStyles.docPage}>
+      <div className={DocRootStyles.docRoot}>
         <PageSidebar
           sidebar={ToolsSidebarData}
           path="/tools/bitcoin/publishtx"

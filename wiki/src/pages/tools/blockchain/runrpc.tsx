@@ -4,13 +4,13 @@ import Layout from "@theme/Layout";
 import Center from "@site/src/components/Center/center";
 import Select from "react-select";
 import CreatableSelect from "react-select/creatable";
-import Web3 from "web3";
+import { Web3 } from "web3";
 
 import useIsBrowser from "@docusaurus/useIsBrowser";
 import { RunRPCSidebarData } from "@site/src/data";
 import PageSidebar from "@site/src/components/PageSidebar/index";
-import MainStyles from "@docusaurus/theme-classic/lib/theme/DocPage/Layout/Main/styles.module.css";
-import DocPageStyles from "@docusaurus/theme-classic/lib/theme/DocPage/Layout/styles.module.css";
+import MainStyles from "@docusaurus/theme-classic/lib/theme/DocRoot/Layout/Main/styles.module.css";
+import DocRootStyles from "@docusaurus/theme-classic/lib/theme/DocRoot/Layout/styles.module.css";
 import { eip155data, pushtxAPIData } from "@site/src/data";
 import { RequestManager, HTTPTransport, Client } from "@open-rpc/client-js";
 
@@ -400,7 +400,7 @@ export default function RunRPC() {
           </div>
         </Center>
       </div>
-      <div className={DocPageStyles.docPage}>
+      <div className={DocRootStyles.docRoot}>
         <PageSidebar
           sidebar={RunRPCSidebarData}
           path={

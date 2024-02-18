@@ -7,7 +7,7 @@ import Content from '@theme/DocSidebar/Desktop/Content';
 import type {Props} from '@theme/DocSidebar/Desktop';
 import { ThemeClassNames } from '@docusaurus/theme-common';
 
-import SidebarStyles from '@docusaurus/theme-classic/lib/theme/DocPage/Layout/Sidebar/styles.module.css';
+import SidebarStyles from '@docusaurus/theme-classic/lib/theme/DocRoot/Layout/Sidebar/styles.module.css';
 import styles from './styles.module.css';
 
 function PageSidebarDesktop({path, sidebar, onCollapse, isHidden}: Props) {

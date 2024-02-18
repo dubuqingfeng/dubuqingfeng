@@ -6,8 +6,8 @@ import { ToolsSidebarData } from "@site/src/data";
 import PageSidebar from "@site/src/components/PageSidebar/index";
 import Link from "@docusaurus/Link";
 import Select from "react-select";
-import MainStyles from "@docusaurus/theme-classic/lib/theme/DocPage/Layout/Main/styles.module.css";
-import DocPageStyles from "@docusaurus/theme-classic/lib/theme/DocPage/Layout/styles.module.css";
+import MainStyles from "@docusaurus/theme-classic/lib/theme/DocRoot/Layout/Main/styles.module.css";
+import DocRootStyles from "@docusaurus/theme-classic/lib/theme/DocRoot/Layout/styles.module.css";
 import { toBuffer, bufferToHex, bigIntToBuffer } from "@ethereumjs/util";
 import { TransactionFactory } from "@ethereumjs/tx";
 import { Transaction, script } from "bitcoinjs-lib";
@@ -136,7 +136,7 @@ export default function DecodeTX() {
       title="Decode Serialized Transaction"
       description="Decode serialized transaction"
     >
-      <div className={DocPageStyles.docPage}>
+      <div className={DocRootStyles.docRoot}>
         <PageSidebar
           sidebar={ToolsSidebarData}
           path="/tools/blockchain/decodetx"

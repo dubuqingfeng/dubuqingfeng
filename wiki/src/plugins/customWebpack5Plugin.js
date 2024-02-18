@@ -11,7 +11,11 @@ module.exports = function () {
             },
             fallback: {
               buffer: require.resolve('buffer/'),
-              stream: require.resolve("stream-browserify")
+              stream: require.resolve("stream-browserify"),
+              https: require.resolve("https-browserify"),
+              http: require.resolve("stream-http"),
+              zlib: require.resolve("browserify-zlib"),
+              assert: require.resolve("assert/"),
             },
           },
           plugins: [

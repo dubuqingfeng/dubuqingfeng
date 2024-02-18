@@ -3,12 +3,12 @@ import clsx from "clsx";
 import Layout from "@theme/Layout";
 import Center from "@site/src/components/Center/center";
 import Select from "react-select";
-import Web3 from "web3";
+import { Web3, HttpProvider } from "web3";
 
 import { ToolsSidebarData } from "@site/src/data";
 import PageSidebar from "@site/src/components/PageSidebar/index";
-import MainStyles from "@docusaurus/theme-classic/lib/theme/DocPage/Layout/Main/styles.module.css";
-import DocPageStyles from "@docusaurus/theme-classic/lib/theme/DocPage/Layout/styles.module.css";
+import MainStyles from "@docusaurus/theme-classic/lib/theme/DocRoot/Layout/Main/styles.module.css";
+import DocRootStyles from "@docusaurus/theme-classic/lib/theme/DocRoot/Layout/styles.module.css";
 import { eip155data } from "@site/src/data";
 
 export default function PublishTX() {
@@ -25,8 +25,7 @@ export default function PublishTX() {
       } else {
         rpcurl = value.url;
       }
-      const provider = new Web3.providers.HttpProvider(rpcurl);
-      const web3 = new Web3(provider || "ws://localhost:8545");
+      const web3 = new Web3(new HttpProvider(rpcurl));
       try {
         const result = await web3.eth.sendSignedTransaction(serializedTx);
         console.log(result);
@@ -65,7 +64,7 @@ export default function PublishTX() {
       title="Publish Ethereum Serialized Transaction"
       description="Publish Ethereum serialized transaction"
     >
-      <div className={DocPageStyles.docPage}>
+      <div className={DocRootStyles.docRoot}>
         <PageSidebar
           sidebar={ToolsSidebarData}
           path="/tools/ethereum/publishtx"

@@ -5,8 +5,8 @@ import Center from "@site/src/components/Center/center";
 import { verify } from "bitcoinjs-message";
 import { ToolsSidebarData } from "@site/src/data";
 import PageSidebar from "@site/src/components/PageSidebar/index";
-import MainStyles from "@docusaurus/theme-classic/lib/theme/DocPage/Layout/Main/styles.module.css";
-import DocPageStyles from "@docusaurus/theme-classic/lib/theme/DocPage/Layout/styles.module.css";
+import MainStyles from "@docusaurus/theme-classic/lib/theme/DocRoot/Layout/Main/styles.module.css";
+import DocRootStyles from "@docusaurus/theme-classic/lib/theme/DocRoot/Layout/styles.module.css";
 
 export default function VerifySignature() {
   let address = "";
@@ -58,7 +58,7 @@ export default function VerifySignature() {
       title="Verify Bitcoin Signature"
       description="Decode Bitcoin serialized transaction"
     >
-      <div className={DocPageStyles.docPage}>
+      <div className={DocRootStyles.docRoot}>
         <PageSidebar
           sidebar={ToolsSidebarData}
           path="/tools/bitcoin/verifysignature"

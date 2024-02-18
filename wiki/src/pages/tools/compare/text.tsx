@@ -4,7 +4,7 @@ import Layout from "@theme/Layout";
 import Center from "@site/src/components/Center/center";
 import MainStyles from "./styles.module.css";
 import Select from "react-select";
-import DocPageStyles from "@docusaurus/theme-classic/lib/theme/DocPage/Layout/styles.module.css";
+import DocPageStyles from "@docusaurus/theme-classic/lib/theme/DocRoot/Layout/styles.module.css";
 import ReactDiffViewer from "react-diff-viewer-continued";
 import { useColorMode } from "@docusaurus/theme-common";
 

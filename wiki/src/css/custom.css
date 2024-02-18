@@ -128,7 +128,7 @@ code {
 }
 
 .markdown h2 {
-  margin-top: 30px !important;
+  /* margin-top: 30px !important; */
   padding-left: 10px;
   padding-bottom: 8px;
   line-height: 100%;
