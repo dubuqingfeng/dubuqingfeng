@@ -13,6 +13,7 @@ import { TransactionFactory } from "@ethereumjs/tx";
 import { Transaction, script } from "bitcoinjs-lib";
 import { fromOutputScript } from "bitcoinjs-lib/src/address";
 import { useColorMode } from "@docusaurus/theme-common";
+import Base58 from "base-58";
 
 export default function DecodeTX() {
   let select_coin = "";
@@ -52,6 +53,116 @@ export default function DecodeTX() {
       hasWitnesses: tx.hasWitnesses(),
     };
     return rawTx;
+  }
+  const hexToByte = (hex) => {
+    const key = '0123456789abcdef'
+    let newBytes = []
+    let currentChar = 0
+    let currentByte = 0
+    for (let i = 0; i < hex.length; i++) {   // Go over two 4-bit hex chars to convert into one 8-bit byte
+        currentChar = key.indexOf(hex[i])
+        if (i % 2 === 0) { // First hex char
+            currentByte = (currentChar << 4) // Get 4-bits from first hex char
+        }
+        if (i % 2 === 1) { // Second hex char
+            currentByte += (currentChar)     // Concat 4-bits from second hex char
+            newBytes.push(currentByte)       // Add byte
+        }
+    }
+    return new Uint8Array(newBytes)
+  }
+  
+  const byteToHex = (byte) => {
+      const key = '0123456789abcdef'
+      let bytes = new Uint8Array(byte)
+      let newHex = ''
+      let currentChar = 0
+      for (let i = 0; i < bytes.length; i++) { // Go over each 8-bit byte
+          currentChar = (bytes[i] >> 4)      // First 4-bits for first hex char
+          newHex += key[currentChar]         // Add first hex char to string
+          currentChar = (bytes[i] & 15)      // Erase first 4-bits, get last 4-bits for second hex char
+          newHex += key[currentChar]         // Add second hex char to string
+      }
+      return newHex
+  }
+
+  function decodeBytes(b) {
+      const tx = {}
+      let readIndex = 0;
+      tx['root.signature.length'] = b[readIndex++];
+      for (let i = 0; i < tx['root.signature.length']; i++) {
+          tx['root.signature.' + i] = byteToHex(b.slice(readIndex, readIndex + 64))
+          readIndex += 64;
+      }
+      tx['root.message.header.numRequiredSignatures'] = b[readIndex++];
+      if (!tx['root.message.header.numRequiredSignatures']) {
+          throw new Error('Invalid Transaction');
+      }
+      tx['root.message.header.numReadonlySignedAccounts'] = b[readIndex++];
+      tx['root.message.header.numReadonlyUnsignedAccounts'] = b[readIndex++];
+      tx['root.message.header.accountKeys.length'] = b[readIndex++];
+      for (let i = 0; i < tx['root.message.header.accountKeys.length']; i++) {
+          tx['root.message.header.accountKeys.' + i] = Base58.encode(b.slice(readIndex, readIndex + 32));
+          readIndex += 32;
+      }
+      tx['root.message.header.recentBlockhash'] = byteToHex(b.slice(readIndex, readIndex + 32));
+      readIndex += 32;
+      tx['root.message.instructions.length'] = b[readIndex++];
+      for (let i = 0; i < tx['root.message.instructions.length']; i++) {
+          const instructionsId = 'root.message.instructions.' + i;
+          tx[instructionsId + '.programIdIndex'] = b[readIndex++];
+          tx[instructionsId + '.accounts.length'] = b[readIndex++];
+          for (let j = 0; j < tx[instructionsId + '.accounts.length']; j++) {
+              tx[instructionsId + '.accounts.' + j + '.index'] = b[readIndex++];
+          }
+          tx[instructionsId + '.data.length'] = b[readIndex++];
+          tx[instructionsId + '.data'] = byteToHex(b.slice(readIndex, readIndex + tx[instructionsId + '.data.length']));
+          readIndex += tx[instructionsId + '.data.length']
+      }
+      return tx;
+  }
+  function decodeBase64Tx(rawTx) {
+      try {
+          const txBytes = atob(rawTx);
+          return decodeBytes(Uint8Array.from(txBytes, (m) => m.codePointAt(0)));
+      } catch (error) {
+          return null;
+      }
+  }
+  function decodeBase58Tx(rawTx) {
+      try {
+          const txBytes = Base58.decode(rawTx);
+          return decodeBytes(txBytes);
+      } catch (error) {
+        console.log(error);
+        return null;
+      }
+  }
+  function decodeHexTx(rawTx) {
+      try {
+          const txBytes = hexToByte(rawTx);
+          return decodeBytes(txBytes);
+      } catch (error) {
+          return null;
+      }
+  }
+
+  function decodeSolanaTx(serializedTx) {
+    const parsers = [
+      decodeBase64Tx,
+      decodeBase58Tx,
+      decodeHexTx
+    ];
+    let tx = null;
+    for (let i = 0; i < parsers.length; i++) {
+        tx = parsers[i](serializedTx);
+        if (tx) {
+          console.log(tx);
+          tx['txid'] = Base58.encode(hexToByte(tx['root.signature.0']));
+          break;
+        }
+    }
+    return tx;
   }
   function decodeEthereumTx(serializedTx) {
     let buf = toBuffer(serializedTx);
@@ -108,6 +219,8 @@ export default function DecodeTX() {
 
       if (select_coin === "ethereum") {
         rawTx = decodeEthereumTx(serializedTx);
+      } else if (select_coin === "solana") {
+        rawTx = decodeSolanaTx(serializedTx);
       } else {
         // 如果以 0x 开头，就以 ethereum 解码
         if (serializedTx.startsWith("0x")) {
@@ -130,6 +243,7 @@ export default function DecodeTX() {
   const options = [
     { value: "bitcoin", label: "Bitcoin" },
     { value: "ethereum", label: "Ethereum" },
+    { value: "solana", label: "Solana" },
   ];
   return (
     <Layout

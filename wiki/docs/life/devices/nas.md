@@ -17,8 +17,4 @@ https://github.com/LogicJake/WebMonitor
 软件方案：
 
 1. quickconnect
-2. 网云穿
-
-硬件方案：
-
-现在的方案是蒲公英 x1
+2. Tailscale

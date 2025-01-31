@@ -24,6 +24,7 @@
     "@open-rpc/client-js": "^1.8.1",
     "assert": "^2.1.0",
     "autoprefixer": "^10.4.13",
+    "base-58": "^0.0.1",
     "browserify-zlib": "^0.2.0",
     "clsx": "^1.2.1",
     "docusaurus-plugin-content-gists": "^3.0.0",
