@@ -225,7 +225,7 @@ const othersMenuData: OthersMenuData = {
 const GITHUB = "github";
 const TELEGRAM = "Telegram";
 const GMAIL = "GMail";
-const TWITTER = "Twitter";
+const TWITTER = "X";
 const WECHAT = "微信";
 const ZHIHU = "知乎";
 const GITHUB_LINK = "https://github.com/dubuqingfeng/";
@@ -244,7 +244,7 @@ const contactMeData: ContactMeData = {
   telegram: TELEGRAM,
   gmail: GMAIL,
   twitter: TWITTER,
-  twitterLink: "https://twitter.com/dubuqingfeng",
+  twitterLink: "https://x.com/dubuqingfeng",
   wechat: WECHAT,
   zhihu: ZHIHU,
   githubLink: GITHUB_LINK,
