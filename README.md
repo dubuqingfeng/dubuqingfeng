@@ -2,6 +2,8 @@
 
 ### Hi there, I'm [独步清风（dubuqingfeng）](https://dubuqingfeng.xyz) 🎉
 
+[![Tech's Blog](https://img.shields.io/badge/Tech-Blog-000)](https://dbqf.xyz) [![Life's Blog](https://img.shields.io/badge/Life-Blog-000)](https://xiaoye.me)
+
 <img src="https://github-readme-stats.vercel.app/api?username=dubuqingfeng&show_icons=true&count_private=true&hide=prs&theme=default_repocard" alt="logo" height="150" width="330" align="left" />
 
 <img src="https://github-readme-stats.vercel.app/api/top-langs/?username=dubuqingfeng&layout=compact" alt="logo" height="200" width="330" align="left" />
@@ -36,6 +38,3 @@ Not good at Algorithm, Sooner or later we will be replaced by AI.
 + Flink Forward Asia 2020, Realtime computing, From 0 to 1
 
 ## Blog
-
-[![Tech's Blog](https://img.shields.io/badge/Tech-Blog-000)](https://dbqf.xyz)
-[![Life's Blog](https://img.shields.io/badge/Life-Blog-000)](https://xiaoye.me)
