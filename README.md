@@ -1,4 +1,4 @@
-<img src="https://github.com/dubuqingfeng/dubuqingfeng/raw/master/images/dubuqingfeng.png"  alt="life" height="380" width="380" align="right" />
+<img src="https://github.com/dubuqingfeng/dubuqingfeng/raw/master/images/dubuqingfeng.png"  alt="life" height="400" width="400" align="right" />
 
 ### Hi there, I'm [独步清风（dubuqingfeng）](https://dubuqingfeng.xyz) 🎉
 
@@ -6,7 +6,7 @@
 
 <img src="https://github-readme-stats.vercel.app/api?username=dubuqingfeng&show_icons=true&count_private=true&hide=prs&theme=default_repocard" alt="logo" height="150" width="330" align="left" />
 
-<img src="https://github-readme-stats.vercel.app/api/top-langs/?username=dubuqingfeng&layout=compact" alt="logo" height="200" width="330" align="left" />
+<img src="https://github-readme-stats.vercel.app/api/top-langs/?username=dubuqingfeng&layout=compact" alt="logo" height="180" width="330" align="left" />
 
 <img src="https://github-profile-trophy.vercel.app/?username=dubuqingfeng&theme=flat&column=7&margin-w=10" alt="logo" height="160" align="center" />
 
@@ -20,7 +20,7 @@
 | Database | [![MySQL](https://img.shields.io/badge/-MySQL-000?style=flat-square&logo=mysql&logoColor=white)](https://mariadb.com/) [![Redis](https://img.shields.io/badge/-Redis-000?style=flat-square&logo=redis&logoColor=white)](https://redis.io/) ![ClickHouse](https://img.shields.io/badge/-ClickHouse-000) |
 | DevOps | ![Docker](https://img.shields.io/badge/-Docker-000?&logo=Docker) ![Kubernetes](https://img.shields.io/badge/-Kubernetes-000?&logo=Kubernetes) ![CI/CD](https://img.shields.io/badge/-CI%2FCD-000?&logo=CircleCI&logoColor=888) ![Linux](https://img.shields.io/badge/-Linux-000?&logo=Linux&logoColor=FCC624) | 
 | Other | ![LaTeX](https://img.shields.io/badge/-LaTeX-000?) ![Machine Learning](https://img.shields.io/badge/Machine-Learning-000?) |
-| Public Full Stack Projects | [![sitenav(网址导航)](https://img.shields.io/badge/-SiteNav-000?)](https://sitenav.link) [![Rubik's Cube Robot(解魔方机器人)](https://img.shields.io/badge/Robot-Rubik'sCube-000?)](https://github.com/DigDream/RubiksCubeRobot) [![blockchain-testcases](https://img.shields.io/badge/blockchain-testcases-000?)](https://github.com/dubuqingfeng/blockchain-testcases) [![Dotfiles](https://img.shields.io/badge/Dotfiles-000?)](https://github.com/dubuqingfeng/dotfiles) |
+| Public Projects | [![sitenav(网址导航)](https://img.shields.io/badge/-SiteNav-000?)](https://sitenav.link) [![Rubik's Cube Robot(解魔方机器人)](https://img.shields.io/badge/Robot-Rubik'sCube-000?)](https://github.com/DigDream/RubiksCubeRobot) [![blockchain-testcases](https://img.shields.io/badge/blockchain-testcases-000?)](https://github.com/dubuqingfeng/blockchain-testcases) [![Dotfiles](https://img.shields.io/badge/Dotfiles-000?)](https://github.com/dubuqingfeng/dotfiles) |
 | Monitor | [![api-monitor(api监控)](https://img.shields.io/badge/API-Monitor-000?)](https://github.com/dubuqingfeng/api-monitor) [![stratum-server-monitor(StratumServer监控)](https://img.shields.io/badge/StratumServer-Monitor-000?)](https://github.com/dubuqingfeng/stratum-server-monitor) |
 | Crawler |  [![BitNodeCrawler(比特币节点信息爬虫)](https://img.shields.io/badge/Crawler-BitcoinNode-000?)](https://github.com/dubuqingfeng/bit-node-crawler) [![Crawler-PoolIncome](https://img.shields.io/badge/Crawler-PoolIncome-000?)](https://github.com/dubuqingfeng/scrapy-pool-coin-income) [![crawlers](https://img.shields.io/badge/Crawlers-000?)](https://github.com/dubuqingfeng/crawlers) |
 | Proxy | [![BlockchainNode-Proxy](https://img.shields.io/badge/BlockchainNode-Proxy-000?)](https://github.com/dubuqingfeng/blockchain-node-proxy) |
@@ -35,5 +35,3 @@ Not good at Algorithm, Sooner or later we will be replaced by AI.
 ## Public Lives
 
 + Flink Forward Asia 2020, Realtime computing, From 0 to 1
-
-## Blog
