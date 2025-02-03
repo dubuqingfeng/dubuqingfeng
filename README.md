@@ -6,7 +6,7 @@
 
 <img src="https://github-readme-stats.vercel.app/api?username=dubuqingfeng&show_icons=true&count_private=true&hide=prs&theme=default_repocard" alt="logo" height="150" width="330" align="left" />
 
-<img src="https://github-readme-stats.vercel.app/api/top-langs/?username=dubuqingfeng&layout=compact" alt="logo" height="180" width="330" align="left" />
+<img src="https://github-readme-stats.vercel.app/api/top-langs/?username=dubuqingfeng&layout=compact" alt="logo" height="200" width="330" align="left" />
 
 <img src="https://github-profile-trophy.vercel.app/?username=dubuqingfeng&theme=flat&column=7&margin-w=10" alt="logo" height="160" align="center" />
 
@@ -27,7 +27,7 @@
 | Awesome | [![awesome-blockchain-explorer](https://img.shields.io/badge/awesome-explorer-000?)](https://github.com/dubuqingfeng/awesome-blockchain-explorer) [![awesome-code](https://img.shields.io/badge/awesome-code-000?)](https://github.com/dubuqingfeng/awesome-code) |
 | Docker Image | [![Coin-Daemon](https://img.shields.io/badge/Coin-Daemon-000?)](https://github.com/dubuqingfeng/coin_daemons_docker) [![Docker-Images](https://img.shields.io/badge/Docker-Images-000?)](https://github.com/dubuqingfeng/Docker-Images) |
 | Private Projects | [![BitQuant](https://img.shields.io/badge/BitQuant-000?)](https://github.com/dubuqingfeng/BitQuant) [![git-backup](https://img.shields.io/badge/Git-Backup-000?)](https://github.com/dubuqingfeng/git-backup) [![BTCcom-work-cli](https://img.shields.io/badge/BTC.com-workcli-000?)](https://github.com/dubuqingfeng/btccom-work-cli)  |
-| Contracts | [![Resume](https://img.shields.io/badge/Resume-000?)](https://github.com/dubuqingfeng/dubuqingfeng/blob/master/docs/Resume.pdf)  |
+| Contracts | [![Resume](https://img.shields.io/badge/Resume-000?)](https://github.com/dubuqingfeng/dubuqingfeng/blob/master/wiki/static/resume.pdf)  |
 
 
 Not good at Algorithm, Sooner or later we will be replaced by AI.
