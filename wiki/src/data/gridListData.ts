@@ -24,7 +24,6 @@ import mongodb from "@site/static/img/skills-icon/mongodb.png";
 import clickhouse from "@site/static/img/skills-icon/clickhouse.png";
 import docker from "@site/static/img/skills-icon/docker.png";
 import kubernetes from "@site/static/img/skills-icon/kubernetes.png";
-import aws from "@site/static/img/skills-icon/aws.png";
 import cicd from "@site/static/img/skills-icon/cicd.png";
 import linux from "@site/static/img/skills-icon/linux.png";
 import web from "@site/static/img/skills-icon/web.png";
@@ -106,7 +105,6 @@ const databaseGridList: Array<GridItemType> = [
 const devOpsGridList: Array<GridItemType> = [
   gridItem(devOpsData.docker, "/docs/docker", docker),
   gridItem(devOpsData.kubernetes, "/docs/kubernetes", kubernetes),
-  gridItem(devOpsData.aws, "/docs/aws", aws),
   gridItem(devOpsData.cicd, "/docs/cicd", cicd),
   gridItem(devOpsData.linux, "/docs/linux", linux),
 ];

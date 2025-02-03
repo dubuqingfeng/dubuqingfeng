@@ -1,4 +1,5 @@
 # about me
+
 ## Hi there, I'm 独步清风（dubuqingfeng）🎉
 
 <img src="https://github.com/dubuqingfeng/dubuqingfeng/raw/master/images/dubuqingfeng.png"  alt="life" height="450" width="450"/>
@@ -54,7 +55,6 @@ Not good at Algorithm, Sooner or later we will be replaced by AI.
 
  DevOps:    ![Docker](https://img.shields.io/badge/-Docker-000?&logo=Docker)
 ![Kubernetes](https://img.shields.io/badge/-Kubernetes-000?&logo=Kubernetes)
-![AWS](https://img.shields.io/badge/-AWS-000?&logo=Amazon-AWS&logoColor=FF9900)
 ![CI/CD](https://img.shields.io/badge/-CI%2FCD-000?&logo=CircleCI&logoColor=888)
 ![Linux](https://img.shields.io/badge/-Linux-000?&logo=Linux&logoColor=FCC624)
 

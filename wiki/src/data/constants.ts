@@ -41,7 +41,6 @@ interface DevOpsMenuData {
 
   readonly docker: string;
   readonly kubernetes: string;
-  readonly aws: string;
   readonly cicd: string;
   readonly linux: string;
 }
@@ -108,7 +107,6 @@ const CLICKHOUSE = "ClickHouse";
 const DEVOPS = "DevOps";
 const DOCKER = "Docker";
 const KUBERNETES = "Kubernetes";
-const AWS = "AWS";
 const CICD = "CI/CD";
 const LINUX = "Linux";
 
@@ -192,7 +190,6 @@ const devopsMenuData: DevOpsMenuData = {
   title: DEVOPS,
   docker: DOCKER,
   kubernetes: KUBERNETES,
-  aws: AWS,
   cicd: CICD,
   linux: LINUX,
 };
