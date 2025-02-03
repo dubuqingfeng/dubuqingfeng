@@ -1,5 +1,4 @@
-<img src="https://github.com/dubuqingfeng/dubuqingfeng/raw/master/images/dubuqingfeng.png"  alt="life" height="360" width="360" align="right" />
-
+<img src="https://github.com/dubuqingfeng/dubuqingfeng/raw/master/images/dubuqingfeng.png"  alt="life" height="380" width="380" align="right" />
 ### Hi there, I'm [独步清风（dubuqingfeng）](https://dubuqingfeng.xyz) 🎉
 
 [![Tech's Blog](https://img.shields.io/badge/Tech-Blog-000)](https://dbqf.xyz) [![Life's Blog](https://img.shields.io/badge/Life-Blog-000)](https://xiaoye.me)
