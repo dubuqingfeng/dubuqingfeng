@@ -1,12 +1,10 @@
 # about me
 
-<img src="https://github.com/dubuqingfeng/dubuqingfeng/raw/master/images/dubuqingfeng.png"  alt="life" height="440" width="440" align="right" />
-
 ### Hi there, I'm [独步清风（dubuqingfeng）](https://dubuqingfeng.xyz) 🎉
 
-[![Tech's Blog](https://img.shields.io/badge/Tech-Blog-000)](https://dbqf.xyz) [![Life's Blog](https://img.shields.io/badge/Life-Blog-000)](https://xiaoye.me) [![sitenav(网址导航)](https://img.shields.io/badge/-SiteNav-000?)](https://sitenav.link) 
+<img src="https://github.com/dubuqingfeng/dubuqingfeng/raw/master/images/dubuqingfeng.png"  alt="life" height="440" width="440" align="right" />
 
-<br>
+[![Tech's Blog](https://img.shields.io/badge/Tech-Blog-000)](https://dbqf.xyz) [![Life's Blog](https://img.shields.io/badge/Life-Blog-000)](https://xiaoye.me) [![sitenav(网址导航)](https://img.shields.io/badge/-SiteNav-000?)](https://sitenav.link) 
 
 | Keywords  |  Content        |
 | ------ | ------------------ | 
