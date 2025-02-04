@@ -241,6 +241,7 @@ const config = {
           id: 'openapi-classic',
           path: 'openapi',
           routeBasePath: 'openapi',
+          docRootComponent: "@theme/DocRoot", // add @theme/DocRoot
           docItemComponent: "@theme/ApiItem" // Derived from docusaurus-theme-openapi-docs
           // sidebarPath: './sidebarsCommunity.js',
           // ... other options
@@ -252,16 +253,12 @@ const config = {
           id: "openapi", // plugin id
           docsPluginId: "openapi-classic", // id of plugin-content-docs or preset for rendering docs
           config: {
-            petstore: { // the <id> referenced when running CLI commands
-              specPath: "src/openapi/petstore.yaml", // path to OpenAPI spec, URLs supported
-              outputDir: "openapi/petstore", // output directory for generated files
+            okxord: {
+              specPath: "src/openapi/okx/ord/openapi.json",
+              outputDir: "openapi/okx-ord",
               sidebarOptions: { // optional, instructs plugin to generate sidebar.js
                 groupPathsBy: "tag", // group sidebar items by operation "tag"
               },
-            },
-            burgers: {
-              specPath: "src/openpai/food/openapi.yaml",
-              outputDir: "openapi/food/burgers",
             }
           }
         },
