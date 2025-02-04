@@ -1,1 +1,0 @@
-"use strict";(self.webpackChunkdubuqingfeng=self.webpackChunkdubuqingfeng||[]).push([[3347],{60558:e=>{e.exports=JSON.parse('{"name":"docusaurus-plugin-content-docs","id":"openapi-classic"}')}}]);
