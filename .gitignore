@@ -71,4 +71,5 @@ Thumbs.db
 *.dll
 *.exe
 
-wiki/openapi
+wiki/openapi/*
+!wiki/openapi/.gitkeep
