@@ -5,19 +5,12 @@
 | 影视  | 优酷会员  |  | | |
 | 待办  | 滴答清单  |  | | |
 | 照片  | NaS  |  | | |
-| 笔记  | [印象笔记](https://app.yinxiang.com/) | Verse | | |
 | Wiki | dubuqingfeng.eth | Workflowy | | |
 | 网盘 | [Google云端硬盘](https://www.google.com/intl/zh-CN_ALL/drive/) |  | | |
-| 代码片段 | Boostnote |  | | |
 | 密码 | keepass |  | | |
 | RSS | feedly | reeder | | |
-| 标签 | 日记 |  | | |
-| Dotfiles | [dotfiles](https://github.com/dubuqingfeng/dotfiles) |  | | |
 | 网络摘抄 | mybase | nas note | DEVONthink | |
-| 代理服务 | clashx |  | | |
 | 同步 | syncing |  | | |
-| Docs | google |  | | |
-| 照片收藏 | 花瓣 | 堆糖 | billfish | |
 
 ## 生活社交
 
