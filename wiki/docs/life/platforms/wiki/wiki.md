@@ -84,6 +84,10 @@
                 + [map](/Wiki/programming/golang/source/map)
             + web
                 + [web](/Wiki/programming/golang/web/web)
+        + python
+            + [python](/Wiki/programming/python)
+        + php
+            + [php](/Wiki/programming/php)
     + security
         + blockchain
             + solidity

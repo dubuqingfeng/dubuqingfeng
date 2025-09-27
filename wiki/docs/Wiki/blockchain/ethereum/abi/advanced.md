@@ -36,7 +36,7 @@ Solidity ABI 采用“头（head）+尾（tail）”布局：
 
 - 数值类型右对齐（高位填零），big-endian 表示
 - 地址与 `uint160` 视作 20B 值，仍右对齐到 32B
-- `bytesN`（N<=32）为静态类型，右对齐，空余零填充
+- `bytesN`（N ≤ 32）为静态类型，右对齐，空余零填充
 - `bytes`/`string`：头部偏移，尾部`len + data + padding`
 
 ### 事件编码（topics/data）
@@ -58,4 +58,3 @@ type Encoded struct{ Head, Tail []byte }
 - 将偏移解释为“相对头部”的偏移（应为相对整段）
 - 忘记尾部的右填充或长度字段单位（字节）
 - 事件 indexed 动态参数在 topics 中是哈希，不是原始值
-
