@@ -29,3 +29,22 @@
 - 在 `then` 中抛出异常会进入拒绝态链路，注意捕获；
 - 长任务阻塞主线程导致卡顿，使用 Web Worker 分担计算。
 
+#### 示例：顺序与微任务
+
+```js
+console.log('start');
+setTimeout(() => console.log('timeout'), 0);
+Promise.resolve().then(() => console.log('microtask'));
+console.log('end');
+// 输出：start → end → microtask → timeout
+```
+
+#### 示例：避免强制同步布局
+
+```js
+// 读写分离：避免交替读写导致多次布局
+requestAnimationFrame(() => {
+  const h = el.offsetHeight; // 读
+  el.style.height = (h + 10) + 'px'; // 写
+});
+```

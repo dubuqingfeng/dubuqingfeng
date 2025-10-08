@@ -82,11 +82,11 @@ const languagesGridList: Array<GridItemType> = [
   gridItem(languagesData.javascript, "/docs/wiki/programming/javascript", javascript),
   gridItem(languagesData.typescript, "/docs/wiki/programming/typescript", typescript),
 
-  gridItem(languagesData.dart, "/docs/dart", dart),
-  gridItem(languagesData.sql, "/docs/sql", sql),
-  gridItem(languagesData.lua, "/docs/lua", lua),
-  gridItem(languagesData.solidity, "/docs/solidity", solidity),
-  gridItem(languagesData.nodejs, "/docs/nodejs", nodejs),
+  gridItem(languagesData.dart, "/docs/wiki/programming/dart", dart),
+  gridItem(languagesData.sql, "/docs/wiki/programming/sql", sql),
+  gridItem(languagesData.lua, "/docs/wiki/programming/lua", lua),
+  gridItem(languagesData.solidity, "/docs/wiki/programming/solidity", solidity),
+  gridItem(languagesData.nodejs, "/docs/wiki/programming/nodejs", nodejs),
 ];
 
 const blockchainGridList: Array<GridItemType> = [

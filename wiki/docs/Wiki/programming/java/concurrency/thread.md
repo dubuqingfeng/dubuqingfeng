@@ -67,3 +67,19 @@ class Worker implements Runnable {
 - 对共享数据使用不可变对象、`final` 字段、`volatile` 或显式同步。
 - 使用高层并发工具（如 `BlockingQueue`、`Semaphore`、`CountDownLatch`、`CompletableFuture`）。
 
+#### 线程池与 CompletableFuture 示例
+
+```java
+ExecutorService pool = Executors.newFixedThreadPool(8);
+try {
+  Future<Integer> f = pool.submit(() -> 1 + 1);
+  System.out.println(f.get());
+} finally {
+  pool.shutdown();
+}
+
+// CompletableFuture 并行组合
+CompletableFuture<Integer> a = CompletableFuture.supplyAsync(() -> 1);
+CompletableFuture<Integer> b = CompletableFuture.supplyAsync(() -> 2);
+int sum = a.thenCombine(b, Integer::sum).join();
+```

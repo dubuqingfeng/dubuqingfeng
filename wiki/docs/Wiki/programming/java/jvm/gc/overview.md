@@ -36,3 +36,22 @@
 - 指标：年轻代/老年代占用、晋升失败、Full GC 次数与时长、对象分配速率、幸存区复制失败；
 - 工具：JFR、`jstat -gcutil`、`jcmd GC.heap_info`、`jmap -histo`、GC 日志（`-Xlog:gc*`）。
 
+#### 常用命令与日志
+
+```bash
+# 概览与监控
+jcmd <pid> GC.heap_info
+jstat -gcutil <pid> 1s 20     # 每秒输出 20 次 GC 利用率
+jmap -histo:live <pid> | head # 活对象直方图
+
+# 打开 GC 日志（JDK 9+）
+JAVA_TOOL_OPTIONS="-Xlog:gc*,safepoint:file=gc.log:tags,uptime,level"
+```
+
+日志要点：年轻代/混合/Full GC 次数与暂停、晋升失败（promotion failed）、Humongous 对象、并发标记时间、回收集大小等。
+
+#### 内存与目标设定
+
+- 初始与最大堆：`-Xms`/`-Xmx`，生产建议设置为相等减少扩容；
+- 目标优先级：吞吐（Parallel）vs 暂停（G1/ZGC）；
+- 指标闭环：设定 `MaxGCPauseMillis`/SLA → 监控 → 调整 Region/阈值/软上限（如 ZGC 的 `SoftMaxHeapSize`）。

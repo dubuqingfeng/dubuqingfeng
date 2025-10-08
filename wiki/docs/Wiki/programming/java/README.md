@@ -17,6 +17,7 @@ slug: /wiki/programming/java
 - [Java 内存模型 JMM 与 volatile](./concurrency/volatile-jmm.md)
 - [线程池 ThreadPoolExecutor](./concurrency/threadpool.md)
 - [CompletableFuture 与异步编排](./concurrency/completablefuture.md)
+- [ForkJoinPool 与工作窃取](./concurrency/forkjoin.md)
 
 ## JVM 底层
 
@@ -24,6 +25,7 @@ slug: /wiki/programming/java
 - [JIT 与运行时优化](./jvm/jit.md)
 - [GC 概览与内存区域](./jvm/gc/overview.md)
 - [G1 GC 机制与调优](./jvm/gc/g1.md)
+- [ZGC 低停顿收集器](./jvm/gc/zgc.md)
 
 ## 集合与数据结构
 

@@ -42,3 +42,14 @@ while (true) {
 - 文件复制：`Files.copy`、`FileChannel#transferTo/transferFrom`；
 - 异步文件 IO：`AsynchronousFileChannel` 结合回调或 `Future`。
 
+```java
+// Files.copy 简单复制
+Files.copy(Path.of("a.dat"), Path.of("b.dat"), StandardCopyOption.REPLACE_EXISTING);
+
+// 零拷贝传输（可能由内核优化）
+try (FileChannel in = FileChannel.open(Path.of("a.dat"));
+     FileChannel out = FileChannel.open(Path.of("b.dat"), StandardOpenOption.CREATE, StandardOpenOption.WRITE)) {
+  long pos = 0, size = in.size();
+  while (pos < size) pos += in.transferTo(pos, size - pos, out);
+}
+```
