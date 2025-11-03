@@ -104,6 +104,10 @@ const config = {
                 label: "JSON",
               },
               {
+                label: "URL Parameter Tool",
+                to: "/tools/urlparam",
+              },
+              {
                 label: "Compare Text",
                 to: "/tools/compare/text",
               },

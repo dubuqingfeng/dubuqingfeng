@@ -1,5 +1,12 @@
 const ToolsSidebarData = [
   {
+    label: "General Tools",
+    type: "category",
+    items: [
+      { type: "link", href: "/tools/urlparam", label: "URL Parameter Tool" },
+    ],
+  },
+  {
     label: "Blockchain",
     type: "category",
     items: [
