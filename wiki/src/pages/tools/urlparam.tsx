@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useRef } from "react";
 import clsx from "clsx";
 import Layout from "@theme/Layout";
 import Center from "@site/src/components/Center/center";
@@ -55,6 +55,10 @@ export default function URLParam() {
   const location = useLocation();
   const [inputValue, setInputValue] = useState("");
   const [useEncryption, setUseEncryption] = useState(true);
+  const [copySuccess, setCopySuccess] = useState(false);
+  const [copyContentSuccess, setCopyContentSuccess] = useState(false);
+  const debounceTimerRef = useRef<NodeJS.Timeout | null>(null);
+  const isInitialMount = useRef(true);
 
   // 页面加载时从 URL 参数读取内容
   useEffect(() => {
@@ -72,35 +76,91 @@ export default function URLParam() {
       setInputValue(paramValue);
       setUseEncryption(false);
     }
-  }, [location.search]);
+    
+    isInitialMount.current = false;
+  }, []);
 
-  // 处理按钮点击
-  const handleSubmit = () => {
+  // 更新 URL（使用 replace 避免历史记录堆积）
+  const updateURL = (value: string, encrypt: boolean) => {
     const searchParams = new URLSearchParams();
 
-    if (useEncryption) {
-      // 使用加密模式
-      const encrypted = simpleEncrypt(inputValue);
-      searchParams.set("e", encrypted);
-    } else {
-      // 使用普通模式
-      searchParams.set("content", inputValue);
+    if (value) {
+      if (encrypt) {
+        // 使用加密模式
+        const encrypted = simpleEncrypt(value);
+        searchParams.set("e", encrypted);
+      } else {
+        // 使用普通模式
+        searchParams.set("content", value);
+      }
     }
 
-    history.push({
+    history.replace({
       pathname: location.pathname,
       search: searchParams.toString(),
     });
   };
 
-  // 处理输入框变化
+  // 处理输入框变化（使用防抖）
   const handleInputChange = (e) => {
-    setInputValue(e.target.value);
+    const newValue = e.target.value;
+    setInputValue(newValue);
+    
+    // 清除之前的定时器
+    if (debounceTimerRef.current) {
+      clearTimeout(debounceTimerRef.current);
+    }
+    
+    // 设置新的定时器，500ms 后更新 URL
+    debounceTimerRef.current = setTimeout(() => {
+      updateURL(newValue, useEncryption);
+    }, 500);
   };
+
+  // 清理定时器
+  useEffect(() => {
+    return () => {
+      if (debounceTimerRef.current) {
+        clearTimeout(debounceTimerRef.current);
+      }
+    };
+  }, []);
 
   // 切换加密模式
   const toggleEncryption = () => {
-    setUseEncryption(!useEncryption);
+    const newEncryption = !useEncryption;
+    setUseEncryption(newEncryption);
+    // 切换加密模式时更新 URL
+    updateURL(inputValue, newEncryption);
+  };
+
+  // 复制 URL 到剪贴板
+  const handleCopyURL = async () => {
+    const fullURL = window.location.origin + location.pathname + location.search;
+    try {
+      await navigator.clipboard.writeText(fullURL);
+      setCopySuccess(true);
+      // 2秒后隐藏成功提示
+      setTimeout(() => {
+        setCopySuccess(false);
+      }, 2000);
+    } catch (err) {
+      console.error("复制失败:", err);
+    }
+  };
+
+  // 复制输入框内容到剪贴板
+  const handleCopyContent = async () => {
+    try {
+      await navigator.clipboard.writeText(inputValue);
+      setCopyContentSuccess(true);
+      // 2秒后隐藏成功提示
+      setTimeout(() => {
+        setCopyContentSuccess(false);
+      }, 2000);
+    } catch (err) {
+      console.error("复制失败:", err);
+    }
   };
 
   return (
@@ -177,10 +237,47 @@ export default function URLParam() {
                     </label>
                     <button
                       type="button"
-                      className="inline-flex justify-center rounded-md border border-transparent bg-indigo-600 py-2 px-4 text-sm font-medium text-white shadow-sm hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2"
-                      onClick={handleSubmit}
+                      onClick={handleCopyContent}
+                      className="inline-flex justify-center rounded-md border border-transparent py-2 px-4 text-sm font-medium shadow-sm focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2"
+                      style={{
+                        backgroundColor: copyContentSuccess ? "#10b981" : "#6366f1",
+                        color: "#ffffff",
+                        transition: "background-color 0.2s",
+                      }}
+                      onMouseEnter={(e) => {
+                        if (!copyContentSuccess) {
+                          e.currentTarget.style.backgroundColor = "#4f46e5";
+                        }
+                      }}
+                      onMouseLeave={(e) => {
+                        if (!copyContentSuccess) {
+                          e.currentTarget.style.backgroundColor = "#6366f1";
+                        }
+                      }}
                     >
-                      更新 URL
+                      {copyContentSuccess ? "✓ 已复制" : "复制内容"}
+                    </button>
+                    <button
+                      type="button"
+                      onClick={handleCopyURL}
+                      className="inline-flex justify-center rounded-md border border-transparent py-2 px-4 text-sm font-medium shadow-sm focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2"
+                      style={{
+                        backgroundColor: copySuccess ? "#10b981" : "#6366f1",
+                        color: "#ffffff",
+                        transition: "background-color 0.2s",
+                      }}
+                      onMouseEnter={(e) => {
+                        if (!copySuccess) {
+                          e.currentTarget.style.backgroundColor = "#4f46e5";
+                        }
+                      }}
+                      onMouseLeave={(e) => {
+                        if (!copySuccess) {
+                          e.currentTarget.style.backgroundColor = "#6366f1";
+                        }
+                      }}
+                    >
+                      {copySuccess ? "✓ 已复制" : "复制 URL"}
                     </button>
                   </div>
                 </Center>

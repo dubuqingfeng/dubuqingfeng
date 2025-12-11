@@ -1,10 +1,8 @@
-# 关于我 About Me
+# about me
 
 Hi there, I'm 独步清风（dubuqingfeng）🎉
 
 <img src="https://github.com/dubuqingfeng/dubuqingfeng/raw/master/images/dubuqingfeng.png"  alt="life" height="450" width="450"/>
-
-—— 更聚焦、更直观的一页简介 ——
 
 ## 一句话简介
 

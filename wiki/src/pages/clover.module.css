@@ -1,0 +1,512 @@
+.container {
+  min-height: calc(100vh - 60px);
+  padding: 2rem 1rem;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  background: linear-gradient(135deg, #ffffff 0%, #f8f9fa 50%, #e9ecef 100%);
+  position: relative;
+  overflow: hidden;
+}
+
+.container::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: 
+    radial-gradient(circle at 20% 30%, rgba(102, 126, 234, 0.05) 0%, transparent 50%),
+    radial-gradient(circle at 80% 70%, rgba(240, 147, 251, 0.05) 0%, transparent 50%),
+    radial-gradient(circle at 50% 50%, rgba(79, 172, 254, 0.03) 0%, transparent 40%);
+  pointer-events: none;
+}
+
+/* 夜间模式 */
+[data-theme='dark'] .container {
+  background: linear-gradient(135deg, #1a1a1a 0%, #2d2d2d 50%, #1e1e1e 100%);
+}
+
+[data-theme='dark'] .container::before {
+  background: 
+    radial-gradient(circle at 20% 30%, rgba(102, 126, 234, 0.15) 0%, transparent 50%),
+    radial-gradient(circle at 80% 70%, rgba(240, 147, 251, 0.15) 0%, transparent 50%),
+    radial-gradient(circle at 50% 50%, rgba(79, 172, 254, 0.1) 0%, transparent 40%);
+}
+
+.header {
+  text-align: center;
+  margin-bottom: 2rem;
+}
+
+.title {
+  font-size: 3rem;
+  font-weight: bold;
+  color: #1a1a1a;
+  margin: 0;
+  text-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+}
+
+.subtitle {
+  font-size: 1.1rem;
+  color: #666;
+  margin-top: 0.5rem;
+}
+
+/* 夜间模式 */
+[data-theme='dark'] .title {
+  color: #ffffff;
+  text-shadow: 0 2px 4px rgba(0, 0, 0, 0.3);
+}
+
+[data-theme='dark'] .subtitle {
+  color: #b0b0b0;
+}
+
+.quadrantContainer {
+  width: 100%;
+  max-width: 900px;
+  margin: 2rem auto;
+  position: relative;
+}
+
+.quadrantGrid {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 2rem;
+  padding: 2rem;
+}
+
+.quadrant {
+  aspect-ratio: 1;
+  border-radius: 24px;
+  padding: 2.5rem;
+  cursor: pointer;
+  transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+  box-shadow: 0 10px 40px rgba(0, 0, 0, 0.3);
+  position: relative;
+  overflow: hidden;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+}
+
+/* 夜间模式 - 象限阴影增强 */
+[data-theme='dark'] .quadrant {
+  box-shadow: 0 10px 40px rgba(0, 0, 0, 0.6);
+}
+
+[data-theme='dark'] .quadrant:hover {
+  box-shadow: 0 20px 60px rgba(0, 0, 0, 0.8);
+}
+
+[data-theme='dark'] .quadrantActive {
+  box-shadow: 0 25px 70px rgba(0, 0, 0, 0.9);
+}
+
+.quadrant::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background: rgba(255, 255, 255, 0.1);
+  opacity: 0;
+  transition: opacity 0.3s ease;
+}
+
+.quadrant:hover {
+  transform: translateY(-8px) scale(1.02);
+  box-shadow: 0 20px 60px rgba(0, 0, 0, 0.4);
+}
+
+.quadrant:hover::before {
+  opacity: 1;
+}
+
+.quadrantActive {
+  transform: scale(1.05);
+  box-shadow: 0 25px 70px rgba(0, 0, 0, 0.5);
+  z-index: 10;
+}
+
+.quadrantActive::after {
+  content: '';
+  position: absolute;
+  inset: -2px;
+  border-radius: 24px;
+  border: 3px solid rgba(255, 255, 255, 0.5);
+  pointer-events: none;
+  animation: borderGlow 1.5s ease-in-out infinite;
+}
+
+@keyframes borderGlow {
+  0%, 100% {
+    opacity: 0.5;
+  }
+  50% {
+    opacity: 1;
+  }
+}
+
+.quadrantContent {
+  text-align: center;
+  color: white;
+  z-index: 2;
+  width: 100%;
+}
+
+.quadrantIcon {
+  font-size: 4rem;
+  margin-bottom: 1rem;
+  filter: drop-shadow(0 4px 8px rgba(0, 0, 0, 0.3));
+  animation: float 3s ease-in-out infinite;
+}
+
+@keyframes float {
+  0%, 100% {
+    transform: translateY(0);
+  }
+  50% {
+    transform: translateY(-10px);
+  }
+}
+
+.quadrantTitle {
+  font-size: 2rem;
+  font-weight: bold;
+  margin: 0 0 0.5rem 0;
+  text-shadow: 0 2px 8px rgba(0, 0, 0, 0.3);
+}
+
+.quadrantDesc {
+  font-size: 1rem;
+  opacity: 0.95;
+  margin: 0;
+  text-shadow: 0 1px 4px rgba(0, 0, 0, 0.3);
+}
+
+.clickHint {
+  position: absolute;
+  bottom: 1.5rem;
+  left: 50%;
+  transform: translateX(-50%);
+  font-size: 0.85rem;
+  color: rgba(255, 255, 255, 0.7);
+  opacity: 0;
+  transition: opacity 0.3s ease;
+  pointer-events: none;
+}
+
+.quadrant:hover .clickHint {
+  opacity: 1;
+}
+
+.centerDecoration {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  pointer-events: none;
+  z-index: 5;
+}
+
+.centerCircle {
+  width: 80px;
+  height: 80px;
+  border-radius: 50%;
+  background: linear-gradient(135deg, #fbbf24 0%, #f59e0b 100%);
+  box-shadow: 
+    0 0 0 8px rgba(251, 191, 36, 0.2),
+    0 0 0 16px rgba(251, 191, 36, 0.1),
+    0 8px 32px rgba(0, 0, 0, 0.3);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  animation: pulse 2s ease-in-out infinite;
+}
+
+@keyframes pulse {
+  0%, 100% {
+    transform: scale(1);
+  }
+  50% {
+    transform: scale(1.1);
+  }
+}
+
+.centerIcon {
+  font-size: 2.5rem;
+  filter: drop-shadow(0 2px 4px rgba(0, 0, 0, 0.3));
+}
+
+/* 详情卡片样式 */
+.detailCard {
+  width: 100%;
+  max-width: 900px;
+  margin: 2rem auto 0;
+  background: rgba(255, 255, 255, 0.95);
+  backdrop-filter: blur(10px);
+  border-radius: 24px;
+  padding: 2.5rem;
+  box-shadow: 
+    0 20px 60px rgba(0, 0, 0, 0.3),
+    inset 0 1px 0 rgba(255, 255, 255, 1);
+  animation: slideUp 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+/* 夜间模式 - 详情卡片 */
+[data-theme='dark'] .detailCard {
+  background: rgba(30, 30, 30, 0.95);
+  box-shadow: 
+    0 20px 60px rgba(0, 0, 0, 0.6),
+    inset 0 1px 0 rgba(255, 255, 255, 0.1);
+}
+
+@keyframes slideUp {
+  from {
+    opacity: 0;
+    transform: translateY(30px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.cardContent {
+  color: #1a1a1a;
+}
+
+.cardHeader {
+  display: flex;
+  align-items: center;
+  gap: 1.5rem;
+  margin-bottom: 2rem;
+  padding-bottom: 1.5rem;
+  border-bottom: 2px solid rgba(0, 0, 0, 0.1);
+}
+
+.cardIcon {
+  font-size: 4rem;
+  filter: drop-shadow(0 2px 4px rgba(0, 0, 0, 0.1));
+}
+
+.cardTitle {
+  font-size: 2rem;
+  font-weight: bold;
+  margin: 0 0 0.25rem 0;
+  color: #1a1a1a;
+}
+
+.cardSubtitle {
+  font-size: 1.1rem;
+  color: #666;
+  margin: 0;
+}
+
+/* 夜间模式 - 卡片内容 */
+[data-theme='dark'] .cardContent {
+  color: #e0e0e0;
+}
+
+[data-theme='dark'] .cardHeader {
+  border-bottom: 2px solid rgba(255, 255, 255, 0.1);
+}
+
+[data-theme='dark'] .cardTitle {
+  color: #ffffff;
+}
+
+[data-theme='dark'] .cardSubtitle {
+  color: #b0b0b0;
+}
+
+.cardList {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+  gap: 1rem;
+}
+
+.cardListItem {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  padding: 1rem 1.25rem;
+  background: linear-gradient(135deg, #f8f9fa 0%, #e9ecef 100%);
+  border-radius: 12px;
+  font-size: 1rem;
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
+  position: relative;
+  overflow: hidden;
+}
+
+.cardListItem::before {
+  content: '';
+  position: absolute;
+  left: 0;
+  top: 0;
+  height: 100%;
+  width: 4px;
+  background: linear-gradient(180deg, #667eea, #764ba2);
+  transform: scaleY(0);
+  transition: transform 0.3s ease;
+}
+
+.cardListItem:hover {
+  background: linear-gradient(135deg, #e9ecef 0%, #dee2e6 100%);
+  transform: translateX(4px);
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+}
+
+.cardListItem:hover::before {
+  transform: scaleY(1);
+}
+
+.checkmark {
+  color: #10b981;
+  font-weight: bold;
+  font-size: 1.3rem;
+  flex-shrink: 0;
+}
+
+/* 夜间模式 - 列表项 */
+[data-theme='dark'] .cardListItem {
+  background: linear-gradient(135deg, #2d2d2d 0%, #3a3a3a 100%);
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.3);
+}
+
+[data-theme='dark'] .cardListItem:hover {
+  background: linear-gradient(135deg, #3a3a3a 0%, #454545 100%);
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.5);
+}
+
+
+.footer {
+  margin-top: 3rem;
+  text-align: center;
+}
+
+.footerText {
+  color: #666;
+  font-size: 1rem;
+  font-style: italic;
+}
+
+/* 夜间模式 - 底部文字 */
+[data-theme='dark'] .footerText {
+  color: #b0b0b0;
+}
+
+/* 响应式设计 */
+@media (max-width: 768px) {
+  .title {
+    font-size: 2rem;
+  }
+
+  .subtitle {
+    font-size: 0.9rem;
+  }
+
+  .quadrantGrid {
+    grid-template-columns: 1fr;
+    gap: 1.5rem;
+    padding: 1rem;
+  }
+
+  .quadrant {
+    aspect-ratio: auto;
+    min-height: 280px;
+    padding: 2rem;
+  }
+
+  .quadrantIcon {
+    font-size: 3rem;
+  }
+
+  .quadrantTitle {
+    font-size: 1.75rem;
+  }
+
+  .centerCircle {
+    width: 60px;
+    height: 60px;
+  }
+
+  .centerIcon {
+    font-size: 2rem;
+  }
+
+  .detailCard {
+    padding: 2rem;
+  }
+
+  .cardHeader {
+    flex-direction: column;
+    text-align: center;
+  }
+
+  .cardList {
+    grid-template-columns: 1fr;
+  }
+}
+
+@media (max-width: 480px) {
+  .container {
+    padding: 1rem 0.5rem;
+  }
+
+  .title {
+    font-size: 1.5rem;
+  }
+
+  .subtitle {
+    font-size: 0.85rem;
+  }
+
+  .quadrant {
+    padding: 1.5rem;
+    min-height: 240px;
+  }
+
+  .quadrantIcon {
+    font-size: 2.5rem;
+  }
+
+  .quadrantTitle {
+    font-size: 1.5rem;
+  }
+
+  .quadrantDesc {
+    font-size: 0.9rem;
+  }
+
+  .centerCircle {
+    display: none;
+  }
+
+  .detailCard {
+    padding: 1.5rem;
+  }
+
+  .cardIcon {
+    font-size: 3rem;
+  }
+
+  .cardTitle {
+    font-size: 1.5rem;
+  }
+
+  .cardSubtitle {
+    font-size: 1rem;
+  }
+
+  .cardListItem {
+    font-size: 0.9rem;
+    padding: 0.85rem 1rem;
+  }
+}
