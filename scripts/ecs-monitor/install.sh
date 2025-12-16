@@ -131,21 +131,25 @@ detect_pyenv() {
     local detected_pyenv_root=""
     local detected_python_bin=""
 
+    log_info "检测 pyenv 环境..."
+
     # 优先级 1: 检测命令行可用的 pyenv
     if command -v pyenv >/dev/null 2>&1; then
-        detected_pyenv_root="$(pyenv root)"
-        log_info "检测到 pyenv (命令行): $detected_pyenv_root"
+        detected_pyenv_root="$(pyenv root 2>/dev/null)"
+        if [ -n "$detected_pyenv_root" ]; then
+            log_info "检测到 pyenv (命令行): $detected_pyenv_root"
 
-        # 立即检查并使用 shim（最高优先级）
-        if [ -f "$detected_pyenv_root/shims/python3" ]; then
-            PYENV_ROOT="$detected_pyenv_root"
-            PYTHON_BIN="$detected_pyenv_root/shims/python3"
-            USE_PYENV=true
+            # 立即检查并使用 shim（最高优先级）
+            if [ -f "$detected_pyenv_root/shims/python3" ]; then
+                PYENV_ROOT="$detected_pyenv_root"
+                PYTHON_BIN="$detected_pyenv_root/shims/python3"
+                USE_PYENV=true
 
-            local current_version=$(pyenv version-name 2>/dev/null || echo "unknown")
-            log_success "使用 pyenv shim: $PYTHON_BIN"
-            log_info "当前版本: $current_version (切换版本后重启服务即可生效)"
-            return 0
+                local current_version=$(pyenv version-name 2>/dev/null || echo "unknown")
+                log_success "使用 pyenv shim: $PYTHON_BIN"
+                log_info "当前版本: $current_version (切换版本后重启服务即可生效)"
+                return 0
+            fi
         fi
     fi
 
@@ -222,6 +226,7 @@ detect_pyenv() {
         fi
     fi
 
+    log_info "未检测到 pyenv，将使用系统 Python"
     return 1
 }
 
@@ -249,21 +254,31 @@ fix_pyenv_shims() {
 
 check_python() {
     # 首先检测 pyenv
-    detect_pyenv
-
-    # 如果检测到 pyenv 但没有找到 shim，尝试修复
-    if [ "$USE_PYENV" = true ] && [[ "$PYTHON_BIN" != *"/shims/"* ]]; then
-        log_warn "检测到 pyenv 但未使用 shim，尝试修复..."
-        fix_pyenv_shims
+    if detect_pyenv; then
+        log_success "已成功检测到 pyenv 环境"
+        
+        # 如果检测到 pyenv 但没有找到 shim，尝试修复
+        if [ "$USE_PYENV" = true ] && [[ "$PYTHON_BIN" != *"/shims/"* ]]; then
+            log_warn "检测到 pyenv 但未使用 shim，尝试修复..."
+            fix_pyenv_shims
+        fi
     fi
 
     # 如果没有通过 pyenv 找到 Python，使用系统 Python
     if [ -z "$PYTHON_BIN" ]; then
+        log_info "尝试使用系统 Python..."
+        
         if ! command -v python3 >/dev/null 2>&1; then
             log_error "未找到 python3"
 
             if prompt_yes_no "是否尝试自动安装 Python3?" "y"; then
                 install_python
+                
+                # 重新检查是否安装成功
+                if ! command -v python3 >/dev/null 2>&1; then
+                    log_error "Python3 安装失败"
+                    exit 1
+                fi
             else
                 log_error "Python3 是必需的依赖"
                 exit 1
@@ -271,6 +286,13 @@ check_python() {
         fi
 
         PYTHON_BIN=$(command -v python3)
+        log_success "使用系统 Python: $PYTHON_BIN"
+    fi
+
+    # 验证 Python 是否可执行
+    if [ ! -f "$PYTHON_BIN" ] || [ ! -x "$PYTHON_BIN" ]; then
+        log_error "Python 可执行文件不存在或无执行权限: $PYTHON_BIN"
+        exit 1
     fi
 
     local python_version=$($PYTHON_BIN --version 2>&1 | awk '{print $2}')
@@ -281,7 +303,7 @@ check_python() {
     local minor=$(echo $python_version | cut -d. -f2)
 
     if [ "$major" -lt 3 ] || ([ "$major" -eq 3 ] && [ "$minor" -lt 6 ]); then
-        log_error "需要 Python 3.6 或更高版本"
+        log_error "需要 Python 3.6 或更高版本，当前版本: $python_version"
         exit 1
     fi
 
@@ -291,10 +313,12 @@ check_python() {
     # 最终确认使用的路径
     if [ "$USE_PYENV" = true ]; then
         if [[ "$PYTHON_BIN" == *"/shims/"* ]]; then
-            log_info "✓ 将使用 pyenv shim，支持自动版本切换"
+            log_success "✓ 将使用 pyenv shim，支持自动版本切换"
         else
             log_warn "✗ 使用固定版本路径，版本切换需重新安装"
         fi
+    else
+        log_info "✓ 使用系统 Python"
     fi
 }
 
@@ -474,28 +498,66 @@ install_dependencies() {
         fi
     else
         # 使用系统 pip
-        if ! command -v pip3 >/dev/null 2>&1; then
-            log_warn "未找到 pip3，尝试安装..."
-
-            case "$OS" in
-                ubuntu|debian)
-                    apt-get install -y python3-pip
-                    ;;
-                centos|rhel|fedora|alinux|alios)
-                    yum install -y python3-pip
-                    ;;
-            esac
+        if command -v pip3 >/dev/null 2>&1; then
+            pip_cmd="pip3"
+            log_info "使用系统 pip3"
+        else
+            log_warn "未找到 pip3，尝试使用 python -m pip 或安装 pip..."
+            
+            # 先尝试使用 python -m pip
+            if $PYTHON_BIN -m pip --version >/dev/null 2>&1; then
+                pip_cmd="$PYTHON_BIN -m pip"
+                log_success "使用 python -m pip"
+            else
+                # 尝试安装 pip
+                log_info "尝试安装 pip..."
+                case "$OS" in
+                    ubuntu|debian)
+                        apt-get update >/dev/null 2>&1 || true
+                        apt-get install -y python3-pip || {
+                            log_warn "无法通过 apt 安装 pip，尝试使用 ensurepip"
+                            $PYTHON_BIN -m ensurepip --upgrade 2>/dev/null || true
+                        }
+                        ;;
+                    centos|rhel|fedora|alinux|alios)
+                        yum install -y python3-pip || {
+                            log_warn "无法通过 yum 安装 pip，尝试使用 ensurepip"
+                            $PYTHON_BIN -m ensurepip --upgrade 2>/dev/null || true
+                        }
+                        ;;
+                    *)
+                        log_warn "未知操作系统，尝试使用 ensurepip"
+                        $PYTHON_BIN -m ensurepip --upgrade 2>/dev/null || true
+                        ;;
+                esac
+                
+                # 重新检查
+                if $PYTHON_BIN -m pip --version >/dev/null 2>&1; then
+                    pip_cmd="$PYTHON_BIN -m pip"
+                    log_success "pip 安装成功"
+                elif command -v pip3 >/dev/null 2>&1; then
+                    pip_cmd="pip3"
+                    log_success "pip3 可用"
+                else
+                    log_error "无法安装或找到 pip"
+                    exit 1
+                fi
+            fi
         fi
-        pip_cmd="pip3"
     fi
 
-    # 安装依赖
-    $pip_cmd install --upgrade pip >/dev/null 2>&1 || true
-    $pip_cmd install psutil requests || {
-        log_warn "某些依赖安装失败，但将继续安装"
-    }
+    log_info "使用 pip 命令: $pip_cmd"
 
-    log_success "依赖安装完成"
+    # 安装依赖
+    log_info "升级 pip..."
+    $pip_cmd install --upgrade pip >/dev/null 2>&1 || log_warn "pip 升级失败，继续使用当前版本"
+    
+    log_info "安装 psutil 和 requests..."
+    if $pip_cmd install psutil requests; then
+        log_success "依赖安装完成"
+    else
+        log_warn "某些依赖安装失败，但将继续安装"
+    fi
 }
 
 create_systemd_service() {
@@ -1160,10 +1222,11 @@ ECS Monitor 智能安装脚本 v${VERSION}
   PYENV_ROOT       pyenv 安装路径（自动检测）
 
 Python 环境支持:
-  - 自动检测 pyenv 环境并优先使用
+  - 自动检测 pyenv 环境并优先使用（如果已安装）
   - 支持 pyenv 管理的 Python 版本
+  - 完全兼容没有安装 pyenv 的环境
+  - 如果未检测到 pyenv，自动使用系统 Python
   - 自动配置 systemd 服务使用正确的 Python 路径
-  - 如果未检测到 pyenv，使用系统 Python
 
 配置文件:
   ${CONFIG_FILE}
