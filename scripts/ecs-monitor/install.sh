@@ -99,10 +99,21 @@ check_root() {
 
 detect_os() {
     if [ -f /etc/os-release ]; then
+        # 临时禁用 set -e 以防止 source 失败导致脚本中断
+        set +e
         . /etc/os-release
-        OS=$ID
-        OS_VERSION=$VERSION_ID
-        log_info "检测到操作系统: $PRETTY_NAME"
+        set -e
+        
+        OS=${ID:-unknown}
+        OS_VERSION=${VERSION_ID:-unknown}
+        
+        # 特殊处理 Alibaba Cloud Linux
+        if [[ "$OS" == "alinux" ]] || [[ "$PRETTY_NAME" =~ "Alibaba Cloud Linux" ]]; then
+            OS="alinux"
+            log_info "检测到操作系统: ${PRETTY_NAME:-Alibaba Cloud Linux} (使用 yum 包管理器)"
+        else
+            log_info "检测到操作系统: ${PRETTY_NAME:-$OS $OS_VERSION}"
+        fi
     else
         log_warn "无法检测操作系统类型"
         OS="unknown"
@@ -294,11 +305,11 @@ install_python() {
         ubuntu|debian)
             apt-get update && apt-get install -y python3 python3-pip
             ;;
-        centos|rhel|fedora)
+        centos|rhel|fedora|alinux|alios)
             yum install -y python3 python3-pip
             ;;
         *)
-            log_error "不支持的操作系统，请手动安装 Python3"
+            log_error "不支持的操作系统: $OS，请手动安装 Python3"
             exit 1
             ;;
     esac
@@ -318,24 +329,7 @@ check_docker() {
 }
 
 install_docker() {
-    log_info "安装 Docker..."
-
-    case "$OS" in
-        ubuntu|debian)
-            apt-get update
-            apt-get install -y docker.io
-            systemctl enable docker
-            systemctl start docker
-            ;;
-        centos|rhel)
-            yum install -y docker
-            systemctl enable docker
-            systemctl start docker
-            ;;
-        *)
-            log_warn "请手动安装 Docker: https://docs.docker.com/engine/install/"
-            ;;
-    esac
+    log_warn "请手动安装 Docker: https://docs.docker.com/engine/install/"
 }
 
 detect_download_tool() {
@@ -351,7 +345,7 @@ detect_download_tool() {
                 ubuntu|debian)
                     apt-get update && apt-get install -y curl
                     ;;
-                centos|rhel|fedora)
+                centos|rhel|fedora|alinux|alios)
                     yum install -y curl
                     ;;
             esac
@@ -487,7 +481,7 @@ install_dependencies() {
                 ubuntu|debian)
                     apt-get install -y python3-pip
                     ;;
-                centos|rhel|fedora)
+                centos|rhel|fedora|alinux|alios)
                     yum install -y python3-pip
                     ;;
             esac
