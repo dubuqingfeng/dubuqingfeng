@@ -4,10 +4,144 @@
         <title>Dubuqingfeng Blog</title>
         <link>https://dubuqingfeng.xyz/blog</link>
         <description>Dubuqingfeng Blog</description>
-        <lastBuildDate>Sun, 01 Jun 2025 20:22:00 GMT</lastBuildDate>
+        <lastBuildDate>Wed, 18 Feb 2026 09:00:00 GMT</lastBuildDate>
         <docs>https://validator.w3.org/feed/docs/rss2.html</docs>
         <generator>https://github.com/jpmonette/feed</generator>
         <language>zh-Hans</language>
+        <item>
+            <title><![CDATA[Claude & Codex 优化与配置]]></title>
+            <link>https://dubuqingfeng.xyz/blog/202602-claude-codex-agent-skills-memory</link>
+            <guid>https://dubuqingfeng.xyz/blog/202602-claude-codex-agent-skills-memory</guid>
+            <pubDate>Wed, 18 Feb 2026 09:00:00 GMT</pubDate>
+            <description><![CDATA[用 Agent / Skills / Memory / Plugin / Ultrathink 稳定产出，再用 Spec-Driven + TDD 把需求与质量落到可验证的结果。]]></description>
+            <content:encoded><![CDATA[<p>这里主要是对于 claude、codex 的相关实践总结，相关的边界、回路、验收是否清楚。</p>
+<h2 class="anchor anchorTargetStickyNavbar_Vzrq" id="agent">Agent<a href="https://dubuqingfeng.xyz/blog/202602-claude-codex-agent-skills-memory#agent" class="hash-link" aria-label="Agent的直接链接" title="Agent的直接链接" translate="no">​</a></h2>
+<p>默认约定 <code>AGENTS.md</code> 或者 <code>CLAUDE.md</code>：</p>
+<ul>
+<li class="">目标：产出什么（文件/PR/命令清单/说明）</li>
+<li class="">禁区：不做什么（不升级依赖、不大范围重构、不跑破坏性命令）</li>
+<li class="">约束：目录/权限/网络/输出格式</li>
+<li class="">验收：怎么证明完成（测试、构建、可复现步骤）</li>
+</ul>
+<p>对 Agent，相关 prompt 要求其遵守“三步走”：</p>
+<ul>
+<li class="">先定位：读关键文件，关键逻辑，别上来就改</li>
+<li class="">先小改：改最小可行点（能编译/能测/能跑），提升效率</li>
+<li class="">再扩面：同类问题批量化时，给出“影响面 + 回滚点”</li>
+</ul>
+<p>一些基础的 agent 命令：</p>
+<p><a href="https://github.com/dubuqingfeng/dotfiles/blob/master/coding-agent/docs/codex.md" target="_blank" rel="noopener noreferrer" class="">https://github.com/dubuqingfeng/dotfiles/blob/master/coding-agent/docs/codex.md</a></p>
+<p>相关的一些 agent 项目：</p>
+<ul>
+<li class=""><a href="https://github.com/mhattingpete/claude-skills-marketplace" target="_blank" rel="noopener noreferrer" class="">https://github.com/mhattingpete/claude-skills-marketplace</a></li>
+<li class=""><a href="https://github.com/affaan-m/everything-claude-code" target="_blank" rel="noopener noreferrer" class="">https://github.com/affaan-m/everything-claude-code</a></li>
+<li class=""><a href="https://github.com/peterfei/ai-agent-team" target="_blank" rel="noopener noreferrer" class="">https://github.com/peterfei/ai-agent-team</a></li>
+</ul>
+<h2 class="anchor anchorTargetStickyNavbar_Vzrq" id="skills">Skills<a href="https://dubuqingfeng.xyz/blog/202602-claude-codex-agent-skills-memory#skills" class="hash-link" aria-label="Skills的直接链接" title="Skills的直接链接" translate="no">​</a></h2>
+<p>用过/常用的一些相关 skills（按场景）：</p>
+<ul>
+<li class=""><code>siyuan-notes</code>：查找、检索、浏览思源笔记内容</li>
+<li class=""><code>skill-creator</code>：创建/改造 skill，把高频工作流固化下来</li>
+<li class=""><code>skill-installer</code></li>
+<li class=""><code>skill-from-github</code></li>
+<li class=""><code>evm-blockchain-rpc</code></li>
+</ul>
+<h2 class="anchor anchorTargetStickyNavbar_Vzrq" id="memory只记能复用的结论">Memory：只记“能复用的结论”<a href="https://dubuqingfeng.xyz/blog/202602-claude-codex-agent-skills-memory#memory%E5%8F%AA%E8%AE%B0%E8%83%BD%E5%A4%8D%E7%94%A8%E7%9A%84%E7%BB%93%E8%AE%BA" class="hash-link" aria-label="Memory：只记“能复用的结论”的直接链接" title="Memory：只记“能复用的结论”的直接链接" translate="no">​</a></h2>
+<p>如果是代码 Agent 的话，不追求记住所有细节，只记三类东西：</p>
+<ul>
+<li class="">项目级事实：测试命令、目录约定、发布方式</li>
+<li class="">个人偏好：输出风格、语言、是否要链接/引用</li>
+<li class="">本次变更：改了哪些文件、为什么改、怎么回滚</li>
+</ul>
+<p>目前来说有以下参考：</p>
+<h3 class="anchor anchorTargetStickyNavbar_Vzrq" id="claude">Claude<a href="https://dubuqingfeng.xyz/blog/202602-claude-codex-agent-skills-memory#claude" class="hash-link" aria-label="Claude的直接链接" title="Claude的直接链接" translate="no">​</a></h3>
+<ul>
+<li class=""><a href="https://github.com/thedotmack/claude-mem" target="_blank" rel="noopener noreferrer" class="">https://github.com/thedotmack/claude-mem</a></li>
+</ul>
+<h3 class="anchor anchorTargetStickyNavbar_Vzrq" id="openclaw">OpenClaw<a href="https://dubuqingfeng.xyz/blog/202602-claude-codex-agent-skills-memory#openclaw" class="hash-link" aria-label="OpenClaw的直接链接" title="OpenClaw的直接链接" translate="no">​</a></h3>
+<ul>
+<li class=""><a href="https://github.com/geq1fan/openclaw-memory" target="_blank" rel="noopener noreferrer" class="">https://github.com/geq1fan/openclaw-memory</a></li>
+<li class=""><a href="https://github.com/oceanbase/powermem" target="_blank" rel="noopener noreferrer" class="">https://github.com/oceanbase/powermem</a></li>
+<li class=""><a href="https://github.com/zilliztech/memsearch" target="_blank" rel="noopener noreferrer" class="">https://github.com/zilliztech/memsearch</a></li>
+</ul>
+<h3 class="anchor anchorTargetStickyNavbar_Vzrq" id="其他项目">其他项目<a href="https://dubuqingfeng.xyz/blog/202602-claude-codex-agent-skills-memory#%E5%85%B6%E4%BB%96%E9%A1%B9%E7%9B%AE" class="hash-link" aria-label="其他项目的直接链接" title="其他项目的直接链接" translate="no">​</a></h3>
+<ul>
+<li class="">一个开源的、专为 AI Agent 设计的上下文数据库，<a href="https://github.com/volcengine/OpenViking" target="_blank" rel="noopener noreferrer" class="">OpenViking</a></li>
+<li class="">一个本地优先（local-first）的 AI 对话客户端：它将每一次对话建模为节点化的 DAG（树 + 分支），并提供显式的 Context Box，用于可控地组装提示词上下文。<a href="https://github.com/yxp934/prompt-tree" target="_blank" rel="noopener noreferrer" class="">prompt-tree</a></li>
+<li class="">为 AI Agent 打造的长期记忆操作系统，<a href="https://github.com/AGI-is-going-to-arrive/Memory-Palace" target="_blank" rel="noopener noreferrer" class="">Memory Palace</a></li>
+<li class="">一个基于 URI 而不是 RAG 的轻量级、可回滚、可视化的 AI 外挂 MCP 记忆库，<a href="https://github.com/Dataojitori/nocturne_memory" target="_blank" rel="noopener noreferrer" class="">nocturne_memory</a></li>
+<li class=""><a href="https://mem.nowledge.co/zh/docs/ai-now" target="_blank" rel="noopener noreferrer" class="">nowledge</a></li>
+</ul>
+<h2 class="anchor anchorTargetStickyNavbar_Vzrq" id="ultrathink只在高风险时开启">Ultrathink：只在高风险时开启<a href="https://dubuqingfeng.xyz/blog/202602-claude-codex-agent-skills-memory#ultrathink%EF%BF%BD%E5%8F%AA%E5%9C%A8%E9%AB%98%E9%A3%8E%E9%99%A9%E6%97%B6%E5%BC%80%E5%90%AF" class="hash-link" aria-label="Ultrathink：只在高风险时开启的直接链接" title="Ultrathink：只在高风险时开启的直接链接" translate="no">​</a></h2>
+<p>在这些场景要求开启 ultrathink，否则就按常规执行：</p>
+<ul>
+<li class="">改动量比较大</li>
+<li class="">安全/权限/资金/隐私相关</li>
+</ul>
+<h2 class="anchor anchorTargetStickyNavbar_Vzrq" id="spec-driven-development">Spec-Driven Development<a href="https://dubuqingfeng.xyz/blog/202602-claude-codex-agent-skills-memory#spec-driven-development" class="hash-link" aria-label="Spec-Driven Development的直接链接" title="Spec-Driven Development的直接链接" translate="no">​</a></h2>
+<p>写 spec 很合适，以及按 spec 落地。关键是 spec 要标准：</p>
+<div class="language-md codeBlockContainer_Ckt0 theme-code-block" style="--prism-color:#393A34;--prism-background-color:#f6f8fa"><div class="codeBlockContent_QJqH"><pre tabindex="0" class="prism-code language-md codeBlock_bY9V thin-scrollbar" style="color:#393A34;background-color:#f6f8fa"><code class="codeBlockLines_e6Vv"><span class="token-line" style="color:#393A34"><span class="token title important punctuation" style="color:#393A34">##</span><span class="token title important"> Goal</span><span class="token plain"></span><br></span><span class="token-line" style="color:#393A34"><span class="token plain"></span><span class="token title important punctuation" style="color:#393A34">##</span><span class="token title important"> Non-goals</span><span class="token plain"></span><br></span><span class="token-line" style="color:#393A34"><span class="token plain"></span><span class="token title important punctuation" style="color:#393A34">##</span><span class="token title important"> Architecture</span><span class="token plain"></span><br></span><span class="token-line" style="color:#393A34"><span class="token plain"></span><span class="token title important punctuation" style="color:#393A34">##</span><span class="token title important"> API / UX (examples)</span><span class="token plain"></span><br></span><span class="token-line" style="color:#393A34"><span class="token plain"></span><span class="token title important punctuation" style="color:#393A34">##</span><span class="token title important"> Edge cases</span><span class="token plain"></span><br></span><span class="token-line" style="color:#393A34"><span class="token plain"></span><span class="token title important punctuation" style="color:#393A34">##</span><span class="token title important"> Acceptance criteria (checklist)</span><br></span></code></pre></div></div>
+<p>相关项目可以参考：</p>
+<ul>
+<li class=""><a href="https://github.com/github/spec-kit" target="_blank" rel="noopener noreferrer" class="">spec-kit</a>：Spec-Driven Development 工具包 + <code>specify</code> CLI</li>
+<li class=""><a href="https://github.com/Fission-AI/OpenSpec" target="_blank" rel="noopener noreferrer" class="">OpenSpec</a>：围绕“规格/说明”驱动交付的项目</li>
+<li class=""><a href="https://github.com/grid-oaa/codex-skill-spec/tree/main" target="_blank" rel="noopener noreferrer" class="">codex-skill-spec</a></li>
+<li class=""><a href="https://github.com/Pimzino/claude-code-spec-workflow" target="_blank" rel="noopener noreferrer" class="">claude-code-spec-workflow</a></li>
+</ul>
+<p>几个点：</p>
+<ul>
+<li class="">先写“项目原则”（质量、测试标准、UX 一致性、性能要求），后面就不容易跑偏</li>
+<li class="">再写 spec（讲清 what/why），再补技术计划（讲清 how），最后拆 task 执行</li>
+<li class="">规格文档不是一次性产物，而是后续实现/验收的基准</li>
+</ul>
+<h2 class="anchor anchorTargetStickyNavbar_Vzrq" id="test-driven-development">Test-Driven Development<a href="https://dubuqingfeng.xyz/blog/202602-claude-codex-agent-skills-memory#test-driven-development" class="hash-link" aria-label="Test-Driven Development的直接链接" title="Test-Driven Development的直接链接" translate="no">​</a></h2>
+<p>推荐按场景选策略：</p>
+<ul>
+<li class="">简单功能：单个方法、逻辑直观，先实现，后验证（补回归 + 边界）。</li>
+<li class="">复杂业务逻辑：多分支判断、算法计算、状态转换，用 TDD：先验证，后实现。</li>
+<li class="">存量代码修改：先加“安全防御”（关键路径回归 + 典型 case），再动实现。</li>
+<li class="">提示词难以描述需求：测试用例就是最好的需求文档，用 TDD 让代码直接表达需求。</li>
+</ul>
+<p>一个可使用的 TDD 节奏：</p>
+<ol>
+<li class="">先写测试：把输入/输出、边界条件、失败场景写死</li>
+<li class="">再写实现：只做到测试通过（先别急着“优化/重构”）</li>
+<li class="">最后重构：保持测试一直绿</li>
+</ol>
+<h3 class="anchor anchorTargetStickyNavbar_Vzrq" id="测试用例的文档怎么补全">测试用例的文档怎么补全<a href="https://dubuqingfeng.xyz/blog/202602-claude-codex-agent-skills-memory#%E6%B5%8B%E8%AF%95%E7%94%A8%E4%BE%8B%E7%9A%84%E6%96%87%E6%A1%A3%E6%80%8E%E4%B9%88%E8%A1%A5%E5%85%A8" class="hash-link" aria-label="测试用例的文档怎么补全的直接链接" title="测试用例的文档怎么补全的直接链接" translate="no">​</a></h3>
+<p>很多测试“有”，但不可读。建议把测试当成一份可执行说明书，至少能回答四个问题：<strong>测什么、在什么前提下、怎么触发、期望是什么</strong>。</p>
+<p>建议补齐这几项（放到测试文件注释、或相关的 <code>README.md</code> 都可以）：</p>
+<ul>
+<li class="">用例名：一句话讲清场景与期望</li>
+<li class="">Given/When/Then：前置条件 / 行为 / 期望结果</li>
+<li class="">覆盖面：主路径、关键分支、边界条件、失败场景</li>
+<li class="">不变量：业务约束（例如金额不能为负）</li>
+</ul>
+<p>一个常用的用例描述模板：</p>
+<div class="language-md codeBlockContainer_Ckt0 theme-code-block" style="--prism-color:#393A34;--prism-background-color:#f6f8fa"><div class="codeBlockContent_QJqH"><pre tabindex="0" class="prism-code language-md codeBlock_bY9V thin-scrollbar" style="color:#393A34;background-color:#f6f8fa"><code class="codeBlockLines_e6Vv"><span class="token-line" style="color:#393A34"><span class="token title important punctuation" style="color:#393A34">##</span><span class="token title important"> Test Cases</span><span class="token plain"></span><br></span><span class="token-line" style="color:#393A34"><span class="token plain" style="display:inline-block"></span><br></span><span class="token-line" style="color:#393A34"><span class="token plain"></span><span class="token title important punctuation" style="color:#393A34">###</span><span class="token title important"> Case: &lt;一句话描述场景&gt;</span><span class="token plain"></span><br></span><span class="token-line" style="color:#393A34"><span class="token plain"></span><span class="token list punctuation" style="color:#393A34">-</span><span class="token plain"> Given: &lt;初始状态/依赖数据/配置&gt;</span><br></span><span class="token-line" style="color:#393A34"><span class="token plain"></span><span class="token list punctuation" style="color:#393A34">-</span><span class="token plain"> When: &lt;调用/事件/输入&gt;</span><br></span><span class="token-line" style="color:#393A34"><span class="token plain"></span><span class="token list punctuation" style="color:#393A34">-</span><span class="token plain"> Then: </span><span class="token tag punctuation" style="color:#393A34">&lt;</span><span class="token tag" style="color:#00009f">可观察结果</span><span class="token tag punctuation" style="color:#393A34">&gt;</span><span class="token plain"></span><br></span><span class="token-line" style="color:#393A34"><span class="token plain"></span><span class="token list punctuation" style="color:#393A34">-</span><span class="token plain"> Notes: &lt;为什么需要这个用例 / 对应的 bug / 风险点&gt;</span><br></span></code></pre></div></div>
+<p>如果规则多，就再加一张用例表（等价于“可执行的规格清单”）：</p>
+<div class="language-md codeBlockContainer_Ckt0 theme-code-block" style="--prism-color:#393A34;--prism-background-color:#f6f8fa"><div class="codeBlockContent_QJqH"><pre tabindex="0" class="prism-code language-md codeBlock_bY9V thin-scrollbar" style="color:#393A34;background-color:#f6f8fa"><code class="codeBlockLines_e6Vv"><span class="token-line" style="color:#393A34"><span class="token table table-header-row punctuation" style="color:#393A34">|</span><span class="token table table-header-row table-header important"> Case </span><span class="token table table-header-row punctuation" style="color:#393A34">|</span><span class="token table table-header-row table-header important"> Input </span><span class="token table table-header-row punctuation" style="color:#393A34">|</span><span class="token table table-header-row table-header important"> Precondition </span><span class="token table table-header-row punctuation" style="color:#393A34">|</span><span class="token table table-header-row table-header important"> Expected </span><span class="token table table-header-row punctuation" style="color:#393A34">|</span><span class="token table table-header-row table-header important"> Edge </span><span class="token table table-header-row punctuation" style="color:#393A34">|</span><span class="token table table-header-row"></span><br></span><span class="token-line" style="color:#393A34"><span class="token table table-header-row"></span><span class="token table table-line punctuation" style="color:#393A34">|</span><span class="token table table-line punctuation" style="color:#393A34">------</span><span class="token table table-line punctuation" style="color:#393A34">|</span><span class="token table table-line punctuation" style="color:#393A34">-------</span><span class="token table table-line punctuation" style="color:#393A34">|</span><span class="token table table-line punctuation" style="color:#393A34">--------------</span><span class="token table table-line punctuation" style="color:#393A34">|</span><span class="token table table-line punctuation" style="color:#393A34">----------</span><span class="token table table-line punctuation" style="color:#393A34">|</span><span class="token table table-line punctuation" style="color:#393A34">------</span><span class="token table table-line punctuation" style="color:#393A34">|</span><span class="token table table-line"></span><br></span><span class="token-line" style="color:#393A34"><span class="token table table-line"></span><span class="token table table-data-rows punctuation" style="color:#393A34">|</span><span class="token table table-data-rows table-data"> ...  </span><span class="token table table-data-rows punctuation" style="color:#393A34">|</span><span class="token table table-data-rows table-data"> ...   </span><span class="token table table-data-rows punctuation" style="color:#393A34">|</span><span class="token table table-data-rows table-data"> ...          </span><span class="token table table-data-rows punctuation" style="color:#393A34">|</span><span class="token table table-data-rows table-data"> ...      </span><span class="token table table-data-rows punctuation" style="color:#393A34">|</span><span class="token table table-data-rows table-data"> ...  </span><span class="token table table-data-rows punctuation" style="color:#393A34">|</span><br></span></code></pre></div></div>
+<p>测试用例文档的最低标准是：换一个人 / AI 接手，能用这份说明在不读实现的情况下补齐新用例/定位失败原因。通常需要再补两类信息：</p>
+<ul>
+<li class="">数据与依赖：哪些是 fixtures，哪些要 mock，哪些来自线上数据</li>
+<li class="">可重现：用例是否确定性（时间/随机数/并发/网络），如何让它稳定可复现</li>
+</ul>
+<h2 class="anchor anchorTargetStickyNavbar_Vzrq" id="总结">总结<a href="https://dubuqingfeng.xyz/blog/202602-claude-codex-agent-skills-memory#%E6%80%BB%E7%BB%93" class="hash-link" aria-label="总结的直接链接" title="总结的直接链接" translate="no">​</a></h2>
+<p>核心思路是：用 Agent + Skills + Memory 稳定产出，用 Spec-Driven + TDD 把需求与质量落到可验证的结果。</p>
+<ul>
+<li class=""><strong>Agent</strong>：明确边界（做什么、不做什么、怎么验收），遵守"先定位、先小改、再扩面"</li>
+<li class=""><strong>Skills</strong>：把高频工作流固化，减少重复沟通成本</li>
+<li class=""><strong>Memory</strong>：只记能复用的结论，保持上下文精简</li>
+<li class=""><strong>Ultrathink</strong>：高风险场景才开，避免资源浪费</li>
+<li class=""><strong>Spec + TDD</strong>：规格驱动交付，测试保障质量</li>
+</ul>
+<p>关键是让每一步都有明确的输入、输出和验收标准，这样无论是人还是 AI 接手，都能快速理解并继续推进。</p>]]></content:encoded>
+            <category>AI</category>
+            <category>Claude</category>
+            <category>Codex</category>
+            <category>Agent</category>
+            <category>技术</category>
+        </item>
         <item>
             <title><![CDATA[意难平  |  心锚]]></title>
             <link>https://dubuqingfeng.xyz/blog/202506-yinanping-xinmao</link>
@@ -540,7 +674,7 @@
 <p><img decoding="async" loading="lazy" src="https://dubuqingfeng.oss-cn-hongkong.aliyuncs.com/blog/life/202105-bugufu-xunzhaonaxiemanxialaidejiaoluo-06.webp" alt="" class="img_ev3q"></p>
 <p>当然现在还有一些书店，有着别致的装修，有着特殊的感觉，就找一个静静的下午，找一本感兴趣的书，慢慢阅读，也可以感受到岁月静好。之前去秦皇岛的时候，还去了猫的天空之城这个书店，装修别致，色彩搭配也自然。北京的话，应该是有三联书店，之前的北京盛世情书店也停业了，事实上，这样的实体书店，也越来越少，现实是很残酷的，那些人当初的想法也无法实现吧，留下的只有记忆与回忆。</p>
 <p><img decoding="async" loading="lazy" src="https://dubuqingfeng.oss-cn-hongkong.aliyuncs.com/blog/life/202105-bugufu-xunzhaonaxiemanxialaidejiaoluo-07.webp" alt="" class="img_ev3q"></p>
-<h2 class="anchor anchorTargetStickyNavbar_Vzrq" id="人口普查官方回应">人口普查官方回应<a href="https://dubuqingfeng.xyz/blog/202105-bugufu-xunzhaonaxiemanxialaidejiaoluo#%E4%BA%BA%E5%8F%A3%E6%99%AE%E6%9F%A5%E5%AE%98%E6%96%B9%E5%9B%9E%E5%BA%94" class="hash-link" aria-label="人口普查官方回应的直接链接" title="人口普查官��方回应的直接链接" translate="no">​</a></h2>
+<h2 class="anchor anchorTargetStickyNavbar_Vzrq" id="人口普查官方回应">人口普查官方回应<a href="https://dubuqingfeng.xyz/blog/202105-bugufu-xunzhaonaxiemanxialaidejiaoluo#%E4%BA%BA%E5%8F%A3%E6%99%AE%E6%9F%A5%E5%AE%98%E6%96%B9%E5%9B%9E%E5%BA%94" class="hash-link" aria-label="人口普查官方回应的直接链接" title="人口普查官方回应的直接链接" translate="no">​</a></h2>
 <p>最近也出了第七次人口普查的结果，结果大概上就是， 现在人口共计 14.1 亿人，较之前是有所增长的，在 2020 年的时候，新出生人口大概有一千多万，男女比例，在 100：102，所以也意味着，以后有一部分男生要经历着一直单身的状态，男女比例除了四川以外，大部分都比较失调。</p>
 <p>当然也注意到了网上有一些言论，对这个调查结果存疑，他们通过近二十年的出生人口数据，进行了统计，2020年0-14岁普查结果 25338万人，但是根据统计局历年出生人口2006-2020年出生计算为 23584 万人。多出来的近 1800 万儿童在哪里。</p>
 <p><img decoding="async" loading="lazy" src="https://dubuqingfeng.oss-cn-hongkong.aliyuncs.com/blog/life/202105-bugufu-xunzhaonaxiemanxialaidejiaoluo-08.webp" alt="" class="img_ev3q"></p>
@@ -900,7 +1034,7 @@
 </li>
 </ol>
 <p>一流的资源过成一流的人生不难，九流的资源过成一流的人生才难，最厉害的是将一流的资源过成失败的人生。</p>
-<h2 class="anchor anchorTargetStickyNavbar_Vzrq" id="脱贫关键在教育">脱贫关键在教育<a href="https://dubuqingfeng.xyz/blog/202105-bugufu-gaofenglizhimeishijuyutuopingjiaoyu#%E8%84%B1%E8%B4%AB%E5%85%B3%E9%94%AE%E5%9C%A8%E6%95%99%E8%82%B2" class="hash-link" aria-label="脱贫关键在教育的直接链接" title="脱贫关键在教育的直接链接" translate="no">​</a></h2>
+<h2 class="anchor anchorTargetStickyNavbar_Vzrq" id="脱贫关键在教育">脱贫关键在教育<a href="https://dubuqingfeng.xyz/blog/202105-bugufu-gaofenglizhimeishijuyutuopingjiaoyu#%E8%84%B1%E8%B4%AB%E5%85%B3%E9%94%AE%E5%9C%A8%E6%95%99%E8%82%B2" class="hash-link" aria-label="脱贫关键在教�育的直接链接" title="脱贫关键在教育的直接链接" translate="no">​</a></h2>
 <p>世界上还有这么一位导演，他是日本人，但常住中国，通过不带任何偏见的记录展示了一个不一样的中国，日本导演竹内亮最近发布了一个关于大凉山的记录，让人感受颇深，本身也比较喜欢这类人文类视频，而且这期也确实很感动。时长在五十分钟。</p>
 <p>十年前的大凉山是贫穷落后的川西秘境，十年后日本导演再度启程，寻路凉山。从悬崖村到昭觉县城，从山里的足球队到双河小学的日文科，当梦想照进现实，大凉山如今又是怎样的面孔？让我们一起走近大凉山，倾听来自大山的声音！</p>
 <p><img decoding="async" loading="lazy" src="https://dubuqingfeng.oss-cn-hongkong.aliyuncs.com/blog/life/202105-bugufu-gaofenmeishilizhijuyutuopinjiaoyu-05.webp" alt="" class="img_ev3q"></p>
@@ -1070,54 +1204,6 @@
             <category>美食</category>
             <category>社会</category>
             <category>顺德</category>
-        </item>
-        <item>
-            <title><![CDATA[不辜负  |  碳中和与半生缘]]></title>
-            <link>https://dubuqingfeng.xyz/blog/202104-bugufu-tanzhongheyubanshengyuan</link>
-            <guid>https://dubuqingfeng.xyz/blog/202104-bugufu-tanzhongheyubanshengyuan</guid>
-            <pubDate>Tue, 27 Apr 2021 22:18:21 GMT</pubDate>
-            <description><![CDATA[引言： 怕无归期，怕空欢喜，怕来者不是你。当然在生活中，也要提倡绿色理念，近些天有一个碳中和的词比较热门，而本次就简单了解碳中和的缘来缘尽。说起缘，不过就是人生的聚散离合。缘来，相遇，缘尽，别离。而那些人，长留心底。]]></description>
-            <content:encoded><![CDATA[<p>引言：</p>
-<p>怕无归期，怕空欢喜，怕来者不是你。当然在生活中，也要提倡绿色理念，近些天有一个碳中和的词比较热门，而本次就简单了解碳中和的缘来缘尽。说起缘，不过就是人生的聚散离合。缘来，相遇，缘尽，别离。而那些人，长留心底。</p>
-<p><img decoding="async" loading="lazy" src="https://dubuqingfeng.oss-cn-hongkong.aliyuncs.com/blog/life/202104-bugufu-tanzhongheyubanshengyuan-01.png" alt="" class="img_ev3q"></p>
-<h2 class="anchor anchorTargetStickyNavbar_Vzrq" id="碳中和">碳中和<a href="https://dubuqingfeng.xyz/blog/202104-bugufu-tanzhongheyubanshengyuan#%E7%A2%B3%E4%B8%AD%E5%92%8C" class="hash-link" aria-label="碳中和的直接链接" title="碳中和的直接链接" translate="no">​</a></h2>
-<p>大概是在今年，碳中和这个词逐渐进入了大众的视野，感觉近五年在环境治理上面，是有很多政策的，每年两会都总会有相关提案。</p>
-<p>今年两会期间，政府工作报告里提到了“碳达峰”、“碳中和”，这大概是在中美关系之后的又一个热点，这里就以我所了解到的碳中和，来讲讲什么是碳中和，以及我们如何去面对。</p>
-<p>碳这里是讲二氧化碳，中和就是正负相抵，达到平衡。这里当然和前几年的全球变暖温室效应也有关，人类不断地排放着二氧化碳，然后再不去采取行动，那么在若干年后，冰山融化，海平面上升，沿海城市将被淹没。同时还会解冻一些远古的微生物，从而进入生态圈，出现一些未知的结果。</p>
-<p>近些天，北京也会有很多扬沙，沙尘暴的这种天气，印象中在近几年是比较少的，大概是几年前，在四五月份的时候，北方经常会遇到一些扬沙、沙尘暴。</p>
-<p>当然之前有言论说，是因为内蒙禁止挖矿，然后人就变得少了，然后植物也就少一些，于是就将扬沙吹到了北京，当然这种是不正确的，只能随便听听。</p>
-<p>排出的二氧化碳或温室气体被植物造林、节能减排等形式抵消，这就是所谓的碳中和。</p>
-<p>其实就可以理解排除的二氧化碳，通过一些措施，植物造林等抵消掉。政府当然说，二氧化碳排放力争于 2030 年前达到峰值，在 2060 前实现中和。</p>
-<p><img decoding="async" loading="lazy" src="https://dubuqingfeng.oss-cn-hongkong.aliyuncs.com/blog/life/202104-bugufu-tanzhongheyubanshengyuan-02.webp" alt="" class="img_ev3q"></p>
-<p>达到峰值的这个结果就是碳达峰。</p>
-<p>其实每件事情，都是要从多个角度去看待的，不是一朝一夕的事情，近些年也在不断地采取了一些措施，比如尽可能地用天然气而不是煤，尽可能地用清洁煤。在理念上，倡导绿色生活，一切应该以节能减排为目标，落实一些像垃圾分类，限塑这种的基础意识和方式。</p>
-<p>当然我们从中，也可以看到很多机会，就像去年刚开始的时候的口罩一样，在政府出台相关政策的时候，就开始关注相关企业，在政策的领导下，这些企业必然收益。反面例子，自然是像阿里，美团这样的垄断。</p>
-<p>在比特币挖矿方面，肯定也紧跟政策，越来越合规，越来越环保，也会尽可能地采用可再生能源，其实在之前，会有些论调说，比特币挖矿所带来的能源消耗是巨大的，但其实也只是表面现象，有些地方多余的电也并不能运输到别的地方，而可以通过这种方式去利用。但凡事都应该有个限度，应该在可预见的未来中，这种增长是趋于稳定的。</p>
-<p>当然现在很多比特币挖矿矿场逐渐在向国外转移，目前火力发电显然逐渐会被限制的，内蒙新疆等矿场也在不断采取措施，来规范这类型的行为。因此我们甚至可以测算，在丰水期结束之后，会有大量的算力流失，而更多地采用清洁类能源，这同时也是一个好的开始。</p>
-<p>有朝一日，我们可以实现净零排放。</p>
-<h2 class="anchor anchorTargetStickyNavbar_Vzrq" id="半生缘">半生缘<a href="https://dubuqingfeng.xyz/blog/202104-bugufu-tanzhongheyubanshengyuan#%E5%8D%8A%E7%94%9F%E7%BC%98" class="hash-link" aria-label="半生缘的直接链接" title="半生缘的直接链接" translate="no">​</a></h2>
-<p><img decoding="async" loading="lazy" src="https://dubuqingfeng.oss-cn-hongkong.aliyuncs.com/blog/life/202104-bugufu-tanzhongheyubanshengyuan-03.webp" alt="" class="img_ev3q"></p>
-<p>缘分其实是一种很奇怪的东西，你若相信，那很多都是缘分，人与人遇见的概率真的很低，有可能一直擦肩而过而不知，也有可能是宿命。</p>
-<p>有这么一部小说，名为《半生缘》，缘起半生，半生有缘。故事里的主人公，其实很多时候就是有缘无份，面对现实，颇感无力，面对环境，颇感悲凉。</p>
-<p>里面也有很多名句，里面会讲房子是一座牢笼，虽然富丽堂皇，但却没有家的气息。以及那句“世钧，我们回不去了。”，也许归来仍是少年，但也不是从前那个样子。</p>
-<p>其实这部小说，看似悲情，却是温情。温情的是那种，淡然地喜欢，那一段世钧和曼桢纯洁的感情，笔下的世钧，真的就如黎明所表演的那样温情，温柔。很多小说，其实要结合背景来看，那个战乱纷飞的背景下，车马已属不易，生活也变得琐碎，很多事情，往往不是两个人的问题，而是环境，家庭背景等。</p>
-<p>其实，很多时候，会有那种感觉，情不知所起，一往情深，包括世钧自己也不知道，是什么时候喜欢上的曼桢，哪怕对方并不完美，可就刚好合适，两个人要么是性格相近，要么是那种性格互补，在感情上也没有那么轰轰烈烈，就这也平淡而又自然从容，就仿佛在读一些世间故事，听一首好歌一样。</p>
-<p>当然在这个故事里，曼璐也不是坏人，是命运与家庭造就的现在的结果，在家庭里，不得不成熟许多，还羡慕着曼桢，难免会有嫉妒心。</p>
-<p><img decoding="async" loading="lazy" src="https://dubuqingfeng.oss-cn-hongkong.aliyuncs.com/blog/life/202104-bugufu-tanzhongheyubanshengyuan-04.webp" alt="" class="img_ev3q"></p>
-<p>如果将世界上出错率的事情进行排名的话，那么婚姻应该是在前列。</p>
-<p>人们结婚的理由其实各种各样，有些人为了面子，有些人为了钱，有些人为了爱，有些人为了孩子，有些人因为到了年纪。实际上，结婚不仅是两个人的事情，更是两个家庭的事情，而自传统以来，都会讲究门当户对，这不知挡掉了多少有缘人。</p>
-<p>每个人身上其实会有一些隐藏的属性，而只有在某一时刻才能激发，对待那个人，他们自有温柔，风情万种，大概只有跟某些人在一起的时候，才是最好的样子吧。</p>
-<p>这并不是一篇爱情小说，更像是生活类型，写的是环境下的命运与抉择，总要经历一些聚散与浮沉，来展现命运。</p>
-<p>张爱玲笔下的人物，往往是那种不完美的，会带一些缺憾的，年老男人虚伪好色，年轻女人爱慕虚荣自我欺骗，年老女人充满嫉妒。</p>
-<p>有一幕印象也比较深，那便是曼桢在自己工作以后，开始维持着家里生计，也在证明着自己，可以靠着光明正大的工作养活家人，那种独立的气质、感觉。但却和世钧越行越远，在那会以后，就像相交的线逐渐远去一样，回不去了。</p>
-<p>正所谓十年生死两茫茫，不思量，自难忘。</p>
-<p><img decoding="async" loading="lazy" src="https://dubuqingfeng.oss-cn-hongkong.aliyuncs.com/blog/life/202104-bugufu-tanzhongheyubanshengyuan-05.webp" alt="" class="img_ev3q"></p>
-<p>今日的歌曲，半生缘，都会遇到灯火阑珊处的那个人。</p>]]></content:encoded>
-            <category>人生</category>
-            <category>不辜负</category>
-            <category>缘分</category>
-            <category>碳中和</category>
-            <category>张爱玲</category>
         </item>
     </channel>
 </rss>
