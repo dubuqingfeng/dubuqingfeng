@@ -1,0 +1,71 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<svg xmlns="http://www.w3.org/2000/svg" width="1200" height="420" viewBox="0 0 1200 420" role="img" aria-label="机械手（夹持模块）结构示意">
+  <defs>
+    <style>
+      .bg { fill: #f8fafc; }
+      .box { fill: #ffffff; stroke: #1f2937; stroke-width: 2; rx: 16; ry: 16; }
+      .cube { fill: #fde68a; stroke: #92400e; stroke-width: 2; }
+      .jaw { fill: #e5e7eb; stroke: #374151; stroke-width: 2; }
+      .pad { fill: #93c5fd; stroke: #1d4ed8; stroke-width: 2; }
+      .title { font: 600 22px -apple-system,BlinkMacSystemFont,Segoe UI,Roboto,Helvetica,Arial,"PingFang SC","Hiragino Sans GB","Microsoft YaHei",sans-serif; fill: #111827; }
+      .text { font: 400 18px -apple-system,BlinkMacSystemFont,Segoe UI,Roboto,Helvetica,Arial,"PingFang SC","Hiragino Sans GB","Microsoft YaHei",sans-serif; fill: #374151; }
+      .muted { fill: #6b7280; }
+      .arrow { stroke: #111827; stroke-width: 2.5; fill: none; marker-end: url(#arrowHead); }
+      .dashed { stroke-dasharray: 7 6; }
+    </style>
+    <marker id="arrowHead" markerWidth="12" markerHeight="12" refX="10" refY="6" orient="auto">
+      <path d="M0,0 L12,6 L0,12 Z" fill="#111827"/>
+    </marker>
+  </defs>
+
+  <rect class="bg" x="0" y="0" width="1200" height="420" rx="18" ry="18"/>
+
+  <text class="title" x="600" y="50" text-anchor="middle">机械手（夹持模块）结构示意</text>
+
+  <!-- Cube -->
+  <rect class="cube" x="520" y="140" width="160" height="160" rx="10" ry="10"/>
+  <text class="text" x="600" y="225" text-anchor="middle">魔方</text>
+
+  <!-- Left jaw -->
+  <rect class="jaw" x="340" y="165" width="140" height="110" rx="14" ry="14"/>
+  <rect class="pad" x="460" y="185" width="18" height="70" rx="8" ry="8"/>
+  <text class="text muted" x="410" y="155" text-anchor="middle">夹爪(亚克力/金属)</text>
+  <text class="text muted" x="470" y="270" text-anchor="end">缓冲垫(硅胶)</text>
+
+  <!-- Right jaw -->
+  <rect class="jaw" x="720" y="165" width="140" height="110" rx="14" ry="14"/>
+  <rect class="pad" x="722" y="185" width="18" height="70" rx="8" ry="8"/>
+  <text class="text muted" x="790" y="155" text-anchor="middle">夹爪(亚克力/金属)</text>
+
+  <!-- Clamp motion arrows -->
+  <path class="arrow" d="M505 220 L480 220"/>
+  <path class="arrow" d="M695 220 L720 220"/>
+  <text class="text muted" x="600" y="330" text-anchor="middle">夹持方向（可加弹簧/柔性结构，避免过紧伤魔方）</text>
+
+  <!-- Linear axis -->
+  <path class="arrow dashed" d="M600 120 L600 85"/>
+  <text class="text muted" x="610" y="105" text-anchor="start">推/退（伸缩）</text>
+
+  <!-- Rotation axis -->
+  <circle cx="600" cy="220" r="10" fill="#ffffff" stroke="#111827" stroke-width="2"/>
+  <path class="arrow dashed" d="M600 220 C650 190 650 250 600 220"/>
+  <text class="text muted" x="660" y="220" text-anchor="start">旋转（主舵机）</text>
+
+  <!-- Notes box -->
+  <rect class="box" x="60" y="90" width="240" height="260"/>
+  <text class="title" x="180" y="130" text-anchor="middle">关键点</text>
+  <text class="text" x="85" y="170">- 接触面要软</text>
+  <text class="text" x="85" y="200">- 夹持要可调</text>
+  <text class="text" x="85" y="230">- 防打滑/防刮</text>
+  <text class="text" x="85" y="260">- 有限位更稳</text>
+  <text class="text" x="85" y="290">- 易拆装维护</text>
+
+  <rect class="box" x="900" y="90" width="240" height="260"/>
+  <text class="title" x="1020" y="130" text-anchor="middle">可选增强</text>
+  <text class="text" x="925" y="170">- 限位开关</text>
+  <text class="text" x="925" y="200">- 霍尔/编码器</text>
+  <text class="text" x="925" y="230">- 力反馈(简化)</text>
+  <text class="text" x="925" y="260">- 防抖结构</text>
+  <text class="text" x="925" y="290">- 快拆夹具</text>
+</svg>
+

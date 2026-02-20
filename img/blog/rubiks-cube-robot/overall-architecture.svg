@@ -1,0 +1,55 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<svg xmlns="http://www.w3.org/2000/svg" width="1200" height="360" viewBox="0 0 1200 360" role="img" aria-label="解魔方机器人整体设计框图">
+  <defs>
+    <style>
+      .box { fill: #ffffff; stroke: #1f2937; stroke-width: 2; rx: 16; ry: 16; }
+      .title { font: 600 22px -apple-system,BlinkMacSystemFont,Segoe UI,Roboto,Helvetica,Arial,"PingFang SC","Hiragino Sans GB","Microsoft YaHei",sans-serif; fill: #111827; }
+      .text { font: 400 18px -apple-system,BlinkMacSystemFont,Segoe UI,Roboto,Helvetica,Arial,"PingFang SC","Hiragino Sans GB","Microsoft YaHei",sans-serif; fill: #374151; }
+      .muted { fill: #6b7280; }
+      .arrow { stroke: #111827; stroke-width: 2.5; fill: none; marker-end: url(#arrowHead); }
+      .dashed { stroke-dasharray: 7 6; }
+      .bg { fill: #f8fafc; }
+    </style>
+    <marker id="arrowHead" markerWidth="12" markerHeight="12" refX="10" refY="6" orient="auto">
+      <path d="M0,0 L12,6 L0,12 Z" fill="#111827"/>
+    </marker>
+  </defs>
+
+  <rect class="bg" x="0" y="0" width="1200" height="360" rx="18" ry="18"/>
+
+  <!-- Left: Android -->
+  <rect class="box" x="60" y="70" width="300" height="220"/>
+  <text class="title" x="210" y="110" text-anchor="middle">Android App</text>
+  <text class="text" x="210" y="150" text-anchor="middle">摄像头采集 / 颜色识别</text>
+  <text class="text" x="210" y="178" text-anchor="middle">解法计算（算法/查表）</text>
+  <text class="text" x="210" y="206" text-anchor="middle">指令下发（串口/蓝牙）</text>
+  <text class="text muted" x="210" y="244" text-anchor="middle">（上位机）</text>
+
+  <!-- Middle: Controller -->
+  <rect class="box" x="450" y="70" width="300" height="220"/>
+  <text class="title" x="600" y="110" text-anchor="middle">控制板 MCU</text>
+  <text class="text" x="600" y="150" text-anchor="middle">ARM / Arduino / 树莓派</text>
+  <text class="text" x="600" y="178" text-anchor="middle">动作序列解析</text>
+  <text class="text" x="600" y="206" text-anchor="middle">舵机驱动（PWM/控制板）</text>
+  <text class="text muted" x="600" y="244" text-anchor="middle">（下位机）</text>
+
+  <!-- Right: Actuation -->
+  <rect class="box" x="840" y="70" width="300" height="220"/>
+  <text class="title" x="990" y="110" text-anchor="middle">机械结构</text>
+  <text class="text" x="990" y="150" text-anchor="middle">舵机 + 机械臂 + 导轨</text>
+  <text class="text" x="990" y="178" text-anchor="middle">夹持 / 推进 / 旋转</text>
+  <text class="text" x="990" y="206" text-anchor="middle">执行动作</text>
+  <text class="text muted" x="990" y="244" text-anchor="middle">魔方复原</text>
+
+  <!-- Arrows -->
+  <path class="arrow" d="M360 180 L450 180"/>
+  <text class="text muted" x="405" y="168" text-anchor="middle">指令</text>
+
+  <path class="arrow" d="M750 180 L840 180"/>
+  <text class="text muted" x="795" y="168" text-anchor="middle">PWM/IO</text>
+
+  <!-- Optional feedback loop -->
+  <path class="arrow dashed" d="M990 290 C990 325 210 325 210 290"/>
+  <text class="text muted" x="600" y="340" text-anchor="middle">可选：传感器/视觉反馈（闭环）</text>
+</svg>
+

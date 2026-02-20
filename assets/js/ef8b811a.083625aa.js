@@ -1,0 +1,1 @@
+"use strict";(globalThis.webpackChunkdubuqingfeng=globalThis.webpackChunkdubuqingfeng||[]).push([[38947],{56600:u=>{u.exports=JSON.parse('{"authors":[{"name":"dubuqingfeng","title":"\u5f00\u53d1 / \u6298\u817e / \u8bb0\u5f55","url":"https://dubuqingfeng.xyz","imageURL":"/img/favicon/favicon.jpeg","key":"dubuqingfeng","page":null,"count":0}]}')}}]);

@@ -1,0 +1,63 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<svg xmlns="http://www.w3.org/2000/svg" width="1200" height="520" viewBox="0 0 1200 520" role="img" aria-label="解魔方机器人系统流程图">
+  <defs>
+    <style>
+      .bg { fill: #f8fafc; }
+      .box { fill: #ffffff; stroke: #1f2937; stroke-width: 2; rx: 14; ry: 14; }
+      .title { font: 600 22px -apple-system,BlinkMacSystemFont,Segoe UI,Roboto,Helvetica,Arial,"PingFang SC","Hiragino Sans GB","Microsoft YaHei",sans-serif; fill: #111827; }
+      .text { font: 400 18px -apple-system,BlinkMacSystemFont,Segoe UI,Roboto,Helvetica,Arial,"PingFang SC","Hiragino Sans GB","Microsoft YaHei",sans-serif; fill: #374151; }
+      .muted { fill: #6b7280; }
+      .arrow { stroke: #111827; stroke-width: 2.5; fill: none; marker-end: url(#arrowHead); }
+      .dashed { stroke-dasharray: 7 6; }
+    </style>
+    <marker id="arrowHead" markerWidth="12" markerHeight="12" refX="10" refY="6" orient="auto">
+      <path d="M0,0 L12,6 L0,12 Z" fill="#111827"/>
+    </marker>
+  </defs>
+
+  <rect class="bg" x="0" y="0" width="1200" height="520" rx="18" ry="18"/>
+  <text class="title" x="600" y="54" text-anchor="middle">系统流程图（从识别到执行）</text>
+
+  <!-- Row 1: Perception & Solve -->
+  <rect class="box" x="70" y="100" width="250" height="110"/>
+  <text class="title" x="195" y="142" text-anchor="middle">采集</text>
+  <text class="text muted" x="195" y="176" text-anchor="middle">摄像头获取各面颜色</text>
+
+  <rect class="box" x="350" y="100" width="250" height="110"/>
+  <text class="title" x="475" y="142" text-anchor="middle">建模</text>
+  <text class="text muted" x="475" y="176" text-anchor="middle">颜色 -> 状态矩阵</text>
+
+  <rect class="box" x="630" y="100" width="250" height="110"/>
+  <text class="title" x="755" y="142" text-anchor="middle">求解</text>
+  <text class="text muted" x="755" y="176" text-anchor="middle">输出动作序列</text>
+
+  <rect class="box" x="910" y="100" width="220" height="110"/>
+  <text class="title" x="1020" y="142" text-anchor="middle">编码</text>
+  <text class="text muted" x="1020" y="176" text-anchor="middle">协议/校验/分包</text>
+
+  <path class="arrow" d="M320 155 L350 155"/>
+  <path class="arrow" d="M600 155 L630 155"/>
+  <path class="arrow" d="M880 155 L910 155"/>
+
+  <!-- Row 2: Transfer & Execute -->
+  <rect class="box" x="170" y="280" width="280" height="120"/>
+  <text class="title" x="310" y="325" text-anchor="middle">传输</text>
+  <text class="text muted" x="310" y="359" text-anchor="middle">蓝牙/串口下发指令</text>
+
+  <rect class="box" x="500" y="280" width="280" height="120"/>
+  <text class="title" x="640" y="325" text-anchor="middle">下位机执行</text>
+  <text class="text muted" x="640" y="359" text-anchor="middle">解析动作 -> PWM 驱动</text>
+
+  <rect class="box" x="830" y="280" width="300" height="120"/>
+  <text class="title" x="980" y="325" text-anchor="middle">机械动作</text>
+  <text class="text muted" x="980" y="359" text-anchor="middle">推进/夹持/旋转/退回</text>
+
+  <path class="arrow" d="M1020 210 L310 280"/>
+  <path class="arrow" d="M450 340 L500 340"/>
+  <path class="arrow" d="M780 340 L830 340"/>
+
+  <!-- Feedback -->
+  <path class="arrow dashed" d="M980 400 C980 470 195 470 195 210"/>
+  <text class="text muted" x="600" y="492" text-anchor="middle">可选闭环：执行后再识别校验 / 纠错（对齐、打滑、颜色误判）</text>
+</svg>
+
