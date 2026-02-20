@@ -61,6 +61,15 @@ const config = {
             "**/__tests__/**",
           ],
         },
+        blog: {
+          routeBasePath: "blog",
+          blogTitle: "Blog",
+          blogDescription: "记录一些折腾、想法与踩坑笔记。",
+          showReadingTime: true,
+          postsPerPage: 10,
+          blogSidebarTitle: "近期文章",
+          blogSidebarCount: 10,
+        },
         theme: {
           customCss: require.resolve('./src/css/custom.css'),
         },
@@ -94,6 +103,16 @@ const config = {
             to: "/docs/wiki",
             position: 'left',
             label: 'Wiki',
+          },
+          {
+            to: "/blog",
+            position: "left",
+            label: "Blog",
+          },
+          {
+            to: "/sitenav",
+            position: "left",
+            label: "SiteNav",
           },
           {
             position: "left",
@@ -266,7 +285,13 @@ const config = {
             }
           }
         },
-      ]
+      ],
+      [
+        require.resolve("./plugins/blog-stats"),
+        {
+          blogPath: "blog",
+        },
+      ],
     ],
 };
 

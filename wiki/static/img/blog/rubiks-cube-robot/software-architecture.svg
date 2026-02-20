@@ -1,0 +1,83 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<svg xmlns="http://www.w3.org/2000/svg" width="1200" height="480" viewBox="0 0 1200 480" role="img" aria-label="解魔方机器人软件架构（上位机与下位机）">
+  <defs>
+    <style>
+      .bg { fill: #f8fafc; }
+      .box { fill: #ffffff; stroke: #1f2937; stroke-width: 2; rx: 16; ry: 16; }
+      .title { font: 700 22px -apple-system,BlinkMacSystemFont,Segoe UI,Roboto,Helvetica,Arial,"PingFang SC","Hiragino Sans GB","Microsoft YaHei",sans-serif; fill: #111827; }
+      .text { font: 400 18px -apple-system,BlinkMacSystemFont,Segoe UI,Roboto,Helvetica,Arial,"PingFang SC","Hiragino Sans GB","Microsoft YaHei",sans-serif; fill: #374151; }
+      .muted { fill: #6b7280; }
+      .arrow { stroke: #111827; stroke-width: 2.5; fill: none; marker-end: url(#arrowHead); }
+      .dashed { stroke-dasharray: 7 6; }
+    </style>
+    <marker id="arrowHead" markerWidth="12" markerHeight="12" refX="10" refY="6" orient="auto">
+      <path d="M0,0 L12,6 L0,12 Z" fill="#111827"/>
+    </marker>
+  </defs>
+
+  <rect class="bg" x="0" y="0" width="1200" height="480" rx="18" ry="18"/>
+  <text class="title" x="600" y="52" text-anchor="middle">软件架构（上位机 Android 与下位机固件）</text>
+
+  <!-- Android app -->
+  <rect class="box" x="60" y="95" width="500" height="320"/>
+  <text class="title" x="310" y="135" text-anchor="middle">Android App（上位机）</text>
+
+  <rect class="box" x="95" y="165" width="210" height="90"/>
+  <text class="text" x="200" y="200" text-anchor="middle">UI/状态</text>
+  <text class="text muted" x="200" y="230" text-anchor="middle">计时 / 步数 / 连接</text>
+
+  <rect class="box" x="330" y="165" width="200" height="90"/>
+  <text class="text" x="430" y="200" text-anchor="middle">相机采集</text>
+  <text class="text muted" x="430" y="230" text-anchor="middle">取样 / 校正</text>
+
+  <rect class="box" x="95" y="275" width="210" height="95"/>
+  <text class="text" x="200" y="312" text-anchor="middle">颜色识别</text>
+  <text class="text muted" x="200" y="342" text-anchor="middle">状态矩阵</text>
+
+  <rect class="box" x="330" y="275" width="200" height="95"/>
+  <text class="text" x="430" y="312" text-anchor="middle">求解器</text>
+  <text class="text muted" x="430" y="342" text-anchor="middle">动作序列</text>
+
+  <path class="arrow" d="M305 210 L330 210"/>
+  <path class="arrow" d="M430 255 L430 275"/>
+  <path class="arrow" d="M200 255 L200 275"/>
+  <path class="arrow" d="M305 322 L330 322"/>
+
+  <rect class="box" x="95" y="385" width="435" height="40"/>
+  <text class="text" x="312" y="412" text-anchor="middle">协议/通信：蓝牙串口（分包/校验/ACK）</text>
+
+  <!-- MCU / firmware -->
+  <rect class="box" x="640" y="95" width="500" height="320"/>
+  <text class="title" x="890" y="135" text-anchor="middle">MCU 固件（下位机）</text>
+
+  <rect class="box" x="675" y="165" width="210" height="90"/>
+  <text class="text" x="780" y="200" text-anchor="middle">命令解析</text>
+  <text class="text muted" x="780" y="230" text-anchor="middle">动作队列</text>
+
+  <rect class="box" x="915" y="165" width="190" height="90"/>
+  <text class="text" x="1010" y="200" text-anchor="middle">执行控制</text>
+  <text class="text muted" x="1010" y="230" text-anchor="middle">时序/超时</text>
+
+  <rect class="box" x="675" y="275" width="210" height="95"/>
+  <text class="text" x="780" y="312" text-anchor="middle">舵机驱动</text>
+  <text class="text muted" x="780" y="342" text-anchor="middle">PWM / 控制板</text>
+
+  <rect class="box" x="915" y="275" width="190" height="95"/>
+  <text class="text" x="1010" y="312" text-anchor="middle">安全与归零</text>
+  <text class="text muted" x="1010" y="342" text-anchor="middle">限位/急停</text>
+
+  <path class="arrow" d="M885 210 L915 210"/>
+  <path class="arrow" d="M1010 255 L1010 275"/>
+  <path class="arrow" d="M780 255 L780 275"/>
+  <path class="arrow" d="M885 322 L915 322"/>
+
+  <rect class="box" x="675" y="385" width="430" height="40"/>
+  <text class="text" x="890" y="412" text-anchor="middle">反馈：ACK/错误码/当前步骤（可选带传感器状态）</text>
+
+  <!-- Link -->
+  <path class="arrow" d="M530 405 L640 405"/>
+  <text class="text muted" x="585" y="392" text-anchor="middle">串口数据</text>
+  <path class="arrow dashed" d="M640 425 L530 425"/>
+  <text class="text muted" x="585" y="458" text-anchor="middle">ACK/状态</text>
+</svg>
+

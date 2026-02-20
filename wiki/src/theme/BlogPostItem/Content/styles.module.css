@@ -1,0 +1,13 @@
+.excerpt {
+  opacity: 0.9;
+}
+
+.excerptParagraph {
+  margin-top: 0.65rem;
+  margin-bottom: 0;
+}
+
+.excerptParagraph:first-child {
+  margin-top: 0;
+}
+

@@ -1,0 +1,63 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<svg xmlns="http://www.w3.org/2000/svg" width="1200" height="420" viewBox="0 0 1200 420" role="img" aria-label="解魔方机器人联调接线示意">
+  <defs>
+    <style>
+      .bg { fill: #f8fafc; }
+      .box { fill: #ffffff; stroke: #1f2937; stroke-width: 2; rx: 16; ry: 16; }
+      .title { font: 600 22px -apple-system,BlinkMacSystemFont,Segoe UI,Roboto,Helvetica,Arial,"PingFang SC","Hiragino Sans GB","Microsoft YaHei",sans-serif; fill: #111827; }
+      .text { font: 400 18px -apple-system,BlinkMacSystemFont,Segoe UI,Roboto,Helvetica,Arial,"PingFang SC","Hiragino Sans GB","Microsoft YaHei",sans-serif; fill: #374151; }
+      .muted { fill: #6b7280; }
+      .arrow { stroke: #111827; stroke-width: 2.5; fill: none; marker-end: url(#arrowHead); }
+      .dashed { stroke-dasharray: 7 6; }
+      .power { stroke: #dc2626; }
+      .gnd { stroke: #2563eb; }
+    </style>
+    <marker id="arrowHead" markerWidth="12" markerHeight="12" refX="10" refY="6" orient="auto">
+      <path d="M0,0 L12,6 L0,12 Z" fill="#111827"/>
+    </marker>
+  </defs>
+
+  <rect class="bg" x="0" y="0" width="1200" height="420" rx="18" ry="18"/>
+  <text class="title" x="600" y="52" text-anchor="middle">联调接线示意（从上位机到舵机）</text>
+
+  <rect class="box" x="60" y="100" width="270" height="170"/>
+  <text class="title" x="195" y="142" text-anchor="middle">上位机</text>
+  <text class="text" x="195" y="176" text-anchor="middle">PC / Android</text>
+  <text class="text muted" x="195" y="206" text-anchor="middle">串口助手 / App</text>
+
+  <rect class="box" x="380" y="90" width="300" height="190"/>
+  <text class="title" x="530" y="132" text-anchor="middle">下位机 MCU</text>
+  <text class="text" x="530" y="166" text-anchor="middle">LM3S615 / Arduino</text>
+  <text class="text muted" x="530" y="196" text-anchor="middle">UART / GPIO / PWM</text>
+  <text class="text muted" x="530" y="226" text-anchor="middle">动作序列解析</text>
+
+  <rect class="box" x="740" y="90" width="400" height="190"/>
+  <text class="title" x="940" y="132" text-anchor="middle">舵机控制板</text>
+  <text class="text" x="940" y="166" text-anchor="middle">24 路 PWM / 串口控制</text>
+  <text class="text muted" x="940" y="196" text-anchor="middle">RXD / TXD / GND</text>
+  <text class="text muted" x="940" y="226" text-anchor="middle">输出到多路舵机</text>
+
+  <rect class="box" x="830" y="305" width="310" height="80"/>
+  <text class="title" x="985" y="350" text-anchor="middle">舵机 x N</text>
+
+  <!-- Data paths -->
+  <path class="arrow" d="M330 185 L380 185"/>
+  <text class="text muted" x="355" y="172" text-anchor="middle">UART</text>
+
+  <path class="arrow" d="M680 185 L740 185"/>
+  <text class="text muted" x="710" y="172" text-anchor="middle">UART / IO</text>
+
+  <path class="arrow" d="M940 280 L985 305"/>
+  <text class="text muted" x="960" y="300" text-anchor="middle">PWM</text>
+
+  <!-- Power/GND notes -->
+  <path class="arrow dashed power" d="M380 115 L330 115"/>
+  <text class="text muted" x="260" y="115" text-anchor="end">逻辑电源 3.3V/5V</text>
+
+  <path class="arrow dashed power" d="M740 115 L690 115"/>
+  <text class="text muted" x="670" y="115" text-anchor="end">舵机电源 5-6V</text>
+
+  <path class="arrow dashed gnd" d="M540 280 L540 360 L830 360"/>
+  <text class="text muted" x="560" y="335" text-anchor="start">共地（必须）</text>
+</svg>
+

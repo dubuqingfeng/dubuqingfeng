@@ -3,7 +3,7 @@
 图片与媒体加载的语义、性能与自适应处理。
 
 #### 要点
-- 图片：`<img>` 与懒加载 `loading="lazy"`；响应式 `srcset`/`sizes`；`<picture>`/`<source>` 选择不同格式；
+- 图片：`<img />` 与懒加载 `loading="lazy"`；响应式 `srcset`/`sizes`；`<picture>`/`<source />` 选择不同格式；
 - 视频/音频：`<video>`/`<audio>` 与 `controls`/`preload`；字幕/描述 `track kind="captions"`；
 - 性能：现代格式（WebP/AVIF）、尺寸裁剪、解码时机与占位（LQIP）。
 

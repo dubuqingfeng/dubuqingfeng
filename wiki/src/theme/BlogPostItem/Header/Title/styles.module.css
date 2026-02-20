@@ -1,0 +1,27 @@
+/**
+ * Override classic theme blog post title sizing.
+ * Default is 3rem which can feel too large for content-heavy sites.
+ */
+
+.title {
+  line-height: 1.2;
+}
+
+.listTitle {
+  /* Use !important because some global heading rules may override in dev. */
+  font-size: 1.35rem !important;
+}
+
+.postTitle {
+  font-size: 1.75rem !important;
+}
+
+@media (max-width: 576px) {
+  .listTitle {
+    font-size: 1.15rem !important;
+  }
+
+  .postTitle {
+    font-size: 1.45rem !important;
+  }
+}

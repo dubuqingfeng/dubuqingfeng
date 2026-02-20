@@ -3,8 +3,8 @@
 基础 SEO 元信息与社交分享元数据，配合良好语义结构与可访问性。
 
 #### 要点
-- `<title>` 与 `<meta name="description">`；
-- 机器人与索引：`<meta name="robots">`、`robots.txt`、`<link rel="canonical">`；
+- `<title>` 与 `<meta name="description" />`；
+- 机器人与索引：`<meta name="robots" />`、`robots.txt`、`<link rel="canonical" />`；
 - 社交卡片：Open Graph（`og:title/description/image`）、Twitter Cards；
 - 国际化：`hreflang`；结构化数据（JSON-LD）。
 

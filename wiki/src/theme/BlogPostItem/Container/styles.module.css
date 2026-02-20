@@ -1,0 +1,25 @@
+.post {
+}
+
+.postCard {
+  border: 1px solid var(--ifm-toc-border-color);
+  border-radius: 14px;
+  background: var(--ifm-background-surface-color);
+  padding: 1.1rem 1.1rem 0.9rem;
+  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.06);
+  transition:
+    transform 160ms ease,
+    border-color 160ms ease,
+    box-shadow 160ms ease;
+}
+
+.postCard:hover {
+  transform: translateY(-2px);
+  border-color: rgba(37, 194, 160, 0.6);
+  box-shadow: 0 14px 40px rgba(0, 0, 0, 0.09);
+}
+
+:global(html[data-theme="dark"]) .postCard {
+  box-shadow: 0 14px 40px rgba(0, 0, 0, 0.35);
+}
+

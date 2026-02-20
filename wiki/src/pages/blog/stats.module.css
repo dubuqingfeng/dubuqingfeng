@@ -1,0 +1,82 @@
+.main {
+  /* Full-width page, but keep comfortable gutters. */
+  padding: 2rem clamp(1rem, 3vw, 3rem);
+}
+
+.inner {
+  width: 100%;
+  max-width: 100%;
+}
+
+.header {
+  margin-bottom: 1rem;
+}
+
+.title {
+  font-size: 1.6rem;
+  margin: 0 0 0.25rem 0;
+}
+
+.subtitle {
+  margin: 0;
+  opacity: 0.8;
+}
+
+.card {
+  border: 1px solid var(--ifm-color-emphasis-200);
+  border-radius: 12px;
+  padding: 1rem 1.25rem;
+  background: var(--ifm-background-color);
+  box-shadow: 0 1px 0 rgba(0, 0, 0, 0.02);
+  width: 100%;
+}
+
+.totalRow {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 1rem;
+  padding-bottom: 0.75rem;
+  border-bottom: 1px solid var(--ifm-color-emphasis-200);
+  margin-bottom: 0.75rem;
+}
+
+.totalLabel {
+  font-weight: 600;
+}
+
+.totalValue {
+  font-size: 1.8rem;
+  font-weight: 700;
+  letter-spacing: 0.5px;
+}
+
+.yearList {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+}
+
+.yearItem {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 1rem;
+  padding: 0.55rem 0;
+  border-bottom: 1px solid var(--ifm-color-emphasis-200);
+}
+
+.year {
+  font-weight: 600;
+}
+
+.count {
+  font-variant-numeric: tabular-nums;
+  font-weight: 600;
+  opacity: 0.9;
+}
+
+.empty {
+  opacity: 0.7;
+  padding: 0.75rem 0;
+}

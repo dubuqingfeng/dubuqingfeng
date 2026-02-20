@@ -1,0 +1,11 @@
+.sidebarToggleRow {
+  display: flex;
+  justify-content: flex-end;
+  margin-bottom: 0.75rem;
+}
+
+/* Some sites override `.button` globally; keep this usable on the blog pages. */
+.sidebarToggleButton {
+  font-weight: 500 !important;
+}
+

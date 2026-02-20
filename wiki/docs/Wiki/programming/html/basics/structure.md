@@ -4,10 +4,10 @@
 
 #### 核心要点
 - DOCTYPE 与标准模式；`<html lang="zh-CN">`；
-- `<meta charset="utf-8">`、`<meta name="viewport" content="width=device-width, initial-scale=1">`；
-- 常用 `<head>`：`<title>`、`<meta name="description">`、站点图标；
+- `<meta charset="utf-8" />`、`<meta name="viewport" content="width=device-width, initial-scale=1" />`；
+- 常用 `<head>`：`<title>`、`<meta name="description" />`、站点图标；
 - 结构层次：标题（`<h1>`-`<h6>`）、段落、列表、区块与内联元素；
-- 与 CSS/JS 的基本衔接：`<link rel="stylesheet">`、`<script defer>`。
+- 与 CSS/JS 的基本衔接：`<link rel="stylesheet" />`、`<script defer>`。
 
 #### 常用 head 模板
 

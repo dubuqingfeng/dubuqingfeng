@@ -36,7 +36,7 @@
       <artifactId>maven-compiler-plugin</artifactId>
       <version>3.11.0</version>
       <configuration>
-        <source>17</source>
+        <source />17</source>
         <target>17</target>
         <encoding>UTF-8</encoding>
       </configuration>

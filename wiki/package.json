@@ -4,7 +4,11 @@
   "private": true,
   "scripts": {
     "docusaurus": "docusaurus",
+    "normalize:blog": "python3 scripts/fix_blog_tags_to_list.py && python3 scripts/fix_mdx_void_elements.py --paths blog",
+    "check:sitenav": "node scripts/check_sitenav_links.mjs",
+    "prestart": "npm run normalize:blog",
     "start": "docusaurus start",
+    "prebuild": "npm run normalize:blog",
     "build": "docusaurus build",
     "swizzle": "docusaurus swizzle",
     "deploy": "docusaurus deploy",

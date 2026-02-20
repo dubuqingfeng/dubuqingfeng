@@ -8,7 +8,7 @@
 - 图文语义：`<figure>`/`<figcaption>`；
 - 列表：有序 `<ol>`、无序 `<ul>`、定义 `<dl>`；
 - 表格：结构化表头/表体、`scope`/`caption`/`summary`；
-- 表单语义：`<label>` 明确指向 `<input>`。
+- 表单语义：`<label>` 明确指向 `<input />`。
 
 #### 实务取舍
 
