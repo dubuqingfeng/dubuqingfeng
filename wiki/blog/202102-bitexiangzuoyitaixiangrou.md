@@ -8,6 +8,11 @@ tags:
  - bitcoin
  - 比特币
  - 以太坊
+updated: 2021-02-20 20:42:38
+categories: blockchain
+excerpt: 比特币不断突破新高，是投机，还是投资，建立对其的信任很关键，当然也要发散性思维，扩展不同的愿景。
+permalink: 202102-bitexiangzuoyitaixiangrou.html
+toc: true
 ---
 
 寄语：比特币不断突破新高，是投机，还是投资，建立对其的信任很关键，当然也要发散性思维，扩展不同的愿景。
