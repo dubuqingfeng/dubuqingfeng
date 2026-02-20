@@ -10,7 +10,7 @@ tags:
   - Agent
   - 技术
 categories: AI
-permalink: 20260218-claude-codex-agent-skills-memory-ultrathink.html
+permalink: 20260218-claude-codex-agent-skills-memory.html
 author: codex, claude
 toc: true
 ---
@@ -38,9 +38,9 @@ https://github.com/dubuqingfeng/dotfiles/blob/master/coding-agent/docs/codex.md
 
 相关的一些 agent 项目：
 
-* https://github.com/mhattingpete/claude-skills-marketplace
-* https://github.com/affaan-m/everything-claude-code
-* https://github.com/peterfei/ai-agent-team
+- https://github.com/mhattingpete/claude-skills-marketplace
+- https://github.com/affaan-m/everything-claude-code
+- https://github.com/peterfei/ai-agent-team
 
 ## Skills
 
@@ -62,27 +62,23 @@ https://github.com/dubuqingfeng/dotfiles/blob/master/coding-agent/docs/codex.md
 
 目前来说有以下参考：
 
-claude
+### Claude
 
-* https://github.com/thedotmack/claude-mem
+- https://github.com/thedotmack/claude-mem
 
-openclaw
+### OpenClaw
 
-* https://github.com/geq1fan/openclaw-memory
-* https://github.com/oceanbase/powermem
-* https://github.com/zilliztech/memsearch
+- https://github.com/geq1fan/openclaw-memory
+- https://github.com/oceanbase/powermem
+- https://github.com/zilliztech/memsearch
 
-其他的一些项目
+### 其他项目
 
-* 一个开源的、专为 AI Agent 设计的上下文数据库，[OpenViking](https://github.com/volcengine/OpenViking)
-
-* 一个本地优先（local-first）的 AI 对话客户端：它将每一次对话建模为节点化的 DAG（树 + 分支），并提供显式的 Context Box，用于可控地组装提示词上下文。[prompt-tree](https://github.com/yxp934/prompt-tree)
-
-* 为 AI Agent 打造的长期记忆操作系统，[Memory Palace](https://github.com/AGI-is-going-to-arrive/Memory-Palace)
-
-* 一个基于uri而不是RAG的轻量级、可回滚、可视化的 **AI 外挂MCP记忆库**。[nocturne_memory](https://github.com/Dataojitori/nocturne_memory)
-
-* [nowledge](https://mem.nowledge.co/zh/docs/ai-now)
+- 一个开源的、专为 AI Agent 设计的上下文数据库，[OpenViking](https://github.com/volcengine/OpenViking)
+- 一个本地优先（local-first）的 AI 对话客户端：它将每一次对话建模为节点化的 DAG（树 + 分支），并提供显式的 Context Box，用于可控地组装提示词上下文。[prompt-tree](https://github.com/yxp934/prompt-tree)
+- 为 AI Agent 打造的长期记忆操作系统，[Memory Palace](https://github.com/AGI-is-going-to-arrive/Memory-Palace)
+- 一个基于 URI 而不是 RAG 的轻量级、可回滚、可视化的 AI 外挂 MCP 记忆库，[nocturne_memory](https://github.com/Dataojitori/nocturne_memory)
+- [nowledge](https://mem.nowledge.co/zh/docs/ai-now)
 
 ## Ultrathink：只在高风险时开启
 
@@ -167,3 +163,15 @@ openclaw
 
 - 数据与依赖：哪些是 fixtures，哪些要 mock，哪些来自线上数据
 - 可重现：用例是否确定性（时间/随机数/并发/网络），如何让它稳定可复现
+
+## 总结
+
+核心思路是：用 Agent + Skills + Memory 稳定产出，用 Spec-Driven + TDD 把需求与质量落到可验证的结果。
+
+- **Agent**：明确边界（做什么、不做什么、怎么验收），遵守"先定位、先小改、再扩面"
+- **Skills**：把高频工作流固化，减少重复沟通成本
+- **Memory**：只记能复用的结论，保持上下文精简
+- **Ultrathink**：高风险场景才开，避免资源浪费
+- **Spec + TDD**：规格驱动交付，测试保障质量
+
+关键是让每一步都有明确的输入、输出和验收标准，这样无论是人还是 AI 接手，都能快速理解并继续推进。
