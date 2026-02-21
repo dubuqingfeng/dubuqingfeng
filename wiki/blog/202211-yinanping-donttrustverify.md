@@ -49,6 +49,8 @@ tags:
 
 ## 饥饿的盛世
 
+<img src="https://dubuqingfeng.oss-cn-hongkong.aliyuncs.com/blog/life/202211-yinanping-donttrustverify-1.png" width="50%" />
+
 圣人后其身而身先，外其身而身存。
 
 清朝是中国封建帝制发展到巅峰的朝代，也是皇权统治下最为专制集权的时代。这本书揭露了表面上繁荣的康乾盛世之下，是怎样的暗无天日，民不聊生。
@@ -74,6 +76,8 @@ tags:
 摘自《核酸往事三则》
 
 来自一个加密无政府主义者的自白
+
+<img src="https://dubuqingfeng.oss-cn-hongkong.aliyuncs.com/blog/life/202211-yinanping-donttrustverify-2.png" width="50%" />
 
 一曲《好了歌》结尾
 
@@ -118,3 +122,4 @@ tags:
  - END -
 
 你的支持，我的动力。会生活，懂生活，爱生活
+

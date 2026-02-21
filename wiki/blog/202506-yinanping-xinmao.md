@@ -26,7 +26,9 @@ tags:
 
 终于，当船儿载着满身风霜的归人，跨过那波涛汹涌的海域，驶向前方，熟悉的或崭新的海岸线在望时，那份激动难以言表。但真正的“归岸”，往往并非地理意义上的抵达某个固定的港口。
 
-图片
+<img src="https://dubuqingfeng.oss-cn-hongkong.aliyuncs.com/blog/life/202506-yinanping-xinmao-1.jpeg" width="50%" />
+
+  
 
 真正的归岸，是风浪过后，你终于能在自己心中，稳稳地抛下那只名为“心安”的铁锚。
 
@@ -36,7 +38,7 @@ tags:
 
 漂泊在霓虹之下，难免会遇到迷茫的时刻，只有经历过一些事情之后，才会明白，不过是历史车轮里面的沧海一粟。
 
-图片
+<img src="https://dubuqingfeng.oss-cn-hongkong.aliyuncs.com/blog/life/202506-yinanping-xinmao-2.jpeg" width="50%" />
 
 最后还是心安便是归处。
 
@@ -48,8 +50,14 @@ tags:
 
 “如果我知道这一别就要四十一年，岁月若能从头 我很想说 我不走。”
 
+<img src="https://dubuqingfeng.oss-cn-hongkong.aliyuncs.com/blog/life/202506-yinanping-xinmao-3.jpeg" width="50%" />
+
 
 ## 凡所有相，皆为虚妄
+
+<img src="https://dubuqingfeng.oss-cn-hongkong.aliyuncs.com/blog/life/202506-yinanping-xinmao-4.jpeg" width="50%" />
+
+####
 
 我们往往有时执著于种种“相”
 
@@ -57,11 +65,13 @@ tags:
 
 窗外那棵老槐树，历经风雨，此刻在微微细雨中默默伸展着枝条，新叶在微风中轻轻摇曳，仿佛在无言诉说：生命自有其不可摧折的韧性，它从不依附于我们执着不放的某一种“相”。
 
+<img src="https://dubuqingfeng.oss-cn-hongkong.aliyuncs.com/blog/life/202506-yinanping-xinmao-5.jpeg" width="50%" />
 
 所谓“我”，并非被某一刻的困局、某一时的形象所完全定义。那窗外亘古的月光，那生命深处不灭的觉性，方是超越一切无常表象的归处。
 
 “凡所有相，皆是虚妄”，这八个字出自《金刚经》，是佛陀对众生最慈悲的提醒，也是最深刻的宇宙真相揭示。它并非否定世界的存在，而是直指我们认知世界时最根本的误区——执着于“相”为真实、永恒、不变的本质。
 
+<img src="https://dubuqingfeng.oss-cn-hongkong.aliyuncs.com/blog/life/202506-yinanping-xinmao-6.jpeg" width="50%" />
 
 何谓“相”？
 
@@ -73,6 +83,7 @@ tags:
 
 放下执着、接纳无常、超越自我认同、活在当下
 
+<img src="https://dubuqingfeng.oss-cn-hongkong.aliyuncs.com/blog/life/202506-yinanping-xinmao-7.jpeg" width="50%" />
 
 清明、从容、慈悲地拥抱这个生生不息、变化无穷的世界
 
@@ -80,7 +91,11 @@ tags:
 
 若见诸相非相，即见如来
 
+<img src="https://dubuqingfeng.oss-cn-hongkong.aliyuncs.com/blog/life/202506-yinanping-xinmao-8.jpeg" width="50%" />
+
 ## 阳光、清风、舒畅
+
+<img src="https://dubuqingfeng.oss-cn-hongkong.aliyuncs.com/blog/life/202506-yinanping-xinmao-9.jpeg" width="50%" />
 
 一束阳光，让你徜徉温暖；
 
@@ -99,3 +114,5 @@ tags:
 悠闲舒适。
 
 今日的歌曲，《戏雪》，原唱张艾嘉，版权原因，建议自行搜索。
+
+<img src="https://dubuqingfeng.oss-cn-hongkong.aliyuncs.com/blog/life/202506-yinanping-xinmao-10.jpeg" width="50%" />

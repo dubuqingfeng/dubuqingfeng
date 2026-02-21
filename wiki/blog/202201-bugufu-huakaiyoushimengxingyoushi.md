@@ -20,31 +20,31 @@ tags:
 
 我们生活在一个广阔无垠的立体空间，当迷失在这个复杂的世界中，每一串记忆又浮上了心头，现实让我们开心，有惊喜，又或有遗憾，伤感。当我们想起这些时，不禁感叹人生如同当时那一瞬，那么地清晰，一下开怀。
 
-![](https://dubuqingfeng.oss-cn-hongkong.aliyuncs.com/blog/life/202201-huakaiyoushimengxingyoushi/00.jfif)
+<img src="https://dubuqingfeng.oss-cn-hongkong.aliyuncs.com/blog/life/202201-huakaiyoushimengxingyoushi/00.jfif" width="50%" />
 
 不知不觉，疫情已经过了两年，时光仿佛要比之前要快很多，在这段时间，我想有一句可以形容，"外貌早改变，处境都变，情怀未变"。我们都是平凡的普通人，不可避免地被环境所影响，而颠沛流离，谁不想着无忧无虑，但时间会改变这一切，这时光确实短暂，以为放不下的，分不开的，在时间的洪流中，一切只是个过程。
 
 我记得，在以前新年的时候，有一个美好的情景。希望你是陪我去富士山下，一起看樱花，共同渡过浪漫的一生，看新年的第一个日出，没有再见，没有拜拜，有的是陪伴，有的是温暖，有的是相互喜欢，冬天的早晨虽然寒冷，但是期待让人变得更加有力量，优秀。
 
-![](https://dubuqingfeng.oss-cn-hongkong.aliyuncs.com/blog/life/202201-huakaiyoushimengxingyoushi/01.jfif)
+<img src="https://dubuqingfeng.oss-cn-hongkong.aliyuncs.com/blog/life/202201-huakaiyoushimengxingyoushi/01.jfif" width="50%" />
 
 但就像林夕写的那样，富士山依旧依然在那里，它并不会随着时间的推移而离开，也不会因为诸多的压力而躲开。就和里面讲的那样，人生本来就很短了，在这期间，与其沉溺于悲伤和难过之间，还不如振作起来，做个有价值，独立，浪漫的人。爱情也是如此，不该聚焦于那一些难过的瞬间，不应该不断放大着那种难过，这种感情，看不见摸不着，却一直影响着自身。
 
 在过去一年也感受到了，任何东西都有可能有美好的一面，不管你是中意村上春树，还是是枝裕和，还是西城秀树，这也不就是在其中发现美好的事物，感受令人醉心的文化，富士山下，樱花树前，默默许下一生中珍贵的心愿。
 
-![](https://dubuqingfeng.oss-cn-hongkong.aliyuncs.com/blog/life/202201-huakaiyoushimengxingyoushi/02.jfif)
+<img src="https://dubuqingfeng.oss-cn-hongkong.aliyuncs.com/blog/life/202201-huakaiyoushimengxingyoushi/02.jfif" width="50%" />
 
 过去这一年，可以感受到，有都市的霓虹灯，雪后的寂静，隔离的萧瑟，郁郁葱葱的树木，他乡的温暖和落寞。好多次迎着风，看着天空，不知是与自我握手言和，还是挣扎于这世间，都要走得从容，因为要有远方的目标，即使打湿了发梢。
 
 基本上有阳光的时间要远大于阴天的时候，即使在阴云密布的时候，也会经历短暂的雨飘，露出迷人的彩虹，然后太阳开始露出光芒，然后变成了夕阳，就仿佛在告诉我们，夕阳和彩虹虽然很美，但是却短暂，要不断地珍惜，回望眼前的景致。那斜出的枝桠，就仿佛成为了前景，构成了美丽的瞬间。
 
-![](https://dubuqingfeng.oss-cn-hongkong.aliyuncs.com/blog/life/202201-huakaiyoushimengxingyoushi/03.jfif)
+<img src="https://dubuqingfeng.oss-cn-hongkong.aliyuncs.com/blog/life/202201-huakaiyoushimengxingyoushi/03.jfif" width="50%" />
 
 就想着以后，有机会可以，感受那一片生活中的美好，人与人之间充满真诚，不再有欺骗，互帮互助，不断地提升自我的认知，就算是村落，也能体会到那片人情。
 
 做个有价值、独立、浪漫的人。
 
-![](https://dubuqingfeng.oss-cn-hongkong.aliyuncs.com/blog/life/202201-huakaiyoushimengxingyoushi/04.jfif)
+<img src="https://dubuqingfeng.oss-cn-hongkong.aliyuncs.com/blog/life/202201-huakaiyoushimengxingyoushi/04.jfif" width="50%" />
 
 ## 如花似梦
 
@@ -54,7 +54,7 @@ tags:
 
 每年都有很多花园，放着展现自我，实现价值的花，有颐和园的荷花，中山公园的杏花，花开时节，梅香萦绕，花开如云，花落如雪，玉渊潭的樱花，灿若云霞，陶然亭的海棠，靓丽风景，令人愉悦，何不相会于此，感受着灿烂，生活的美好，做一个赏花人。
 
-![](https://dubuqingfeng.oss-cn-hongkong.aliyuncs.com/blog/life/202201-huakaiyoushimengxingyoushi/05.jfif)
+<img src="https://dubuqingfeng.oss-cn-hongkong.aliyuncs.com/blog/life/202201-huakaiyoushimengxingyoushi/05.jfif" width="50%" />
 
 就和标题一样，如花似梦，有太多太多的回味和珍藏的句子了。比如赠人玫瑰，手留余香。比如重寻春昼梦，笑把浅花枝。再比如接天莲叶无穷碧，映日荷花别样红。
 
@@ -64,7 +64,7 @@ tags:
 
 人的一生就像花的一生一样，每个阶段都是值得回味的，不要轻易的 emo，也许等待你的绽放就是下个花期。
 
-![](https://dubuqingfeng.oss-cn-hongkong.aliyuncs.com/blog/life/202201-huakaiyoushimengxingyoushi/06.jfif)
+<img src="https://dubuqingfeng.oss-cn-hongkong.aliyuncs.com/blog/life/202201-huakaiyoushimengxingyoushi/06.jfif" width="50%" />
 
 ## 彼岸花
 
@@ -78,8 +78,8 @@ tags:
 
 真正现实中，考究，有一部分是来自日本，在植物里称之为石蒜，在日本叫做彼岸花，这么解释的，在秋彼岸日左右时间开花，所以叫彼岸花。这个彼岸，是指的24节气的“春分”和“秋分”为“中日”的前后各3天的7天时间，每年有春秋两次，分别叫“春彼岸”、“秋彼岸”，大概每年的9月中下旬就是它的花期。它自身也充满着神秘色彩，听说有人误食中毒。另一种说法是来自于佛教《法华经》，梵语“摩诃曼珠沙华”的音译，佛经记载，开一千年，落一千年。情不为因果，缘注定生死。
 
-![](https://dubuqingfeng.oss-cn-hongkong.aliyuncs.com/blog/life/202201-huakaiyoushimengxingyoushi/07.jfif)
+<img src="https://dubuqingfeng.oss-cn-hongkong.aliyuncs.com/blog/life/202201-huakaiyoushimengxingyoushi/07.jfif" width="50%" />
 
 可以讲讲你们喜欢过什么花吗？
 
-![](https://dubuqingfeng.oss-cn-hongkong.aliyuncs.com/blog/life/202201-huakaiyoushimengxingyoushi/08.jfif)
+<img src="https://dubuqingfeng.oss-cn-hongkong.aliyuncs.com/blog/life/202201-huakaiyoushimengxingyoushi/08.jfif" width="50%" />

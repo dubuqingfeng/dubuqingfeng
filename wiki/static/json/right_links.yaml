@@ -12,13 +12,9 @@
     name: OI Wiki
   - link: http://diyhpl.us/wiki/
     name: diyhpl Wiki
-  - link: https://myslide.cn/
-    name: PPT myslides
 - name: 工具
   description: A better default template for html-webpack-plugin.
   special:
-  - link: https://tool.c7sky.com/password/
-    name: 随机字符串生成
   - link: https://www.processon.com/
     name: Processon
   - link: https://www.draw.io/
@@ -63,9 +59,6 @@
     name: 技术期刊
     description: ''
     links:
-    - link: https://weekly.manong.io/issues/
-      name: 码农周刊
-      description: 一份专为广大程序员、编程爱好者们打造的IT技术周刊
     - link: https://www.anquanke.com/discovery
       name: 安全客季刊
       description: 安全客的第一版电子年刊
@@ -89,8 +82,6 @@
     - link: https://salttiger.com/archives/
       name: salttiger
       description: 一个英文原版书籍分享平台
-    - link: http://bestcbooks.com/
-      name: 计算机书籍控
     - link: https://booksea.app/
       name: 书海泛舟
       description: 免费下载优质计算机图书
@@ -176,15 +167,9 @@
     - link: https://metamask.io/
       name: Metamark
       description: A crypto wallet & gateway to blockchain apps
-    - link: https://www.8btc.com/
-      name: 8BTC
-      description: 巴比特社区
     - link: https://steemit.com/trending/hive-180932
       name: Steemit
       description: Steemit is a social media platform for sharing content and opinions
-    - link: https://dprism.ai/dashboard
-      name: Dprism.ai
-      description: dPrism Blockchain Data Oriented Ecosystem.Tracking, Demystifying and Linking On-chain, Cross-chain and Off-chain Data & Behaviors.
   - id: bitcoin
     name: Bitcoin
     description: ''
@@ -207,8 +192,6 @@
       name: transactionfee
     - link: https://iancoleman.io/bip39/
       name: BIP39
-    - link: http://ibloodline.com/articles/2018/01/26/master-bitcoin.html
-      name: 精通比特币
     - link: https://bitcoin.clarkmoody.com/dashboard/
       name: bitcoin-dashboard
     - link: https://glassnode.com/
@@ -227,8 +210,6 @@
       name: Etherscan
     - link: https://eth.btc.com/
       name: BTC.com Explorer
-    - link: https://www.parity.io/ethereum/
-      name: parity
   - id: defi
     name: defi
     description: ''
@@ -269,8 +250,6 @@
       name: Blockchair
     - link: https://chainz.cryptoid.info/
       name: cryptoID
-    - link: https://tokenview.com/
-      name: TokenView
     - link: https://chainflyer.bitflyer.com/
       name: bitflyer
     - link: https://www.blockchain.com/explorer
@@ -319,8 +298,6 @@
     links:
     - link: https://lopp.net/bitcoin.html
       name: RESOURCES
-    - link: https://www.coinwarz.com/cryptocurrency/coins
-      name: coinwarz
     - link: https://bitinfocharts.com/zh/
       name: bitinfocharts
     - link: https://miningpoolstats.stream/
@@ -359,8 +336,6 @@
     name: 闪电网络
     description: ''
     links:
-    - link: https://explorer.acinq.co/
-      name: Explorer(ACINQ)
     - link: https://bitcoinvisuals.com/lightning
       name: BitcoinVisuals
     - link: https://1ml.com/
@@ -385,18 +360,10 @@
     links:
     - link: https://coinmarketcap.com/
       name: CoinMarketCap
-  - id: bsv
-    name: BSV
-    description: ''
-    links:
-    - link: https://testnet.bitcoincloud.net/
-      name: Testnet
   - id: security
     name: Security
     description: ''
     links:
-    - link: http://blockchain.seebug.org/
-      name: Seebug
     - link: https://dvpnet.io/
       name: DVP
     - link: https://www.slowmist.com/
@@ -415,15 +382,6 @@
       name: ae
     - link: https://www.grinmint.com/pages/index.html
       name: grinmint
-    - link: https://grin.report/
-      name: grin.report
-  - id: ipfs
-    name: IPFS
-    description: ''
-    link: https://ipfs.io/
-    links:
-    - link: https://github.com/ipfs/ipfs
-      name: GitHub
   - id: people
     name: People
     description: ''
@@ -448,9 +406,6 @@
     - link: https://skills.bugbank.cn/
       name: 漏洞银行技能树
       description: 国内最大的漏洞发现平台之一
-    - link: http://www.mottoin.com/
-      name: MottoIN
-      description: 安全内参| 决策者的网络安全知识库
   - id: pojiecrack
     name: 破解 crack
     description: ''
@@ -463,12 +418,6 @@
       name: 飘云阁
     - link: https://www.pd521.com/
       name: 逆向未来
-  - id: erjinzhianquan
-    name: 二进制安全
-    description: ''
-    links:
-    - link: http://www.binvul.com/
-      name: BinVul
   - id: yidonganquan
     name: 移动安全
     description: ''
@@ -503,12 +452,6 @@
       name: HackerOne
     - link: https://dvpnet.io/
       name: DVP
-  - id: securitysitenav
-    name: 导航
-    description: ''
-    links:
-    - link: https://www.shentoushi.top/
-      name: 渗透师导航
   - id: onlinectf
     name: 在线 CTF
     description: ''
@@ -531,20 +474,14 @@
       name: 长亭科技
     - link: http://pwning.net/
       name: ppp
-    - link: http://www.blue-lotus.net/
-      name: 蓝莲花
     - link: https://googleprojectzero.blogspot.com/
       name: project zero
-    - link: https://blog.pwnhub.cn/
-      name: 胖哈勃
     - link: http://blog.nsfocus.net/
       name: 绿盟博客
   - id: securitycompany
     name: 安全公司
     description: ''
     links:
-    - link: http://blog.knownsec.com/
-      name: 知道创宇
     - link: http://www.nsfocus.com.cn/
       name: 绿盟
     - link: http://www.topsec.com.cn/index1.html
@@ -732,10 +669,6 @@
     links:
     - link: https://tech.meituan.com/
       name: 美团点评
-    - link: http://jm.taobao.org/
-      name: 阿里中间件
-    - link: http://blogs.360.cn/
-      name: '360'
     - link: https://tech.youzan.com/
       name: 有赞
   - id: blog-anquanjishu
@@ -746,8 +679,6 @@
       name: flanker
     - link: http://evilcos.me/
       name: evilcos
-    - link: https://www.virzz.com/
-      name: Virink
     - link: https://programlife.net/
       name: 程序人生
     - link: http://0cx.cc/
@@ -766,8 +697,6 @@
       name: 随风
     - link: https://rickyhao.com/
       name: ricky
-    - link: http://riusksk.me/
-      name: 泉哥
     - link: http://blog.fatezero.org/
       name: fate0
     - link: http://whereisk0shl.top/
@@ -875,16 +804,3 @@
     - link: https://dexnav.com/
       name: dexnav
       description: 炒币每日工作流
-    - link: https://www.biyixian.com/
-      name: 币一线
-      description: 是一家专注收集整合数字货币圈内网址网站大全的专业平台。
-- name: 失效链接
-  description: ''
-  special: []
-  classify:
-  - id: outline-blockchain
-    name: 区块链
-    description: ''
-    links:
-     - link: http://www.qukuaiwang.com.cn/
-       name: 区块网

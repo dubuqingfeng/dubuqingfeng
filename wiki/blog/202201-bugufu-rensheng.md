@@ -16,7 +16,7 @@ tags:
 
 ## 节选
 
-![](https://dubuqingfeng.oss-cn-hongkong.aliyuncs.com/blog/life/202201-bugufu-rensheng/00.jfif)
+<img src="https://dubuqingfeng.oss-cn-hongkong.aliyuncs.com/blog/life/202201-bugufu-rensheng/00.jfif" width="50%" />
 
 在这个充斥着手机，互联网，数据的时代，我想可能越来越少的人会选择实体书店，去静下心读一本书，了解作者背后的想法和心声。习惯了快餐式文化、碎片阅读的我们，越加缺乏分辨是非的能力。
 
@@ -29,7 +29,7 @@ tags:
 
 记得最后那一幕，男主角说的，我们现在已经不喜欢或者不习惯深度思考了，不会再追求事物的真理，不会独立思考了。很多人都只喜欢自己爱好的东西，甚至于习惯于个性化推荐，比如哪天不看抖音刷一会儿就难受，只看那些喜欢的东西，而不关注事物的本质，一味的跟风。而有的媒体、up 主，为了自己的流量，也在灌输着略带偏见的观念。在这个娱乐至上的氛围中，我们也不知道这样是不是快乐的，确实是不知道。
 
-![](https://dubuqingfeng.oss-cn-hongkong.aliyuncs.com/blog/life/202201-bugufu-rensheng/01.jfif)
+<img src="https://dubuqingfeng.oss-cn-hongkong.aliyuncs.com/blog/life/202201-bugufu-rensheng/01.jfif" width="50%" />
 
 
 之前有一次去过蓬蒿剧场，体验了一次朗读会，路遥的纪念，其中我在里面朗读以下节选，私认为，朗读要饱含感情，将听者带到作者的世界里，感受其中的情感世界，这便是心灵之间的沟通吧。
@@ -91,7 +91,7 @@ B：
 
 这个打击对这个家庭来说显然是严重的。对于高加林来说，他高中毕业没有考上大学，已经受了很大的精神创伤。亏得这三年教书，他既不要参加繁重的体力劳动，又有时间继续学习，对他喜爱的文科深入钻研。他最近在地区报上已经发表过两三篇诗歌和散文，全是这段时间苦钻苦熬的结果。现在这一切都结束了，他将不得不像父亲一样开始自己的农民生涯。他虽然没有认真地在土地上劳动过，但他是农民的儿子，知道在这贫瘠的山区当个农民意味着什么。农民啊，他们那全部伟大的艰辛他都一清二楚！他虽然从来也没鄙视过任何一个农民，但他自己从来都没有当农民的精神准备！不必隐瞒，他十几年拼命读书，就是为了不像他父亲一样一辈子当土地的主人（或者按他的另一种说法是奴隶）。
 
-![](https://dubuqingfeng.oss-cn-hongkong.aliyuncs.com/blog/life/202201-bugufu-rensheng/02.jfif)
+<img src="https://dubuqingfeng.oss-cn-hongkong.aliyuncs.com/blog/life/202201-bugufu-rensheng/02.jfif" width="50%" />
 
 
 ## 矛盾与对话
@@ -104,7 +104,7 @@ B：
 
 这一章讲述的内容，是被动的选择，接受，但是却不甘心，不同于父母的态度，不愿意就这样度过普通的一生。
 
-![](https://dubuqingfeng.oss-cn-hongkong.aliyuncs.com/blog/life/202201-bugufu-rensheng/03.jfif)
+<img src="https://dubuqingfeng.oss-cn-hongkong.aliyuncs.com/blog/life/202201-bugufu-rensheng/03.jfif" width="50%" />
 
 
 从整篇小说来讲，作者在传达这样的一种态度，人生在世，难免会遇到各种各样的挫折，坎坷，不要因为一时的不开心而放弃，生活除了这些不如意，还有很多美好的东西值得去追寻，去探索，不如意仅仅是一时的，要有积极的心态面对生活。
@@ -115,4 +115,4 @@ B：
 
 不再有遗憾。
 
-![](https://dubuqingfeng.oss-cn-hongkong.aliyuncs.com/blog/life/202201-bugufu-rensheng/04.jfif)
+<img src="https://dubuqingfeng.oss-cn-hongkong.aliyuncs.com/blog/life/202201-bugufu-rensheng/04.jfif" width="50%" />
