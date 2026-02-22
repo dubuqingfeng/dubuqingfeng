@@ -1,6 +1,6 @@
 ---
 title: Claude & Codex 优化与配置
-description: "用 Agent / Skills / Memory / Plugin / Ultrathink 稳定产出，再用 Spec-Driven + TDD 把需求与质量落到可验证的结果。"
+description: "用 Agent / Skills / Memory / Plugin 稳定产出，再用 Spec-Driven + TDD 把需求与质量落到可验证的结果。"
 date: 2026-02-18 09:00
 updated: 2026-02-18 09:00
 tags:
@@ -79,13 +79,6 @@ https://github.com/dubuqingfeng/dotfiles/blob/master/coding-agent/docs/codex.md
 - 为 AI Agent 打造的长期记忆操作系统，[Memory Palace](https://github.com/AGI-is-going-to-arrive/Memory-Palace)
 - 一个基于 URI 而不是 RAG 的轻量级、可回滚、可视化的 AI 外挂 MCP 记忆库，[nocturne_memory](https://github.com/Dataojitori/nocturne_memory)
 - [nowledge](https://mem.nowledge.co/zh/docs/ai-now)
-
-## Ultrathink：只在高风险时开启
-
-在这些场景要求开启 ultrathink，否则就按常规执行：
-
-- 改动量比较大
-- 安全/权限/资金/隐私相关
 
 ## Spec-Driven Development
 
@@ -171,7 +164,6 @@ https://github.com/dubuqingfeng/dotfiles/blob/master/coding-agent/docs/codex.md
 - **Agent**：明确边界（做什么、不做什么、怎么验收），遵守"先定位、先小改、再扩面"
 - **Skills**：把高频工作流固化，减少重复沟通成本
 - **Memory**：只记能复用的结论，保持上下文精简
-- **Ultrathink**：高风险场景才开，避免资源浪费
 - **Spec + TDD**：规格驱动交付，测试保障质量
 
 关键是让每一步都有明确的输入、输出和验收标准，这样无论是人还是 AI 接手，都能快速理解并继续推进。
