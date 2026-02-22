@@ -12,7 +12,7 @@
         <id>https://dubuqingfeng.xyz/blog/202602-claude-codex-agent-skills-memory</id>
         <link href="https://dubuqingfeng.xyz/blog/202602-claude-codex-agent-skills-memory"/>
         <updated>2026-02-18T09:00:00.000Z</updated>
-        <summary type="html"><![CDATA[用 Agent / Skills / Memory / Plugin / Ultrathink 稳定产出，再用 Spec-Driven + TDD 把需求与质量落到可验证的结果。]]></summary>
+        <summary type="html"><![CDATA[用 Agent / Skills / Memory / Plugin 稳定产出，再用 Spec-Driven + TDD 把需求与质量落到可验证的结果。]]></summary>
         <content type="html"><![CDATA[<p>这里主要是对于 claude、codex 的相关实践总结，相关的边界、回路、验收是否清楚。</p>
 <h2 class="anchor anchorTargetStickyNavbar_Vzrq" id="agent">Agent<a href="https://dubuqingfeng.xyz/blog/202602-claude-codex-agent-skills-memory#agent" class="hash-link" aria-label="Agent的直接链接" title="Agent的直接链接" translate="no">​</a></h2>
 <p>默认约定 <code>AGENTS.md</code> 或者 <code>CLAUDE.md</code>：</p>
@@ -71,12 +71,6 @@
 <li class="">一个基于 URI 而不是 RAG 的轻量级、可回滚、可视化的 AI 外挂 MCP 记忆库，<a href="https://github.com/Dataojitori/nocturne_memory" target="_blank" rel="noopener noreferrer" class="">nocturne_memory</a></li>
 <li class=""><a href="https://mem.nowledge.co/zh/docs/ai-now" target="_blank" rel="noopener noreferrer" class="">nowledge</a></li>
 </ul>
-<h2 class="anchor anchorTargetStickyNavbar_Vzrq" id="ultrathink只在高风险时开启">Ultrathink：只在高风险时开启<a href="https://dubuqingfeng.xyz/blog/202602-claude-codex-agent-skills-memory#ultrathink%EF%BF%BD%E5%8F%AA%E5%9C%A8%E9%AB%98%E9%A3%8E%E9%99%A9%E6%97%B6%E5%BC%80%E5%90%AF" class="hash-link" aria-label="Ultrathink：只在高风险时开启的直接链接" title="Ultrathink：只在高风险时开启的直接链接" translate="no">​</a></h2>
-<p>在这些场景要求开启 ultrathink，否则就按常规执行：</p>
-<ul>
-<li class="">改动量比较大</li>
-<li class="">安全/权限/资金/隐私相关</li>
-</ul>
 <h2 class="anchor anchorTargetStickyNavbar_Vzrq" id="spec-driven-development">Spec-Driven Development<a href="https://dubuqingfeng.xyz/blog/202602-claude-codex-agent-skills-memory#spec-driven-development" class="hash-link" aria-label="Spec-Driven Development的直接链接" title="Spec-Driven Development的直接链接" translate="no">​</a></h2>
 <p>写 spec 很合适，以及按 spec 落地。关键是 spec 要标准：</p>
 <div class="language-md codeBlockContainer_Ckt0 theme-code-block" style="--prism-color:#393A34;--prism-background-color:#f6f8fa"><div class="codeBlockContent_QJqH"><pre tabindex="0" class="prism-code language-md codeBlock_bY9V thin-scrollbar" style="color:#393A34;background-color:#f6f8fa"><code class="codeBlockLines_e6Vv"><span class="token-line" style="color:#393A34"><span class="token title important punctuation" style="color:#393A34">##</span><span class="token title important"> Goal</span><span class="token plain"></span><br></span><span class="token-line" style="color:#393A34"><span class="token plain"></span><span class="token title important punctuation" style="color:#393A34">##</span><span class="token title important"> Non-goals</span><span class="token plain"></span><br></span><span class="token-line" style="color:#393A34"><span class="token plain"></span><span class="token title important punctuation" style="color:#393A34">##</span><span class="token title important"> Architecture</span><span class="token plain"></span><br></span><span class="token-line" style="color:#393A34"><span class="token plain"></span><span class="token title important punctuation" style="color:#393A34">##</span><span class="token title important"> API / UX (examples)</span><span class="token plain"></span><br></span><span class="token-line" style="color:#393A34"><span class="token plain"></span><span class="token title important punctuation" style="color:#393A34">##</span><span class="token title important"> Edge cases</span><span class="token plain"></span><br></span><span class="token-line" style="color:#393A34"><span class="token plain"></span><span class="token title important punctuation" style="color:#393A34">##</span><span class="token title important"> Acceptance criteria (checklist)</span><br></span></code></pre></div></div>
@@ -131,7 +125,6 @@
 <li class=""><strong>Agent</strong>：明确边界（做什么、不做什么、怎么验收），遵守"先定位、先小改、再扩面"</li>
 <li class=""><strong>Skills</strong>：把高频工作流固化，减少重复沟通成本</li>
 <li class=""><strong>Memory</strong>：只记能复用的结论，保持上下文精简</li>
-<li class=""><strong>Ultrathink</strong>：高风险场景才开，避免资源浪费</li>
 <li class=""><strong>Spec + TDD</strong>：规格驱动交付，测试保障质量</li>
 </ul>
 <p>关键是让每一步都有明确的输入、输出和验收标准，这样无论是人还是 AI 接手，都能快速理解并继续推进。</p>]]></content>
