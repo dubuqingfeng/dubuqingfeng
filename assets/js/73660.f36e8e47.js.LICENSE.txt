@@ -1,0 +1,6 @@
+/*@license Copyright 2015-2022 Ably Real-time Ltd (ably.com)
+
+Ably JavaScript Library v2.26.0
+https://github.com/ably/ably-js
+
+Released under the Apache Licence v2.0*/
