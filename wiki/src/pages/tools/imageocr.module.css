@@ -1,0 +1,244 @@
+.page {
+  max-width: 960px;
+  margin: 0 auto;
+}
+
+.heading {
+  margin: 16px 0 8px;
+  text-align: center;
+}
+
+.intro {
+  margin: 0 auto 24px;
+  max-width: 640px;
+  color: var(--ifm-color-emphasis-700);
+  text-align: center;
+}
+
+.workspace {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
+  gap: 20px;
+}
+
+.panel {
+  min-width: 0;
+}
+
+.panelTitle {
+  margin: 0 0 10px;
+  font-size: 16px;
+}
+
+.dropzone {
+  display: flex;
+  min-height: 280px;
+  padding: 18px;
+  align-items: center;
+  justify-content: center;
+  border: 2px dashed var(--ifm-color-emphasis-400);
+  border-radius: 8px;
+  background: var(--ifm-background-surface-color);
+  cursor: pointer;
+  outline: none;
+  transition: border-color 160ms ease, background-color 160ms ease;
+}
+
+.dropzone:hover,
+.dropzone:focus-visible,
+.dropzoneActive {
+  border-color: var(--ifm-color-primary);
+  background: var(--ifm-color-primary-lightest);
+}
+
+.dropzoneContent {
+  color: var(--ifm-color-emphasis-700);
+  text-align: center;
+}
+
+.dropzoneContent strong,
+.dropzoneContent span {
+  display: block;
+}
+
+.dropzoneContent span {
+  margin-top: 8px;
+  font-size: 14px;
+}
+
+.preview {
+  display: block;
+  max-width: 100%;
+  max-height: 360px;
+  object-fit: contain;
+}
+
+.imageMeta {
+  margin: 10px 0 0;
+  color: var(--ifm-color-emphasis-700);
+  font-size: 13px;
+  text-align: center;
+}
+
+.controls {
+  display: flex;
+  gap: 10px;
+  margin-top: 14px;
+  align-items: end;
+  flex-wrap: wrap;
+}
+
+.selectLabel {
+  display: grid;
+  gap: 5px;
+  color: var(--ifm-color-emphasis-700);
+  font-size: 14px;
+}
+
+.select {
+  height: 38px;
+  padding: 0 10px;
+  border: 1px solid var(--ifm-color-emphasis-400);
+  border-radius: 4px;
+  background: var(--ifm-background-surface-color);
+  color: var(--ifm-font-color-base);
+}
+
+.button {
+  min-height: 38px;
+  padding: 0 16px;
+  border: 0;
+  border-radius: 4px;
+  background: var(--ifm-color-primary);
+  color: #fff;
+  cursor: pointer;
+  font: inherit;
+}
+
+.button:hover:not(:disabled) {
+  background: var(--ifm-color-primary-dark);
+}
+
+.button:disabled {
+  cursor: not-allowed;
+  opacity: 0.6;
+}
+
+.secondaryButton {
+  background: var(--ifm-color-emphasis-600);
+}
+
+.secondaryButton:hover:not(:disabled) {
+  background: var(--ifm-color-emphasis-700);
+}
+
+.status {
+  min-height: 22px;
+  margin: 14px 0 0;
+  color: var(--ifm-color-emphasis-700);
+  font-size: 14px;
+}
+
+.error {
+  color: var(--ifm-color-danger);
+}
+
+.result {
+  width: 100%;
+  min-height: 280px;
+  padding: 12px;
+  border: 1px solid var(--ifm-color-emphasis-400);
+  border-radius: 4px;
+  background: var(--ifm-background-surface-color);
+  color: var(--ifm-font-color-base);
+  font: inherit;
+  line-height: 1.6;
+  resize: vertical;
+}
+
+.result:focus {
+  border-color: var(--ifm-color-primary);
+  outline: none;
+}
+
+.copyRow {
+  display: flex;
+  gap: 10px;
+  margin-top: 14px;
+  align-items: center;
+}
+
+.base64Controls {
+  display: flex;
+  gap: 10px;
+  margin-top: 14px;
+  flex-wrap: wrap;
+}
+
+.base64Section {
+  margin-top: 14px;
+}
+
+.base64Label {
+  display: grid;
+  gap: 6px;
+  color: var(--ifm-color-emphasis-700);
+  font-size: 14px;
+}
+
+.base64Result {
+  width: 100%;
+  min-height: 180px;
+  padding: 10px;
+  border: 1px solid var(--ifm-color-emphasis-400);
+  border-radius: 4px;
+  background: var(--ifm-background-surface-color);
+  color: var(--ifm-font-color-base);
+  font-family: var(--ifm-font-family-monospace);
+  font-size: 12px;
+  line-height: 1.5;
+  resize: vertical;
+}
+
+.urlControls {
+  display: flex;
+  gap: 12px;
+  margin-top: 12px;
+  align-items: center;
+  flex-wrap: wrap;
+}
+
+.encryptionLabel {
+  display: inline-flex;
+  gap: 7px;
+  align-items: center;
+  color: var(--ifm-color-emphasis-700);
+  cursor: pointer;
+  font-size: 14px;
+}
+
+.encryptionLabel input {
+  accent-color: var(--ifm-color-primary);
+}
+
+.copyHint {
+  color: var(--ifm-color-success);
+  font-size: 14px;
+}
+
+.privacy {
+  margin: 24px 0 0;
+  color: var(--ifm-color-emphasis-700);
+  font-size: 13px;
+  text-align: center;
+}
+
+@media (max-width: 768px) {
+  .workspace {
+    grid-template-columns: minmax(0, 1fr);
+  }
+
+  .dropzone {
+    min-height: 220px;
+  }
+}

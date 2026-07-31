@@ -4,6 +4,8 @@ const ToolsSidebarData = [
     type: "category",
     items: [
       { type: "link", href: "/tools/urlparam", label: "URL Parameter Tool" },
+      { type: "link", href: "/tools/imageocr", label: "图片文字识别" },
+      { type: "link", href: "/tools/realtime", label: "实时消息" },
     ],
   },
   {
