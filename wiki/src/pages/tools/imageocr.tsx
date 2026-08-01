@@ -69,6 +69,7 @@ export default function ImageOCR() {
   const history = useHistory();
   const location = useLocation();
   const inputRef = useRef<HTMLInputElement>(null);
+  const cameraInputRef = useRef<HTMLInputElement>(null);
   const previewUrlRef = useRef<string | null>(null);
   const base64FileRef = useRef<File | null>(null);
   const urlUpdateTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
@@ -87,6 +88,7 @@ export default function ImageOCR() {
   const [showBase64, setShowBase64] = useState(false);
   const [isLoadingBase64, setIsLoadingBase64] = useState(false);
   const [base64Copied, setBase64Copied] = useState(false);
+  const [isReadingClipboard, setIsReadingClipboard] = useState(false);
 
   const updateURL = (value: string, encrypt: boolean) => {
     if (urlUpdateTimerRef.current) {
@@ -201,6 +203,51 @@ export default function ImageOCR() {
       setImage(image);
     } else {
       setError("请拖入图片文件。");
+    }
+  };
+
+  const handleFileSelection = (
+    event: React.ChangeEvent<HTMLInputElement>
+  ) => {
+    const [file] = Array.from(event.target.files || []);
+    if (file) setImage(file);
+    // Allows selecting the same photo again after an unsuccessful attempt.
+    event.currentTarget.value = "";
+  };
+
+  const readClipboardImage = async () => {
+    if (!navigator.clipboard?.read) {
+      setError("当前浏览器不支持读取剪贴板图片，请从相册选择或拍照。");
+      return;
+    }
+
+    setIsReadingClipboard(true);
+    setError("");
+
+    try {
+      const clipboardItems = await navigator.clipboard.read();
+      const imageItem = clipboardItems.find((item) =>
+        item.types.some((type) => type.startsWith("image/"))
+      );
+      const imageType = imageItem?.types.find((type) =>
+        type.startsWith("image/")
+      );
+
+      if (!imageItem || !imageType) {
+        setError("剪贴板中没有图片，请先复制一张图片后重试。");
+        return;
+      }
+
+      const blob = await imageItem.getType(imageType);
+      const extension = imageType.split("/")[1] || "png";
+      setImage(
+        new File([blob], `clipboard-image.${extension}`, { type: imageType })
+      );
+    } catch (clipboardError) {
+      console.error("读取剪贴板图片失败:", clipboardError);
+      setError("无法读取剪贴板图片。请允许剪贴板权限，或从相册选择图片。");
+    } finally {
+      setIsReadingClipboard(false);
     }
   };
 
@@ -346,7 +393,7 @@ export default function ImageOCR() {
             <div className={styles.page}>
               <h1 className={styles.heading}>图片文字识别</h1>
               <p className={styles.intro}>
-                粘贴图片、拖入图片或选择本地文件，提取其中的文字。
+                粘贴图片、拖入图片，或从相册和相机导入图片，提取其中的文字。
               </p>
 
               <div className={styles.workspace}>
@@ -363,7 +410,14 @@ export default function ImageOCR() {
                       isDragging && styles.dropzoneActive
                     )}
                     tabIndex={0}
-                    onClick={(event) => event.currentTarget.focus()}
+                    role="button"
+                    onClick={() => inputRef.current?.click()}
+                    onKeyDown={(event) => {
+                      if (event.key === "Enter" || event.key === " ") {
+                        event.preventDefault();
+                        inputRef.current?.click();
+                      }
+                    }}
                     onPaste={handlePaste}
                     onDragEnter={(event) => {
                       event.preventDefault();
@@ -382,8 +436,8 @@ export default function ImageOCR() {
                       />
                     ) : (
                       <div className={styles.dropzoneContent}>
-                        <strong>在这里粘贴图片</strong>
-                        <span>也可以拖入图片或点击选择文件</span>
+                        <strong>点击从相册选择图片</strong>
+                        <span>桌面端也支持粘贴或拖入图片</span>
                       </div>
                     )}
                   </div>
@@ -392,11 +446,15 @@ export default function ImageOCR() {
                     type="file"
                     accept="image/*"
                     hidden
-                    onChange={(event) => {
-                      const [file] = Array.from(event.target.files || []);
-                      if (file) setImage(file);
-                      event.currentTarget.value = "";
-                    }}
+                    onChange={handleFileSelection}
+                  />
+                  <input
+                    ref={cameraInputRef}
+                    type="file"
+                    accept="image/*"
+                    capture="environment"
+                    hidden
+                    onChange={handleFileSelection}
                   />
                   {imageFile && (
                     <p className={styles.imageMeta}>
@@ -410,7 +468,23 @@ export default function ImageOCR() {
                       onClick={() => inputRef.current?.click()}
                       disabled={isRecognizing}
                     >
-                      选择图片
+                      从相册选择
+                    </button>
+                    <button
+                      className={clsx(styles.button, styles.secondaryButton)}
+                      type="button"
+                      onClick={() => cameraInputRef.current?.click()}
+                      disabled={isRecognizing}
+                    >
+                      拍照
+                    </button>
+                    <button
+                      className={clsx(styles.button, styles.secondaryButton)}
+                      type="button"
+                      onClick={readClipboardImage}
+                      disabled={isRecognizing || isReadingClipboard}
+                    >
+                      {isReadingClipboard ? "正在读取剪贴板" : "粘贴剪贴板图片"}
                     </button>
                     <label className={styles.selectLabel}>
                       识别语言
