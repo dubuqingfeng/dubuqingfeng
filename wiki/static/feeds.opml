@@ -1,0 +1,44 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<opml version="2.0">
+  <head>
+    <title>Dubuqingfeng RSS subscriptions</title>
+    <dateCreated>Sat, 01 Aug 2026 03:47:27 +0200</dateCreated>
+    <ownerName>Dubuqingfeng</ownerName>
+  </head>
+  <body>
+    <outline text="0x101-web3blog">
+      <outline text="bitcoin-dev blog" type="rss" xmlUrl="https://bitcoin-dev.blog/feed.xml" htmlUrl="https://bitcoin-dev.blog/" description="Recent content on bitcoin-dev blog"/>
+      <outline text="BTC Study" type="rss" xmlUrl="https://www.btcstudy.org/atom.xml" htmlUrl="https://www.btcstudy.org/" description="学习比特币"/>
+      <outline text="Luyao Zhang" type="rss" xmlUrl="https://zhangluyao.com/index.xml" htmlUrl="https://zhangluyao.com/" description="Recent content on Luyao Zhang"/>
+    </outline>
+    <outline text="0x102-web3security">
+      <outline text="Blog | Tenderly" type="rss" xmlUrl="https://blog.tenderly.co/rss/" htmlUrl="https://blog.tenderly.co/" description="Full-Stack Web3 Infrastructure"/>
+    </outline>
+    <outline text="0x104-web3podcast">
+      <outline text="ZK Podcast" type="rss" xmlUrl="https://zeroknowledge.fm/feed/" htmlUrl="https://zeroknowledge.fm" description="This community is built around the Zero Knowledge Podcast, a weekly show which goes deep into zk and blockchain topics and features interviews with top technical minds building decentralised tech and blockchain networks."/>
+    </outline>
+    <outline text="0x106-web3research">
+      <outline text="Ethereum Research - Latest posts" type="rss" xmlUrl="https://ethresear.ch/posts.rss" htmlUrl="https://ethresear.ch" description="Latest posts"/>
+    </outline>
+    <outline text="0x107-web3reeds">
+      <outline text="ChainFeeds精选" type="rss" xmlUrl="https://www.chainfeeds.xyz/rss" htmlUrl="https://www.chainfeeds.xyz/rss/"/>
+    </outline>
+    <outline text="0x108-web3security-blog">
+      <outline text="Ashiq's blog" type="rss" xmlUrl="https://ashiq.co.za/feed.xml" htmlUrl="https://ashiq.co.za" description="Personal blog."/>
+      <outline text="samczsun" type="rss" xmlUrl="https://samczsun.com/rss/" htmlUrl="https://samczsun.com/" description="Things I think are worth talking about"/>
+      <outline text="Trail of Bits Blog" type="rss" xmlUrl="https://blog.trailofbits.com/index.xml" htmlUrl="https://blog.trailofbits.com" description="Recent content on The Trail of Bits Blog"/>
+    </outline>
+    <outline text="0x202-security-blog">
+      <outline text="薇拉航线" type="rss" xmlUrl="https://www.zuozuovera.com/index.xml" htmlUrl="https://www.zuozuovera.com/" description="Recent content on 薇拉航线"/>
+    </outline>
+    <outline text="0x301-programming-blog">
+      <outline text="[Unknown]" type="rss" xmlUrl="https://wdxtub.com/atom.xml"/>
+      <outline text="云风的 BLOG" type="rss" xmlUrl="https://blog.codingnow.com/atom.xml" htmlUrl="https://blog.codingnow.com/" description="思绪来得快去得也快，偶尔会在这里停留"/>
+      <outline text="冰蓝记录思考的地方" type="rss" xmlUrl="http://lanbing510.info/pages/atom.xml" htmlUrl="http://lanbing510.info" description="My personal blog"/>
+      <outline text="刘未鹏 | Mind Hacks" type="rss" xmlUrl="https://mindhacks.cn/feed/" htmlUrl="https://mindhacks.cn" description="思维改变生活"/>
+    </outline>
+    <outline text="Uncategorized">
+      <outline text="FreshRSS releases" type="rss" xmlUrl="https://github.com/FreshRSS/FreshRSS/releases.atom" htmlUrl="https://github.com/FreshRSS/FreshRSS/" description="FreshRSS releases @ GitHub"/>
+    </outline>
+  </body>
+</opml>
