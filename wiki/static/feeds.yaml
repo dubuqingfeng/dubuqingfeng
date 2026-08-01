@@ -1,0 +1,94 @@
+# Public RSS subscriptions maintained by Dubuqingfeng.
+# Source: FreshRSS OPML export on 2026-08-01.
+title: Dubuqingfeng's RSS subscriptions
+updated_at: 2026-08-01
+categories:
+  - id: 0x101-web3blog
+    title: Web3 blogs
+    feeds:
+      - title: bitcoin-dev blog
+        feed_url: https://bitcoin-dev.blog/feed.xml
+        site_url: https://bitcoin-dev.blog/
+        description: Recent content on bitcoin-dev blog
+      - title: BTC Study
+        feed_url: https://www.btcstudy.org/atom.xml
+        site_url: https://www.btcstudy.org/
+        description: 学习比特币
+      - title: Luyao Zhang
+        feed_url: https://zhangluyao.com/index.xml
+        site_url: https://zhangluyao.com/
+        description: Recent content on Luyao Zhang
+  - id: 0x102-web3security
+    title: Web3 security
+    feeds:
+      - title: Blog | Tenderly
+        feed_url: https://blog.tenderly.co/rss/
+        site_url: https://blog.tenderly.co/
+        description: Full-Stack Web3 Infrastructure
+  - id: 0x104-web3podcast
+    title: Web3 podcasts
+    feeds:
+      - title: ZK Podcast
+        feed_url: https://zeroknowledge.fm/feed/
+        site_url: https://zeroknowledge.fm
+        description: >-
+          This community is built around the Zero Knowledge Podcast, a weekly show which goes deep into zk and blockchain topics and features interviews with top technical minds building decentralised tech and blockchain networks.
+  - id: 0x106-web3research
+    title: Web3 research
+    feeds:
+      - title: Ethereum Research - Latest posts
+        feed_url: https://ethresear.ch/posts.rss
+        site_url: https://ethresear.ch
+        description: Latest posts
+  - id: 0x107-web3reeds
+    title: Web3 reads
+    feeds:
+      - title: ChainFeeds精选
+        feed_url: https://www.chainfeeds.xyz/rss
+        site_url: https://www.chainfeeds.xyz/rss/
+  - id: 0x108-web3security-blog
+    title: Web3 security blogs
+    feeds:
+      - title: Ashiq's blog
+        feed_url: https://ashiq.co.za/feed.xml
+        site_url: https://ashiq.co.za
+        description: Personal blog.
+      - title: samczsun
+        feed_url: https://samczsun.com/rss/
+        site_url: https://samczsun.com/
+        description: Things I think are worth talking about
+      - title: Trail of Bits Blog
+        feed_url: https://blog.trailofbits.com/index.xml
+        site_url: https://blog.trailofbits.com
+        description: Recent content on The Trail of Bits Blog
+  - id: 0x202-security-blog
+    title: Security blogs
+    feeds:
+      - title: 薇拉航线
+        feed_url: https://www.zuozuovera.com/index.xml
+        site_url: https://www.zuozuovera.com/
+        description: Recent content on 薇拉航线
+  - id: 0x301-programming-blog
+    title: Programming blogs
+    feeds:
+      - title: "[Unknown]"
+        feed_url: https://wdxtub.com/atom.xml
+      - title: 云风的 BLOG
+        feed_url: https://blog.codingnow.com/atom.xml
+        site_url: https://blog.codingnow.com/
+        description: 思绪来得快去得也快，偶尔会在这里停留
+      - title: 冰蓝记录思考的地方
+        feed_url: http://lanbing510.info/pages/atom.xml
+        site_url: http://lanbing510.info
+        description: My personal blog
+      - title: 刘未鹏 | Mind Hacks
+        feed_url: https://mindhacks.cn/feed/
+        site_url: https://mindhacks.cn
+        description: 思维改变生活
+  - id: uncategorized
+    title: Uncategorized
+    feeds:
+      - title: FreshRSS releases
+        feed_url: https://github.com/FreshRSS/FreshRSS/releases.atom
+        site_url: https://github.com/FreshRSS/FreshRSS/
+        description: FreshRSS releases @ GitHub
