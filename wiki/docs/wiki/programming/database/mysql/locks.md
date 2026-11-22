@@ -1,4 +1,5 @@
 ---
+slug: "/Wiki/programming/database/mysql/locks"
 title: 锁类型与并发控制
 ---
 

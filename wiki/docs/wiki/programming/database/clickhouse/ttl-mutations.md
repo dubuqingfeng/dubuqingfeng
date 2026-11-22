@@ -1,4 +1,5 @@
 ---
+slug: "/Wiki/programming/database/clickhouse/ttl-mutations"
 title: TTL/Mutation 与删除
 ---
 

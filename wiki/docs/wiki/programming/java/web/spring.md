@@ -1,3 +1,6 @@
+---
+slug: "/Wiki/programming/java/web/spring"
+---
 ### Spring/Spring Boot 概览
 
 #### ToC

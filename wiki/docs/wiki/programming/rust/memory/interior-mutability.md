@@ -1,3 +1,6 @@
+---
+slug: "/Wiki/programming/rust/memory/interior-mutability"
+---
 ### 内部可变性：UnsafeCell、Cell、RefCell
 
 #### UnsafeCell：打破共享不可变的唯一合法方式

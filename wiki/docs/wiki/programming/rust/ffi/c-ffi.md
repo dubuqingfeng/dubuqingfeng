@@ -1,3 +1,6 @@
+---
+slug: "/Wiki/programming/rust/ffi/c-ffi"
+---
 ### FFI：与 C 交互
 
 #### 调用 C（extern 块）

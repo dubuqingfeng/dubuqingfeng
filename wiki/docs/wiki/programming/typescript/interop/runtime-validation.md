@@ -1,3 +1,6 @@
+---
+slug: "/Wiki/programming/typescript/interop/runtime-validation"
+---
 ### 运行时类型校验（Zod/io-ts/valibot）
 
 #### ToC

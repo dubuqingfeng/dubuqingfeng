@@ -1,4 +1,5 @@
 ---
+slug: "/Wiki/programming/solidity/upgrades-proxies"
 title: 升级与代理（UUPS/Transparent）
 ---
 

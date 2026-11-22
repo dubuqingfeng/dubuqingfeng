@@ -1,4 +1,5 @@
 ---
+slug: "/Wiki/programming/solidity/security"
 title: 安全与常见漏洞
 ---
 

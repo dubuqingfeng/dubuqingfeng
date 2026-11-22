@@ -1,3 +1,6 @@
+---
+slug: "/Wiki/programming/rust/macros/"
+---
 ### 宏：声明式与过程宏
 
 #### 声明式宏（macro_rules!）

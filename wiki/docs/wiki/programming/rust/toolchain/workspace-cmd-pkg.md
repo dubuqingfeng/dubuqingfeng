@@ -1,3 +1,6 @@
+---
+slug: "/Wiki/programming/rust/toolchain/workspace-cmd-pkg"
+---
 ### Go 风格的 Rust Workspace（cmd/pkg 结构）
 
 #### 背景

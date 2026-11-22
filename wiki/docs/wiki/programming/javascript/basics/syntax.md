@@ -1,3 +1,6 @@
+---
+slug: "/Wiki/programming/javascript/basics/syntax"
+---
 ### 语法与核心概念（ES6+）
 
 #### ToC

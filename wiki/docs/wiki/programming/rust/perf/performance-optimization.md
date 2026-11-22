@@ -1,3 +1,6 @@
+---
+slug: "/Wiki/programming/rust/perf/performance-optimization"
+---
 ### 性能与优化手段
 
 #### 度量先行

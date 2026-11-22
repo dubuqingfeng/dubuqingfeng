@@ -1,3 +1,6 @@
+---
+slug: "/Wiki/programming/php/web/"
+---
 ### Web 基础与运行模式
 
 典型运行方式：FPM（Nginx/Apache）、CLI、Swoole/协程；路由、中间件、配置与部署。

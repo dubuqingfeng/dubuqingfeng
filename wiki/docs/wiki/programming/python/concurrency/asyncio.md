@@ -1,3 +1,6 @@
+---
+slug: "/Wiki/programming/python/concurrency/asyncio"
+---
 ### Asyncio 异步 I/O
 
 概念要点：事件循环、协程、任务、await/async、I/O 密集型高并发。

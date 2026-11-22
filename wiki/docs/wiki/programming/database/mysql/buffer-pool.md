@@ -1,4 +1,5 @@
 ---
+slug: "/Wiki/programming/database/mysql/buffer-pool"
 title: InnoDB 缓冲池与页结构
 ---
 

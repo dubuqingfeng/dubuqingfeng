@@ -1,3 +1,6 @@
+---
+slug: "/Wiki/programming/javascript/basics/this-closure"
+---
 ### this 绑定与闭包
 
 #### ToC

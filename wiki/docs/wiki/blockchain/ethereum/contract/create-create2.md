@@ -1,3 +1,6 @@
+---
+slug: "/Wiki/blockchain/ethereum/contract/create-create2"
+---
 ## 合约创建：CREATE 与 CREATE2
 
 ### CREATE（传统）

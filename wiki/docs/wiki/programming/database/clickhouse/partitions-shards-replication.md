@@ -1,4 +1,5 @@
 ---
+slug: "/Wiki/programming/database/clickhouse/partitions-shards-replication"
 title: 分区/分片/副本
 ---
 

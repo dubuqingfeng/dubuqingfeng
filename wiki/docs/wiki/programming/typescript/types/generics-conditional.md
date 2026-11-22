@@ -1,3 +1,6 @@
+---
+slug: "/Wiki/programming/typescript/types/generics-conditional"
+---
 ### 泛型与条件类型
 
 #### ToC

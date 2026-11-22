@@ -1,3 +1,6 @@
+---
+slug: "/Wiki/programming/typescript/types/basics"
+---
 ### 类型基础与常用内置
 
 #### ToC

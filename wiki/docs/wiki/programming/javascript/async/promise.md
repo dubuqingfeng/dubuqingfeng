@@ -1,3 +1,6 @@
+---
+slug: "/Wiki/programming/javascript/async/promise"
+---
 ### Promise/async-await 原理
 
 #### ToC

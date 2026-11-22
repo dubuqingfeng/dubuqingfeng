@@ -1,4 +1,5 @@
 ---
+slug: "/Wiki/programming/solidity/language-basics"
 title: 语言基础与类型
 ---
 

@@ -1,3 +1,6 @@
+---
+slug: "/Wiki/programming/nodejs/deploy/pm2-docker"
+---
 ### 进程管理与容器化
 
 使用 PM2/systemd 管理进程，容器化部署与资源限制，结合反向代理与编排。

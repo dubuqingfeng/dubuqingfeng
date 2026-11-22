@@ -1,3 +1,6 @@
+---
+slug: "/Wiki/programming/cpp/toolchain/cmake"
+---
 ### CMake 基础
 
 最小示例：

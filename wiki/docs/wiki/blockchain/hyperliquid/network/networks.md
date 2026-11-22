@@ -1,3 +1,6 @@
+---
+slug: "/Wiki/blockchain/hyperliquid/network/networks"
+---
 ### 网络与链
 
 要点占位：

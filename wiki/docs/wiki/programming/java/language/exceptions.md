@@ -1,3 +1,6 @@
+---
+slug: "/Wiki/programming/java/language/exceptions"
+---
 ### 异常机制与最佳实践
 
 #### ToC

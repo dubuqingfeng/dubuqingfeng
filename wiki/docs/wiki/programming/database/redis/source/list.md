@@ -1,4 +1,5 @@
 ---
+slug: "/Wiki/programming/database/redis/source/list"
 title: List 源码阅读（概览）
 ---
 

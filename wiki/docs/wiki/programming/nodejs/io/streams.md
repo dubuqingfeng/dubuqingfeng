@@ -1,3 +1,6 @@
+---
+slug: "/Wiki/programming/nodejs/io/streams"
+---
 ### 流与背压（Streams）
 
 Node 的 Stream 抽象支持高效 I/O 与背压控制，类型包含 Readable/Writable/Duplex/Transform。

@@ -1,3 +1,6 @@
+---
+slug: "/Wiki/blockchain/ethereum/state/storage"
+---
 ## 存储布局与 SSTORE 规则
 
 Solidity 将状态变量映射到 32 字节对齐的 slot，映射与动态数组采用 `keccak(slot || key)`/`keccak(slot)` 派生位置。

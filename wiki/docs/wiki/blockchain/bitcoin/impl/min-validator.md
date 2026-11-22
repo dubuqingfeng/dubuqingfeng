@@ -1,3 +1,6 @@
+---
+slug: "/Wiki/blockchain/bitcoin/impl/min-validator"
+---
 ## 最小验证器（从零到一）
 
 目标：实现可校验区块头与 PoW、同步 headers、验证区块体结构与 Merkle，逐步扩展到 TX/UTXO、SegWit、Taproot。

@@ -1,3 +1,6 @@
+---
+slug: "/Wiki/algorithm/sort/quick"
+---
 ## Quick Sort
 
 快速排序

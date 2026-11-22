@@ -1,4 +1,5 @@
 ---
+slug: "/Wiki/programming/lua/redis-scripting"
 title: Redis 脚本与原子操作
 ---
 

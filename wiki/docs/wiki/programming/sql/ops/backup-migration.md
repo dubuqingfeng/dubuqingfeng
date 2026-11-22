@@ -1,3 +1,6 @@
+---
+slug: "/Wiki/programming/sql/ops/backup-migration"
+---
 ### 备份恢复与迁移
 
 逻辑/物理备份，时间点恢复与结构迁移的兼容性评估。

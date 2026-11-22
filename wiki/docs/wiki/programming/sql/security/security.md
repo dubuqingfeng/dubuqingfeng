@@ -1,3 +1,6 @@
+---
+slug: "/Wiki/programming/sql/security/"
+---
 ### 权限与安全
 
 账户与权限、最小权限原则，防御 SQL 注入与敏感数据保护。

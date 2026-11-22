@@ -1,3 +1,6 @@
+---
+slug: "/Wiki/programming/rust/memory/variance-phantomdata"
+---
 ### 方差（Variance）与 PhantomData、Drop 检查
 
 #### 方差速览

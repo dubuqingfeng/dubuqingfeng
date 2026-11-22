@@ -1,3 +1,6 @@
+---
+slug: "/Wiki/blockchain/bitcoin/transaction/fee"
+---
 # 计算交易手续费脚本
 
 ```

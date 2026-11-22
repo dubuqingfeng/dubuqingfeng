@@ -1,3 +1,6 @@
+---
+slug: "/Wiki/blockchain/bitcoin/wallet/hd"
+---
 ## HD 钱包（BIP32/39/44/84/86）
 
 分层确定性（HD）钱包通过“主种子 + 路径”派生无限密钥对，便于备份与账户化管理。

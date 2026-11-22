@@ -10,7 +10,7 @@ tags:
 excerpt: 本文从 DevOps 的角度去浅显地探讨软件安全开发周期，而建设软件安全开发周期任重而道远，而面对大多数公司的安全性问题，能否使用软件安全开发周期解决。并且 DevOps 作为周期很重要的一环，如何推动公司的安全体系建设。当然 SDL 并不是银弹，只是能大量减少软件安全缺陷。
 categories: DevOps
 permalink: 201610-devops-best-practices-sdl.html
-author: admin
+authors: [admin]
 toc: true
 ---
 

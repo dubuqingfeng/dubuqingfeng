@@ -1,3 +1,6 @@
+---
+slug: "/Wiki/programming/sql/basics/types-constraints"
+---
 ### 数据类型与约束
 
 通用标量/时间/二进制类型与约束（主键/唯一/外键/检查）。

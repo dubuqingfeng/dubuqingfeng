@@ -1,3 +1,6 @@
+---
+slug: "/Wiki/blockchain/hyperliquid/concepts/overview"
+---
 ### 概览
 
 Hyperliquid 聚焦高性能的去中心化永续合约撮合与结算：

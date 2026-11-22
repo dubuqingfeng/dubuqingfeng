@@ -1,4 +1,5 @@
 ---
+slug: "/Wiki/programming/database/clickhouse/primary-index"
 title: 主键/排序键与稀疏索引
 ---
 

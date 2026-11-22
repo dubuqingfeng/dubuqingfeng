@@ -1,3 +1,6 @@
+---
+slug: "/Wiki/programming/sql/query/set-operations"
+---
 ### 集合操作
 
 `UNION/UNION ALL/INTERSECT/EXCEPT` 等集合运算及其语义与性能。

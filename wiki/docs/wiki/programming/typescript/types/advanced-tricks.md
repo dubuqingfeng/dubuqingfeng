@@ -1,3 +1,6 @@
+---
+slug: "/Wiki/programming/typescript/types/advanced-tricks"
+---
 ### 高级技巧与类型体操（实用）
 
 #### ToC

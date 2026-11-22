@@ -10,7 +10,7 @@ tags:
 excerpt: 每fork一个项目后，当进行改动，然后push上去以后，如何进行保持与原作者的同步，以及git的一些协同命令和Pull Request。
 categories: git
 permalink: 201503-git-fork-synchronized.html
-author: admin
+authors: [admin]
 toc: true
 ---
 

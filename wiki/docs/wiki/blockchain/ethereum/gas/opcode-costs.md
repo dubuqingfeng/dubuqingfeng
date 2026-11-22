@@ -1,3 +1,6 @@
+---
+slug: "/Wiki/blockchain/ethereum/gas/opcode-costs"
+---
 ## Opcode 成本速查与内存扩展
 
 本页汇总常用指令成本与内存扩展公式，便于估算 gas。实际数值随硬分叉/EIP 可能调整，请以客户端实现为准（Berlin/London/Shanghai/Dencun 之后的一般取值）。

@@ -1,3 +1,6 @@
+---
+slug: "/Wiki/programming/rust/memory/pin-self-referential"
+---
 ### Pin 与自引用类型
 
 #### 背景

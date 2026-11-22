@@ -1,3 +1,6 @@
+---
+slug: "/Wiki/programming/cpp/concurrency/thread"
+---
 ### 线程 std::thread
 
 使用 `std::thread` 启动、加入与分离线程。

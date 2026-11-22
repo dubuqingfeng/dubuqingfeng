@@ -1,3 +1,6 @@
+---
+slug: "/Wiki/programming/javascript/basics/prototype"
+---
 ### 原型与原型链
 
 #### ToC

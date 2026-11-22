@@ -1,3 +1,6 @@
+---
+slug: "/Wiki/blockchain/solana/program"
+---
 ## Programs（程序）
 
 在 Solana 上，“程序”是部署的链上可执行代码（BPF），程序本身也有地址（公钥）。交易的指令以“调用某程序 + 传入账户与数据”的方式执行。
@@ -37,4 +40,8 @@ console.log('ATA Program:', ASSOCIATED_TOKEN_PROGRAM_ID.toBase58())
 - 账户未按程序要求的“可写/只读/签名”排列 → 指令执行失败
 - 使用了错误的 Program Id（经典 Token 与 2022 混用）
 - CPI 时未将被调用程序与相关账户加入本次交易的账户列表
+
+### 执行结果与账户提交
+
+程序执行完成后，状态何时提交、失败时保留哪些变化，以及 Geyser 如何通知，见[交易执行与数据路径](./data-path.md#path)。
 

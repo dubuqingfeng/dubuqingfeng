@@ -1,4 +1,5 @@
 ---
+slug: "/Wiki/programming/database/mysql/explain-optimization"
 title: EXPLAIN 与查询优化
 ---
 

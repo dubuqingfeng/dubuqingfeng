@@ -1,3 +1,6 @@
+---
+slug: "/Wiki/programming/sql/performance/optimization"
+---
 ### 查询优化策略
 
 从写法到索引、从统计信息到执行参数，系统化优化查询性能。

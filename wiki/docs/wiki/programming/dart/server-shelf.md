@@ -1,4 +1,5 @@
 ---
+slug: "/Wiki/programming/dart/server-shelf"
 title: Shelf（服务端）
 ---
 

@@ -1,4 +1,5 @@
 ---
+slug: "/Wiki/programming/database/redis/thread-model"
 title: 线程模型与性能
 ---
 

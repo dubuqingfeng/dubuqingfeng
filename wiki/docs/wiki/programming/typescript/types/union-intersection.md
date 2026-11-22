@@ -1,3 +1,6 @@
+---
+slug: "/Wiki/programming/typescript/types/union-intersection"
+---
 ### 联合/交叉与控制流分析
 
 #### ToC

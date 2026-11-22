@@ -1,3 +1,6 @@
+---
+slug: "/Wiki/programming/css/animation/animations"
+---
 ### Animations 关键帧动画
 
 使用 `@keyframes` 自定义连续动画，注意性能与可控性。

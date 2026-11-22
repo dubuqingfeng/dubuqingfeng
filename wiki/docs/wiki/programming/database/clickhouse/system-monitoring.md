@@ -1,4 +1,5 @@
 ---
+slug: "/Wiki/programming/database/clickhouse/system-monitoring"
 title: 系统表与监控
 ---
 

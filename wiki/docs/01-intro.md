@@ -1,6 +1,8 @@
 ---
 sidebar_position: 1
 slug: /
+title: "Intro"
+
 ---
 
 回忆过去，珍惜现在，做一个自由的计算机爱好者

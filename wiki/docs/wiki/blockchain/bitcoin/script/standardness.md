@@ -1,3 +1,6 @@
+---
+slug: "/Wiki/blockchain/bitcoin/script/standardness"
+---
 ## 标准性（Policy）与共识
 
 实现中需要严格区分“共识规则”（consensus）与“中继/打包策略”（policy）。

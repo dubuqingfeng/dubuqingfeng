@@ -1,3 +1,6 @@
+---
+slug: "/Wiki/programming/cpp/concurrency/lock-free"
+---
 ### 无锁结构与注意事项
 
 无锁并不等于无竞争；常依赖 `std::atomic` 与 CAS（compare_exchange_*）。

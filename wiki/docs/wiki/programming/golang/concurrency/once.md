@@ -1,3 +1,6 @@
+---
+slug: "/Wiki/programming/golang/concurrency/once"
+---
 ### Once
 
 

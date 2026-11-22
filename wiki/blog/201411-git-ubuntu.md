@@ -10,7 +10,7 @@ tags:
 excerpt: 记录一下在ubuntu下的git入门及其配置，以及git常用的命令。
 categories: git
 permalink: 201411-git-ubuntu.html
-author: admin
+authors: [admin]
 toc: true
 ---
 

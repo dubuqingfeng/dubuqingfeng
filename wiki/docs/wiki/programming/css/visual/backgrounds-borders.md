@@ -1,3 +1,6 @@
+---
+slug: "/Wiki/programming/css/visual/backgrounds-borders"
+---
 ### 背景与边框
 
 背景层叠、多重背景，边框与圆角等视觉细节控制。

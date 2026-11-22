@@ -39,3 +39,18 @@ slug: /wiki/programming/python
 
 若有新增条目或分类需要调整，按需补充即可。
 
+
+
+## 本级目录 {#directory-index}
+
+### 子目录 {#directory-children}
+
+- [Python：Web](./web/README.md)
+- [Python：内存模型](./memory/README.md)
+- [Python：基础](./basics/README.md)
+- [Python：工具链](./toolchain/README.md)
+- [Python：并发](./concurrency/README.md)
+- [Python：数据结构](./data-structure/README.md)
+- [Python：面试与练习](./interview/README.md)
+
+返回[上一级：编程与数据库](./../README.md)。

@@ -1,3 +1,6 @@
+---
+slug: "/Wiki/blockchain/ethereum/evm/precompiles"
+---
 ## 预编译合约（Precompiles）
 
 为高成本的密码学运算提供固定地址的“合约内建实现”，降低 gas 成本：

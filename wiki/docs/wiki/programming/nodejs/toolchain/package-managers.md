@@ -1,3 +1,6 @@
+---
+slug: "/Wiki/programming/nodejs/toolchain/package-managers"
+---
 ### 包管理器与依赖策略
 
 npm/yarn/pnpm 的锁文件与解析差异、workspace 管理与发布流程。更多基础参考 JavaScript 章节的[包管理：npm/yarn/pnpm](../../javascript/toolchain/package-managers.md)。

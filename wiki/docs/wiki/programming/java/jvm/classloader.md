@@ -1,3 +1,6 @@
+---
+slug: "/Wiki/programming/java/jvm/classloader"
+---
 ### 类加载与初始化
 
 #### ToC

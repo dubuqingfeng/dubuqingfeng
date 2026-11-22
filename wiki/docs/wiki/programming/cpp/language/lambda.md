@@ -1,3 +1,6 @@
+---
+slug: "/Wiki/programming/cpp/language/lambda"
+---
 ### Lambda 与捕获
 
 Lambda 是匿名函数对象，可捕获外部变量：

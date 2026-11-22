@@ -1,3 +1,6 @@
+---
+slug: "/Wiki/blockchain/ethereum/transaction/types"
+---
 ## 交易类型与封装（EIP-2718/2930/1559）
 
 以太坊引入“Typed Transaction Envelope”（EIP-2718），不同类型以一个前缀字节区分：

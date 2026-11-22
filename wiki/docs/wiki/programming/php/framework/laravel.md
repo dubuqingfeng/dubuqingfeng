@@ -1,3 +1,6 @@
+---
+slug: "/Wiki/programming/php/framework/laravel"
+---
 ### Laravel 概览
 
 目录结构、路由/中间件、容器与服务提供者、Eloquent、队列/事件、配置与部署。

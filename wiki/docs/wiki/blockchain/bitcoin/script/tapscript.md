@@ -1,3 +1,6 @@
+---
+slug: "/Wiki/blockchain/bitcoin/script/tapscript"
+---
 ## Tapscript（BIP342）
 
 Tapscript 是 Taproot 的脚本语义更新，配合 Schnorr（BIP340）与 Taproot（BIP341）引入更简洁、可组合的脚本表达。

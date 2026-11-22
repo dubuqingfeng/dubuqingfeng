@@ -1,3 +1,6 @@
+---
+slug: "/Wiki/programming/golang/data-race/"
+---
 ### Data Race 数据竞争
 
 

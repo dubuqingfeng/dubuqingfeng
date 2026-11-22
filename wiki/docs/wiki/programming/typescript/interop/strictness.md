@@ -1,3 +1,6 @@
+---
+slug: "/Wiki/programming/typescript/interop/strictness"
+---
 ### 严格模式与 any 最小化
 
 - 开启 `strict` 并尽量用 `unknown` 代替 `any`；

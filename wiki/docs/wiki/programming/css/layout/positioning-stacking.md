@@ -1,3 +1,6 @@
+---
+slug: "/Wiki/programming/css/layout/positioning-stacking"
+---
 ### 定位与堆叠上下文
 
 控制元素相对定位与层级呈现，理解 `z-index` 的真正生效条件。

@@ -1,3 +1,6 @@
+---
+slug: "/Wiki/blockchain/bitcoin/block/header"
+---
 ## 区块头与目标难度
 
 区块头结构：

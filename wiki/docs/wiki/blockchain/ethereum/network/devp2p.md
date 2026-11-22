@@ -1,3 +1,6 @@
+---
+slug: "/Wiki/blockchain/ethereum/network/devp2p"
+---
 ## devp2p 与同步（eth/66、snap）
 
 以太坊网络基于 devp2p（RLPx），在其上叠加 `eth/*` 协议族：

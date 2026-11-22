@@ -11,7 +11,7 @@ tags:
 excerpt: 在国内，使用一些常见的软件源会大幅度提升速度，提升工作上的效率，本文总结了一些常用的软件源。
 categories: 自由软件
 permalink: 201603-some-sources.html
-author: admin
+authors: [admin]
 toc: true
 ---
 

@@ -1,3 +1,6 @@
+---
+slug: "/Wiki/programming/sql/tooling/orm-migrations"
+---
 ### ORM 与迁移
 
 迁移工具与 ORM 使用准则，控制演进风险与性能。

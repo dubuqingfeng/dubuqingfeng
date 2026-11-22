@@ -1,3 +1,6 @@
+---
+slug: "/Wiki/programming/rust/web/axum-quickstart"
+---
 ### Web: Axum 快速上手
 
 #### 依赖

@@ -1,3 +1,6 @@
+---
+slug: "/Wiki/programming/java/toolchain/gradle"
+---
 ### Gradle 基础与常用配置
 
 #### ToC

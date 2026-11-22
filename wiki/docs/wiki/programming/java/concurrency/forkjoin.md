@@ -1,3 +1,6 @@
+---
+slug: "/Wiki/programming/java/concurrency/forkjoin"
+---
 ### ForkJoinPool 与工作窃取
 
 #### ToC

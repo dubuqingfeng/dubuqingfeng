@@ -10,7 +10,7 @@ tags:
 excerpt: 在认识启动函数的过程中，得知main函数之前系统要做一些准备工作，再加上上学期学的C语言程序入口函数不是main函数，而是_start函数。因此想对启动过程进行一定分析。
 categories: 反汇编
 permalink: 201407-reverse-disassemble-c-main.html
-author: admin
+authors: [admin]
 toc: true
 ---
 

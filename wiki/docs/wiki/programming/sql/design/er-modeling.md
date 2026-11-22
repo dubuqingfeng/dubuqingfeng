@@ -1,3 +1,6 @@
+---
+slug: "/Wiki/programming/sql/design/er-modeling"
+---
 ### ER 建模与约束
 
 实体/属性/关系建模，主外键与基数约束，演进与迁移策略。

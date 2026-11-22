@@ -12,7 +12,7 @@ tags:
 excerpt: 从传统的findViewById出发，经历不同的方式，注解，泛型，反射，最后的数据绑定，以及其源码实现。
 categories: Android
 permalink: 201606-android-develop-annotations-reflect-mvvm.html
-author: admin
+authors: [admin]
 toc: true
 ---
 

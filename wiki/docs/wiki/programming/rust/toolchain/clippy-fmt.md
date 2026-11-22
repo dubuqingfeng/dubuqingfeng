@@ -1,3 +1,6 @@
+---
+slug: "/Wiki/programming/rust/toolchain/clippy-fmt"
+---
 ### 格式化与静态检查（rustfmt/clippy）
 
 #### rustfmt

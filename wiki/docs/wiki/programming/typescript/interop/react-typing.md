@@ -1,3 +1,6 @@
+---
+slug: "/Wiki/programming/typescript/interop/react-typing"
+---
 ### React/Redux 类型集成
 
 #### ToC

@@ -1,3 +1,6 @@
+---
+slug: "/Wiki/programming/typescript/tooling/declaration-files"
+---
 ### 声明文件与 ambient 模块
 
 #### ToC

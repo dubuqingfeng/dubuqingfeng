@@ -1,3 +1,6 @@
+---
+slug: "/Wiki/programming/cpp/language/modules"
+---
 ### C++20 Modules 概览
 
 最小示例：

@@ -1,3 +1,6 @@
+---
+slug: "/Wiki/programming/html/seo/"
+---
 ### SEO 与元信息
 
 基础 SEO 元信息与社交分享元数据，配合良好语义结构与可访问性。

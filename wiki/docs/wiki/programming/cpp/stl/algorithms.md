@@ -1,3 +1,6 @@
+---
+slug: "/Wiki/programming/cpp/stl/algorithms"
+---
 ### 算法与迭代器
 
 `<algorithm>` 提供丰富的通用算法，基于迭代器和范围：

@@ -1,4 +1,5 @@
 ---
+slug: "/Wiki/programming/dart/basics"
 title: 语法/类型/空安全
 ---
 

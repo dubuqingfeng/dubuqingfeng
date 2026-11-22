@@ -1,4 +1,5 @@
 ---
+slug: "/Wiki/programming/solidity/gas-optimizations"
 title: Gas 优化与可观察性
 ---
 

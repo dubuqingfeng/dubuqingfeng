@@ -1,3 +1,6 @@
+---
+slug: "/Wiki/programming/cpp/concurrency/condition-variable"
+---
 ### 条件变量 std::condition_variable
 
 用于线程间等待/通知，配合 `std::unique_lock<std::mutex>` 和谓词使用，避免虚假唤醒。

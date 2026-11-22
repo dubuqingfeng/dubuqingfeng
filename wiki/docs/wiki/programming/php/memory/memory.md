@@ -1,3 +1,6 @@
+---
+slug: "/Wiki/programming/php/memory/"
+---
 ### 内存管理与性能要点
 
 OPcache、JIT、内存占用与对象复制，性能调优的常见抓手。
@@ -22,6 +25,8 @@ opcache.jit_buffer_size=128M
 - Xdebug profiler：生成 cachegrind，用 KCachegrind 分析；
 - XHProf/Tideways：在线采样分析，开销更小；
 - 结合 APM 与系统指标定位瓶颈。
+
+<span id="内存�与字符串优化"></span>
 
 #### 内存与字符串优化
 

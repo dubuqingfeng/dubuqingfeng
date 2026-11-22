@@ -1,3 +1,6 @@
+---
+slug: "/Wiki/blockchain/bitcoin/script/overview"
+---
 ## 脚本系统概览（Script）
 
 Bitcoin Script 是基于栈的、图灵不完备的连接语言。锁定脚本 `scriptPubKey` 与解锁脚本 `scriptSig/witness` 串接执行，最终需得到 TRUE。

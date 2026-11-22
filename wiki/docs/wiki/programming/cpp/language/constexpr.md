@@ -1,3 +1,6 @@
+---
+slug: "/Wiki/programming/cpp/language/constexpr"
+---
 ### constexpr 与常量表达式
 
 `constexpr` 允许在编译期计算，提高性能并增加类型安全。

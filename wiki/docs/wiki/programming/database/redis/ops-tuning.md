@@ -1,4 +1,5 @@
 ---
+slug: "/Wiki/programming/database/redis/ops-tuning"
 title: 运维与调优
 ---
 

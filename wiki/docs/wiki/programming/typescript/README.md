@@ -34,3 +34,15 @@ slug: /wiki/programming/typescript
 - [高频题要点](./interview/interview.md)
 
 若有新增条目或分类需要调整，按需补充即可。
+
+
+## 本级目录 {#directory-index}
+
+### 子目录 {#directory-children}
+
+- [TypeScript：工具](./tooling/README.md)
+- [TypeScript：类型互操作](./interop/README.md)
+- [TypeScript：类型系统](./types/README.md)
+- [TypeScript：面试与练习](./interview/README.md)
+
+返回[上一级：编程与数据库](./../README.md)。

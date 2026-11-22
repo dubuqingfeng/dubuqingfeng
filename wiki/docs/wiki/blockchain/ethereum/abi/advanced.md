@@ -1,3 +1,6 @@
+---
+slug: "/Wiki/blockchain/ethereum/abi/advanced"
+---
 ## ABI 进阶：动态类型与布局
 
 Solidity ABI 采用“头（head）+尾（tail）”布局：
@@ -7,7 +10,9 @@ Solidity ABI 采用“头（head）+尾（tail）”布局：
 
 适用范围：`bytes`、`string`、动态数组 `T[]`、元素含动态的 `tuple`/`struct`。
 
-### 函数选择器与参数编码
+<span id="函数选择器与参数��编码" aria-hidden="true" />
+
+### 函数选择器与参数编码 {#函数选择器与参数编码}
 
 - 函数调用数据：`4B selector || ABI-encoded(args...)`
 - 选择器：方法签名做 Keccak-256，取前 4 字节，例如：`transfer(address,uint256)`

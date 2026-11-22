@@ -44,3 +44,21 @@ slug: /wiki/programming/nodejs
 
 若有新增条目或分类需要调整，按需补充即可。
 
+
+
+## 本级目录 {#directory-index}
+
+### 子目录 {#directory-children}
+
+- [Node.js：I/O](./io/README.md)
+- [Node.js：Web](./web/README.md)
+- [Node.js：基础](./basics/README.md)
+- [Node.js：安全](./security/README.md)
+- [Node.js：工具链](./toolchain/README.md)
+- [Node.js：并发](./concurrency/README.md)
+- [Node.js：性能](./performance/README.md)
+- [Node.js：模块](./modules/README.md)
+- [Node.js：运维](./ops/README.md)
+- [Node.js：部署](./deploy/README.md)
+
+返回[上一级：编程与数据库](./../README.md)。

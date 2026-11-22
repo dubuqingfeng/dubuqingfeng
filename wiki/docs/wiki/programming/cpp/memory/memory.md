@@ -1,3 +1,6 @@
+---
+slug: "/Wiki/programming/cpp/memory/"
+---
 ### 内存模型与 RAII
 
 C++ 无自动 GC，资源管理以 RAII 为核心：构造获取资源、析构释放资源。

@@ -1,3 +1,6 @@
+---
+slug: "/Wiki/programming/cpp/concurrency/shared-mutex"
+---
 ### 读写锁 std::shared_mutex
 
 允许多个读者共享锁，写者独占（C++17）。

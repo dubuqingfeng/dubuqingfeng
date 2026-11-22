@@ -1,4 +1,5 @@
 ---
+slug: "/Wiki/programming/database/mysql/backup-restore"
 title: 备份与时间点恢复（PITR）
 ---
 

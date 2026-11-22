@@ -1,4 +1,5 @@
 ---
+slug: "/Wiki/programming/database/mysql/replication-ha"
 title: 复制、GTID 与高可用
 ---
 

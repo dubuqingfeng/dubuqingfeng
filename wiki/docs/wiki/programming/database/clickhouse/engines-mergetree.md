@@ -1,4 +1,5 @@
 ---
+slug: "/Wiki/programming/database/clickhouse/engines-mergetree"
 title: 表引擎与 MergeTree 家族
 ---
 

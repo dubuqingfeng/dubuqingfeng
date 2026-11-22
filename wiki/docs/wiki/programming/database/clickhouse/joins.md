@@ -1,4 +1,5 @@
 ---
+slug: "/Wiki/programming/database/clickhouse/joins"
 title: JOIN 策略与设置
 ---
 

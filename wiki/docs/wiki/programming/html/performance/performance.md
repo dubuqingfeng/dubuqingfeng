@@ -1,3 +1,6 @@
+---
+slug: "/Wiki/programming/html/performance/"
+---
 ### 性能与最佳实践
 
 围绕关键渲染路径优化、资源加载策略与首屏交互体验。

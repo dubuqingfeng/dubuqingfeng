@@ -1,3 +1,6 @@
+---
+slug: "/Wiki/programming/javascript/toolchain/testing"
+---
 ### 测试与覆盖率（Jest/Vitest）
 
 #### 要点

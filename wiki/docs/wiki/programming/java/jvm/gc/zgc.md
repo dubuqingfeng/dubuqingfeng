@@ -1,3 +1,6 @@
+---
+slug: "/Wiki/programming/java/jvm/gc/zgc"
+---
 ### ZGC 低停顿收集器
 
 #### ToC

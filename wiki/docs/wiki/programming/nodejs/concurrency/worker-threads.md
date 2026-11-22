@@ -1,3 +1,6 @@
+---
+slug: "/Wiki/programming/nodejs/concurrency/worker-threads"
+---
 ### Worker Threads
 
 在同一进程内提供多线程执行环境，适合 CPU 密集型任务与隔离状态管理。

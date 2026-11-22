@@ -10,7 +10,7 @@ description: 记录从“能动”到“稳定能跑”的组装与调试过程�
 excerpt: 本文在机械与电路部分的初步设计之下，进行一些主控板与硬件器件的辨析、连接与调试。
 categories: 电子设计
 permalink: 201503-Rubik's-Cube-Robot-Zhuzhuangtiaoshi.html
-author: admin, codex
+authors: [admin, codex]
 toc: true
 ---
 

@@ -1,3 +1,6 @@
+---
+slug: "/Wiki/programming/python/data-structure/list"
+---
 ### List 列表
 
 特性：动态数组、切片复制、原地修改、常用 API。

@@ -1,3 +1,6 @@
+---
+slug: "/Wiki/programming/php/toolchain/composer"
+---
 ### Composer 包管理
 
 依赖声明、自动加载、脚本与发布；镜像与私有仓库。

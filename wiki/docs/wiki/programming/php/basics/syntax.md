@@ -1,3 +1,6 @@
+---
+slug: "/Wiki/programming/php/basics/syntax"
+---
 ### PHP 语法速览
 
 记录常用语法与易错点：类型系统、数组、字符串、错误处理、命名空间与自动加载等。

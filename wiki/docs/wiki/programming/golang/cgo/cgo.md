@@ -1,3 +1,6 @@
+---
+slug: "/Wiki/programming/golang/cgo/"
+---
 ### cgo
 
 
@@ -101,6 +104,8 @@ bs := C.GoBytes(unsafe.Pointer(ptr), C.int(n))
 ```
 
 
+
+<span id="构��建与链接cgo"></span>
 
 #### 构建与链接（#cgo）
 

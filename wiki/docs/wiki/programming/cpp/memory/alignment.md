@@ -1,3 +1,6 @@
+---
+slug: "/Wiki/programming/cpp/memory/alignment"
+---
 ### 内存对齐 alignas/alignof
 
 对齐影响性能与 ABI：

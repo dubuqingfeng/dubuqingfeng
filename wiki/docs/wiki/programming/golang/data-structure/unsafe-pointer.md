@@ -1,3 +1,6 @@
+---
+slug: "/Wiki/programming/golang/data-structure/unsafe-pointer"
+---
 ### unsafe.pointer
 
 

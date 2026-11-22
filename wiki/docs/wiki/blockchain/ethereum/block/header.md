@@ -1,3 +1,6 @@
+---
+slug: "/Wiki/blockchain/ethereum/block/header"
+---
 ## 区块头与执行负载（后 Merge）
 
 执行层区块头关键域：

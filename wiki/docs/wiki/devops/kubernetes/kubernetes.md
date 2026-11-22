@@ -1,0 +1,3 @@
+---
+slug: "/Wiki/devops/kubernetes/"
+---

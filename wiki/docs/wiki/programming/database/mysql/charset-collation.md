@@ -1,4 +1,5 @@
 ---
+slug: "/Wiki/programming/database/mysql/charset-collation"
 title: 字符集与排序规则（Charset/Collation）
 ---
 

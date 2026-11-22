@@ -1,3 +1,6 @@
+---
+slug: "/Wiki/blockchain/bitcoin/address/segwit"
+---
 ## SegWit（隔离见证，v0）
 
 隔离见证将签名/公钥等“见证数据”从交易基础数据中分离，带来两大改变：

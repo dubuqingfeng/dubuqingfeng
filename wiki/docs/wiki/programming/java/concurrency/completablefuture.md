@@ -1,3 +1,6 @@
+---
+slug: "/Wiki/programming/java/concurrency/completablefuture"
+---
 ### CompletableFuture 与异步编排
 
 #### ToC

@@ -3,3 +3,13 @@ dubuqingfeng:
   title: "开发 / 折腾 / 记录"
   url: "https://dubuqingfeng.xyz"
   image_url: "/img/favicon/favicon.jpeg"
+
+admin:
+  name: admin
+  title: "早期文章"
+  url: "https://dubuqingfeng.xyz"
+  image_url: "/img/favicon/favicon.jpeg"
+
+codex:
+  name: codex
+  title: "AI 协作"

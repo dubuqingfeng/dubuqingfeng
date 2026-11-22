@@ -1,3 +1,6 @@
+---
+slug: "/Wiki/programming/cpp/language/coroutines"
+---
 ### 协程（C++20）
 
 协程是可暂停/恢复的函数，底层通过 `co_await`、`co_return`、`co_yield` 实现。标准库提供最小支撑，需要类型满足 Awaiter/Awaitable 协议，实际常结合库（如 asio、cppcoro）。

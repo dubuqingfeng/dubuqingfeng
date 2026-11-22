@@ -1,3 +1,6 @@
+---
+slug: "/Wiki/programming/sql/transactions/isolation"
+---
 ### 事务与隔离级别
 
 ACID 基础、隔离级别与并发异常，配合各引擎实现（MVCC/锁）。

@@ -1,3 +1,6 @@
+---
+slug: "/Wiki/programming/java/jvm/gc/overview"
+---
 ### GC 概览与内存区域
 
 #### ToC

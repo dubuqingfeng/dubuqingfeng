@@ -1,3 +1,6 @@
+---
+slug: "/Wiki/programming/html/semantics/"
+---
 ### 语义化标签与文档结构
 
 强调语义化有助于可读性、可访问性与 SEO：合理使用 `header/nav/main/section/article/aside/footer` 等结构标签。

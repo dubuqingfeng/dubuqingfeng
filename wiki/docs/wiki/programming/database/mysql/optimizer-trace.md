@@ -1,4 +1,5 @@
 ---
+slug: "/Wiki/programming/database/mysql/optimizer-trace"
 title: Optimizer Trace 与执行计划诊断
 ---
 

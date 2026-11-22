@@ -1,3 +1,8 @@
+---
+slug: "/Wiki/programming/nodejs/performance/profiling"
+---
+<span id="性能分析与�定位"></span>
+
 ### 性能分析与定位
 
 CPU/内存/事件循环延迟的可观测性，工具链包含内置 inspector、Chrome DevTools、clinic.js 等。

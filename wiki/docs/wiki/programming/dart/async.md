@@ -1,4 +1,5 @@
 ---
+slug: "/Wiki/programming/dart/async"
 title: Future/Stream/async-await
 ---
 

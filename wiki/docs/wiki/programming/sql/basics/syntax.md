@@ -1,3 +1,6 @@
+---
+slug: "/Wiki/programming/sql/basics/syntax"
+---
 ### SQL 基础与语法
 
 概览 DDL/DML/DCL/TCL，语句结构与常见关键字，区分大小写与转义规则。

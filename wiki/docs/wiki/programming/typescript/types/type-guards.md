@@ -1,3 +1,6 @@
+---
+slug: "/Wiki/programming/typescript/types/type-guards"
+---
 ### 类型守卫与窄化
 
 #### ToC

@@ -1,3 +1,6 @@
+---
+slug: "/Wiki/programming/cpp/toolchain/perf"
+---
 ### 性能分析（perf/valgrind）
 
 Linux perf（采样）：

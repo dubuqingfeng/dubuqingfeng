@@ -1,3 +1,6 @@
+---
+slug: "/Wiki/programming/sql/performance/explain"
+---
 ### 执行计划与 EXPLAIN
 
 阅读执行计划，理解访问路径/连接顺序/代价估计，定位性能瓶颈。

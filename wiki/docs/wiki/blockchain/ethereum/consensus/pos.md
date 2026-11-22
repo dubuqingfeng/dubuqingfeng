@@ -1,3 +1,6 @@
+---
+slug: "/Wiki/blockchain/ethereum/consensus/pos"
+---
 ## 执行层/共识层与 The Merge（PoS）
 
 以太坊已从 PoW 迁移至 PoS。网络分为：

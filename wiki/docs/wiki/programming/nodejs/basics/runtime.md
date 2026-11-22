@@ -1,3 +1,6 @@
+---
+slug: "/Wiki/programming/nodejs/basics/runtime"
+---
 ### 运行时架构与事件循环
 
 Node 基于 V8 + libuv，单线程事件循环 + 线程池 + 系统 I/O，提供跨平台网络/文件能力。

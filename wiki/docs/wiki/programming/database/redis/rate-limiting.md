@@ -1,4 +1,5 @@
 ---
+slug: "/Wiki/programming/database/redis/rate-limiting"
 title: 分布式限流（Redis-Cell 等）
 ---
 

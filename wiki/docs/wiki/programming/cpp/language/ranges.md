@@ -1,3 +1,6 @@
+---
+slug: "/Wiki/programming/cpp/language/ranges"
+---
 ### Ranges 范围适配
 
 基于范围的算法让管道式写法更自然（C++20）。

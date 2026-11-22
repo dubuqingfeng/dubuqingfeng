@@ -1,3 +1,6 @@
+---
+slug: "/Wiki/programming/sql/design/normalization"
+---
 ### 范式与反范式
 
 从 1NF/2NF/3NF/BCNF 到适度反范式化，在读写性能与一致性间权衡。

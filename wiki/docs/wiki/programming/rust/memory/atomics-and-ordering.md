@@ -1,3 +1,6 @@
+---
+slug: "/Wiki/programming/rust/memory/atomics-and-ordering"
+---
 ### 原子与内存序（Acquire/Release/SeqCst）
 
 #### 为什么需要原子

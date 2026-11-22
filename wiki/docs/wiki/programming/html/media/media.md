@@ -1,3 +1,6 @@
+---
+slug: "/Wiki/programming/html/media/"
+---
 ### 多媒体与图片
 
 图片与媒体加载的语义、性能与自适应处理。

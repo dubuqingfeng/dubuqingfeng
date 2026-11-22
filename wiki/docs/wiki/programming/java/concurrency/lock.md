@@ -1,3 +1,6 @@
+---
+slug: "/Wiki/programming/java/concurrency/lock"
+---
 ### 锁与同步（synchronized/Lock）
 
 #### ToC

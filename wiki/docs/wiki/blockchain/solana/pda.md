@@ -1,3 +1,6 @@
+---
+slug: "/Wiki/blockchain/solana/pda"
+---
 ## PDA（Program Derived Address）
 
 PDA 是“程序派生地址”，通过（若干 seeds + bump + programId）确定且不可由私钥签名（off-curve）。常用于：金库、配置账户、用户态状态账户等。
@@ -54,3 +57,6 @@ let addr = Pubkey::create_program_address(&[b"vault", user.key.as_ref(), &[bump]
 - 使用 on-curve 结果 → 安全性不达标（请用 findProgramAddress 选择 off-curve）
 - 把用户钱包当作 PDA（钱包地址通常 on-curve，可签名）
 
+### 执行与数据观察
+
+PDA 参与交易后的账户写入、失败回滚及事件关联，见[交易执行与数据路径](./data-path.md#path)。

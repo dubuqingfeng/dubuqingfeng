@@ -1,3 +1,6 @@
+---
+slug: "/Wiki/programming/javascript/security/csp"
+---
 ### CSP 与前端安全
 
 - CSP（Content-Security-Policy）可显著降低 XSS 风险：

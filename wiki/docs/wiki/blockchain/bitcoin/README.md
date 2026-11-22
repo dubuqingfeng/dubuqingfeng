@@ -61,4 +61,21 @@ slug: /wiki/blockchain/bitcoin
 
 ## BIP 导航
 
-- [关键 BIP 导航与分组](./bip/index.md)
+- [关键 BIP 导航与分组](./bip/README.md)
+
+
+## 本级目录 {#directory-index}
+
+### 子目录 {#directory-children}
+
+- [比特币：BIP 提案](./bip/README.md)
+- [比特币：中继策略](./policy/README.md)
+- [比特币：交易](./transaction/README.md)
+- [比特币：区块](./block/README.md)
+- [比特币：地址](./address/README.md)
+- [比特币：实现与验证](./impl/README.md)
+- [比特币：网络](./network/README.md)
+- [比特币：脚本](./script/README.md)
+- [比特币：钱包](./wallet/README.md)
+
+返回[上一级：区块链](./../README.md)。

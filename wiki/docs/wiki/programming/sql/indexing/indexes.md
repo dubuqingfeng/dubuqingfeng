@@ -1,3 +1,6 @@
+---
+slug: "/Wiki/programming/sql/indexing/indexes"
+---
 ### 索引与访问路径
 
 理解 B-Tree/Hash/位图/倒排等索引形态与访问路径选择，匹配常见谓词。

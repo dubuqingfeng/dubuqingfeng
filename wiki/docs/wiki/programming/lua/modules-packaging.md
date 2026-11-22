@@ -1,4 +1,5 @@
 ---
+slug: "/Wiki/programming/lua/modules-packaging"
 title: 模块、包管理与依赖
 ---
 

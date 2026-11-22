@@ -1,4 +1,5 @@
 ---
+slug: "/Wiki/programming/database/redis/cluster-ha"
 title: 集群与高可用（Sentinel/Cluster）
 ---
 

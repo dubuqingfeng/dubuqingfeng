@@ -1,3 +1,6 @@
+---
+slug: "/Wiki/programming/javascript/web/fetch"
+---
 ### Fetch API 与实践
 
 #### ToC

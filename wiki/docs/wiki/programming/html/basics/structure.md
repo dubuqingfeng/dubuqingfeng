@@ -1,3 +1,6 @@
+---
+slug: "/Wiki/programming/html/basics/structure"
+---
 ### HTML 文档结构与基础
 
 要点速览：`<!doctype html>`、`<html lang>`、`<head>` 元信息、`<body>` 内容、字符集与视口设置等。

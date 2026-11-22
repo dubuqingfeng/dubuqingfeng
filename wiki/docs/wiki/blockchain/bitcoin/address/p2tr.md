@@ -1,3 +1,6 @@
+---
+slug: "/Wiki/blockchain/bitcoin/address/p2tr"
+---
 ## p2tr
 
 Pay to Taproot（支付到 Taproot）

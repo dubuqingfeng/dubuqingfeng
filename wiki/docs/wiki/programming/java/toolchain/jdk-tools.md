@@ -1,3 +1,6 @@
+---
+slug: "/Wiki/programming/java/toolchain/jdk-tools"
+---
 ### JDK 工具速览（诊断与打包）
 
 #### ToC

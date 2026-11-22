@@ -1,3 +1,6 @@
+---
+slug: "/Wiki/programming/rust/memory/borrow-advanced"
+---
 ### 借用检查进阶：NLL、两阶段借用、重借用
 
 #### NLL（Non-Lexical Lifetimes）
@@ -36,6 +39,8 @@ fn inc(x: &mut i32) {
     *x += 1;           // 原可变借用继续使用
 }
 ```
+
+<span id="方法接收者��与借用"></span>
 
 #### 方法接收者与借用
 

@@ -1,3 +1,6 @@
+---
+slug: "/Wiki/programming/sql/tooling/cli"
+---
 ### CLI 与客户端
 
 常用命令行客户端与 GUI 工具，连接管理与脚本化执行。

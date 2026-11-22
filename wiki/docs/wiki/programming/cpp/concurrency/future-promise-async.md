@@ -1,3 +1,6 @@
+---
+slug: "/Wiki/programming/cpp/concurrency/future-promise-async"
+---
 ### 异步与期约 std::future/std::promise/std::async
 
 用 `std::promise` 产生值，用 `std::future` 等待结果；`std::async` 封装异步任务。

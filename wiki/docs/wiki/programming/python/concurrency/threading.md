@@ -1,3 +1,6 @@
+---
+slug: "/Wiki/programming/python/concurrency/threading"
+---
 ### Threading 线程
 
 概念要点：GIL、I/O 密集型适用、锁/条件/队列、线程池。

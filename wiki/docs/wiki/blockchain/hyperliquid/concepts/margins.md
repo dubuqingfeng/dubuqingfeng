@@ -1,3 +1,6 @@
+---
+slug: "/Wiki/blockchain/hyperliquid/concepts/margins"
+---
 ### 保证金与风险
 
 常见概念（具体以官方规则为准）：

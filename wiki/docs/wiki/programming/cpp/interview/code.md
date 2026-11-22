@@ -1,3 +1,6 @@
+---
+slug: "/Wiki/programming/cpp/interview/code"
+---
 ### 代码练习
 
 - 实现一个 RAII 封装的文件句柄类，支持移动，不可拷贝。

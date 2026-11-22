@@ -1,3 +1,6 @@
+---
+slug: "/Wiki/programming/css/animation/transitions"
+---
 ### Transitions 过渡
 
 基于状态变化的平滑过渡，简化交互反馈与层级变化。

@@ -1,3 +1,6 @@
+---
+slug: "/Wiki/blockchain/bitcoin/address/p2sh"
+---
 ## p2sh
 
 Pay to Script Hash（支付到脚本哈希）

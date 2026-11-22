@@ -1,4 +1,5 @@
 ---
+slug: "/Wiki/programming/database/redis/consistency-cache"
 title: 一致性与缓存模式
 ---
 

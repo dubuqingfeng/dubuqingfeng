@@ -1,3 +1,6 @@
+---
+slug: "/Wiki/programming/css/visual/shadows-filters"
+---
 ### 阴影与滤镜
 
 `box-shadow`/`filter` 提升层次与质感，注意性能与可访问性。

@@ -1,3 +1,6 @@
+---
+slug: "/Wiki/programming/typescript/interop/typing-js-libs"
+---
 ### JS 库的类型补全策略
 
 - 优先寻找官方类型或 `@types`；

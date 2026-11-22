@@ -1,3 +1,6 @@
+---
+slug: "/Wiki/blockchain/bitcoin/address/"
+---
 ## 地址概览
 
 Bitcoin 地址是锁定脚本的“人类可读”表达，常见三类：

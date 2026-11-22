@@ -1,3 +1,6 @@
+---
+slug: "/Wiki/programming/nodejs/modules/esm-cjs"
+---
 ### 模块系统：ESM 与 CommonJS
 
 Node 同时支持 CJS（`require/module.exports`）与 ESM（`import/export`），两者有差异与互操作边界。

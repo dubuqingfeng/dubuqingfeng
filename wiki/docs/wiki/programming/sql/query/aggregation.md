@@ -1,3 +1,6 @@
+---
+slug: "/Wiki/programming/sql/query/aggregation"
+---
 ### 聚合与分组
 
 `GROUP BY`/`HAVING` 与聚合函数，明晰语义与常见陷阱。

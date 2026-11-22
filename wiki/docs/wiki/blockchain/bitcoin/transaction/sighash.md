@@ -1,3 +1,6 @@
+---
+slug: "/Wiki/blockchain/bitcoin/transaction/sighash"
+---
 ## 签名哈希与 SIGHASH
 
 签名哈希决定“签名覆盖的范围”。常见类型：`SIGHASH_ALL/NONE/SINGLE` 与 `ANYONECANPAY` 可组合。

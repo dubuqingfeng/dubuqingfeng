@@ -10,7 +10,7 @@ tags:
 excerpt: 前两天去了全球容器技术大会，讨论容器技术的现在与未来。大会主要面向对容器技术感兴趣的中高端的人员，不乏很多互联网技术公司的人，都在学习如何建设新的基础设施架构。
 categories: Docker
 permalink: 201508-CNUTCon-Docker-Beijing.html
-author: admin
+authors: [admin]
 toc: true
 ---
 

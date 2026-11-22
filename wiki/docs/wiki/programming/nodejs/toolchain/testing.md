@@ -1,3 +1,6 @@
+---
+slug: "/Wiki/programming/nodejs/toolchain/testing"
+---
 ### 测试与覆盖率
 
 单元/集成/端到端测试与覆盖率度量，结合 Mock/容器化依赖。更多实践见 JavaScript 章节的[测试与覆盖率（Jest/Vitest）](../../javascript/toolchain/testing.md)。

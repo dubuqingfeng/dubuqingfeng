@@ -1,4 +1,5 @@
 ---
+slug: "/Wiki/programming/dart/packages-toolchain"
 title: 包管理与工具链（pub/dart）
 ---
 

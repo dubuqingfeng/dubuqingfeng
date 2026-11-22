@@ -1,4 +1,5 @@
 ---
+slug: "/Wiki/programming/dart/flutter-basics"
 title: Flutter 基础
 ---
 

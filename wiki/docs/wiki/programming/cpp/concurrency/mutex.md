@@ -1,3 +1,6 @@
+---
+slug: "/Wiki/programming/cpp/concurrency/mutex"
+---
 ### 互斥锁 std::mutex
 
 最基本的互斥原语，配合 `std::lock_guard` 或 `std::unique_lock` 使用以确保异常安全。

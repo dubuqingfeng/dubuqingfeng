@@ -1,3 +1,6 @@
+---
+slug: "/Wiki/programming/database/redis/interview/"
+---
 ### interview
 
 

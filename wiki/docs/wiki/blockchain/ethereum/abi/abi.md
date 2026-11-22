@@ -1,3 +1,6 @@
+---
+slug: "/Wiki/blockchain/ethereum/abi/"
+---
 ### ABI 编码要点
 
 - 函数选择器：方法签名（如 `transfer(address,uint256)`）做 Keccak-256，取前 4 字节。

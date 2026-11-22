@@ -10,7 +10,7 @@ tags:
 excerpt: 对于Linux的VPS的一些基础设置，例如更换端口，加强登录验证，日志的记录，shadowsocks的安装，shadowsocks的优化等。
 categories: linux
 permalink: 201505-vps-base-setting.html
-author: admin
+authors: [admin]
 toc: true
 ---
 

@@ -1,3 +1,6 @@
+---
+slug: "/Wiki/programming/javascript/interview/"
+---
 ### JavaScript 高频题要点
 
 - 原型链、this 绑定、闭包与作用域；

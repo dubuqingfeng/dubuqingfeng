@@ -1,3 +1,6 @@
+---
+slug: "/Wiki/blockchain/quant/"
+---
 ### 量化
 
 

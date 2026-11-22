@@ -1,3 +1,6 @@
+---
+slug: "/Wiki/programming/cpp/memory/move-semantics"
+---
 ### 移动语义与右值引用
 
 移动语义避免不必要的深拷贝，提升性能。实现自定义类型的 Rule of Five：

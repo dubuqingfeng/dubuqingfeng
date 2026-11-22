@@ -1,3 +1,6 @@
+---
+slug: "/Wiki/programming/cpp/toolchain/cmake-advanced"
+---
 ### CMake 进阶
 
 现代 CMake 以“目标”为核心：

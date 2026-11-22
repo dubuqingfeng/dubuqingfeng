@@ -1,3 +1,6 @@
+---
+slug: "/Wiki/programming/javascript/memory/gc"
+---
 ### V8 内存与垃圾回收（概览）
 
 #### ToC
@@ -6,6 +9,8 @@
 - GC 算法与写屏障
 - 隐藏类与内联缓存（IC）
 - 性能建议
+
+<span id="新生��代老生代"></span>
 
 #### 新生代/老生代
 

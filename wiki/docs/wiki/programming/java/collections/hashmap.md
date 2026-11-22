@@ -1,3 +1,6 @@
+---
+slug: "/Wiki/programming/java/collections/hashmap"
+---
 ### HashMap 实现与细节（JDK 8）
 
 #### ToC

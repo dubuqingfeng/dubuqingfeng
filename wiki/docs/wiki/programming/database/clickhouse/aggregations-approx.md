@@ -1,4 +1,5 @@
 ---
+slug: "/Wiki/programming/database/clickhouse/aggregations-approx"
 title: 聚合函数与近似统计
 ---
 

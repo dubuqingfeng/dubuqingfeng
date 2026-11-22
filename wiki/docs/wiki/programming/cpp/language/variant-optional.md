@@ -1,3 +1,6 @@
+---
+slug: "/Wiki/programming/cpp/language/variant-optional"
+---
 ### 可选与代数类型：std::optional/std::variant
 
 `std::optional<T>` 表示可有可无的值：

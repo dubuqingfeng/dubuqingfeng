@@ -1,3 +1,6 @@
+---
+slug: "/Wiki/programming/typescript/tooling/module-resolution"
+---
 ### 模块解析与路径别名
 
 #### ToC

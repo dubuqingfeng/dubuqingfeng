@@ -1,3 +1,6 @@
+---
+slug: "/Wiki/blockchain/solana/address"
+---
 ## Address
 
 Solana 地址是 Ed25519 公钥（32 字节）的 Base58 编码。与比特币/以太坊不同：
@@ -5,7 +8,9 @@ Solana 地址是 Ed25519 公钥（32 字节）的 Base58 编码。与比特币/�
 - 显示长度通常在 32~44 个 Base58 字符之间。
 - 任意账户（外部账户、程序账户、代币账户、PDA）本质都是一个“地址”。
 
-### 密钥与地址
+<span id="密钥与地�址" aria-hidden="true" />
+
+### 密钥与地址 {#密钥与地址}
 
 - 密钥对算法：Ed25519
 - 公钥：32 字节 → 地址字符串 = Base58(pubkey)
@@ -61,4 +66,8 @@ console.log('ATA:', ata.toBase58())
 - Base58 解码后应为 32 字节，否则不是有效公钥地址。
 - 普通钱包地址一般 on-curve；遇到 off-curve 多为 PDA（程序派生地址）。
 - Keypair JSON 应为 64 字节；若仅有 32 字节，多半只是私钥种子，不符合 Web3.js 的 `fromSecretKey` 输入格式。
+
+### 账户状态与数据观察
+
+地址只标识账户；账户在不同 Bank 中的状态和查询上下文，还需要结合[交易执行与数据路径](./data-path.md#state)理解。
 

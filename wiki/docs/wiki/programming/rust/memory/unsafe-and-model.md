@@ -1,3 +1,6 @@
+---
+slug: "/Wiki/programming/rust/memory/unsafe-and-model"
+---
 ### unsafe 与内存模型
 
 #### unsafe 能做什么

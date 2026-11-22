@@ -1,3 +1,6 @@
+---
+slug: "/Wiki/programming/rust/toolchain/cargo"
+---
 ### Cargo 基本用法
 
 #### 常用命令

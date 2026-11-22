@@ -1,4 +1,5 @@
 ---
+slug: "/Wiki/programming/database/redis/memory-eviction"
 title: 内存与淘汰策略
 ---
 

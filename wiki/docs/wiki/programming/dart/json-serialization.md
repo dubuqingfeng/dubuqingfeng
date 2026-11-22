@@ -1,4 +1,5 @@
 ---
+slug: "/Wiki/programming/dart/json-serialization"
 title: JSON 序列化（json_serializable/Freezed）
 ---
 

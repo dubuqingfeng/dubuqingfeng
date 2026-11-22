@@ -1,4 +1,5 @@
 ---
+slug: "/Wiki/programming/lua/coroutines"
 title: 协程（coroutine）与迭代器
 ---
 

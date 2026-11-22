@@ -1,3 +1,6 @@
+---
+slug: "/Wiki/programming/css/layout/flexbox"
+---
 ### Flexbox 布局
 
 一维布局方案，适合行或列方向的对齐与分配。

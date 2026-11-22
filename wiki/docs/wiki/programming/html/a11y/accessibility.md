@@ -1,3 +1,6 @@
+---
+slug: "/Wiki/programming/html/a11y/accessibility"
+---
 ### 可访问性基础（A11y）
 
 通过语义与 ARIA 提升可访问性：标签、可聚焦、键盘可用与对比度。

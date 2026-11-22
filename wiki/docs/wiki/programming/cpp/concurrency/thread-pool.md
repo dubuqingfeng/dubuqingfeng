@@ -1,3 +1,6 @@
+---
+slug: "/Wiki/programming/cpp/concurrency/thread-pool"
+---
 ### 线程池思路
 
 关键点：任务队列、工作线程、停止标记与条件变量。最小实现通常包含：

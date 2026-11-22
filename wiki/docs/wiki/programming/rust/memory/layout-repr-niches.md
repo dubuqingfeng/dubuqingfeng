@@ -1,3 +1,6 @@
+---
+slug: "/Wiki/programming/rust/memory/layout-repr-niches"
+---
 ### 内存布局：repr、透明与 niche 优化
 
 #### repr 选项

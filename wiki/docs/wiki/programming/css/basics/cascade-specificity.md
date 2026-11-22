@@ -1,3 +1,6 @@
+---
+slug: "/Wiki/programming/css/basics/cascade-specificity"
+---
 ### 层叠与优先级（Cascade & Specificity）
 
 控制样式冲突的基础：来源、重要性、特异性与顺序。

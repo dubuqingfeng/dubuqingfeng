@@ -1,3 +1,6 @@
+---
+slug: "/Wiki/programming/golang/interview/"
+---
 ### 常见的一些 Golang 面试题，八股文
 
 

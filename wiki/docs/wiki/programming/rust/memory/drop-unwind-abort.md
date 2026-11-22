@@ -1,3 +1,6 @@
+---
+slug: "/Wiki/programming/rust/memory/drop-unwind-abort"
+---
 ### Drop 顺序与 panic：展开（unwind）与中止（abort）
 
 #### Drop 顺序（确定性）

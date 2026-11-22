@@ -1,4 +1,5 @@
 ---
+slug: "/Wiki/programming/lua/embedding-capi"
 title: 嵌入式 C API 与扩展
 ---
 

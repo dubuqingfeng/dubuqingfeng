@@ -10,7 +10,7 @@ description: 本文在上一篇解魔方机器人初步设计的基础上，补�
 excerpt: 本文在上一篇解魔方机器人初步设计的基础上进行的详细设计，基于Android和控制板，后期可以扩展到树莓派等，后期会陆续开源，从材料结构，到算法控制等的一些简单设计。
 categories: 电子设计
 permalink: 201503-Rubik's-Cube-Robot-Xiangxisikao.html
-author: admin, codex
+authors: [admin, codex]
 toc: true
 ---
 

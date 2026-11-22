@@ -1,3 +1,6 @@
+---
+slug: "/Wiki/blockchain/ethereum/address/"
+---
 ### 账户与地址
 
 以太坊有两类账户：

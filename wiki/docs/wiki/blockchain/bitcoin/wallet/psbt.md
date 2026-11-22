@@ -1,3 +1,6 @@
+---
+slug: "/Wiki/blockchain/bitcoin/wallet/psbt"
+---
 ## PSBT（BIP174/370/371）
 
 PSBT 是“部分签名的 Bitcoin 交易”的标准容器，支持多方协作与离线签名。

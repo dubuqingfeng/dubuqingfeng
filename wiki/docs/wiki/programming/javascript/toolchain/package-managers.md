@@ -1,3 +1,6 @@
+---
+slug: "/Wiki/programming/javascript/toolchain/package-managers"
+---
 ### 包管理：npm/yarn/pnpm 与版本策略
 
 #### 要点

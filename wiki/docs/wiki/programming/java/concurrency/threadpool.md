@@ -1,3 +1,6 @@
+---
+slug: "/Wiki/programming/java/concurrency/threadpool"
+---
 ### 线程池 ThreadPoolExecutor
 
 #### ToC

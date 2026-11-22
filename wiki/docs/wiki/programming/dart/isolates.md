@@ -1,4 +1,5 @@
 ---
+slug: "/Wiki/programming/dart/isolates"
 title: Isolate 与并发模型
 ---
 

@@ -1,3 +1,6 @@
+---
+slug: "/Wiki/programming/php/database/"
+---
 ### 数据库访问与 ORM 概览
 
 PDO、mysqli、常见 ORM（Eloquent/Doctrine）与查询构建器、连接池与迁移。

@@ -1,4 +1,5 @@
 ---
+slug: "/Wiki/programming/database/clickhouse/kafka-mv"
 title: Kafka 与物化视图摄入
 ---
 

@@ -1,3 +1,6 @@
+---
+slug: "/Wiki/programming/java/language/generics"
+---
 ### 泛型与类型擦除
 
 #### ToC

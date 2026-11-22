@@ -1,3 +1,6 @@
+---
+slug: "/Wiki/programming/javascript/toolchain/node-version"
+---
 ### Node 版本管理（nvm/nodenv/Volta）
 
 - nvm：常用 `nvm install 20 && nvm use 20 && nvm alias default 20`；

@@ -23,3 +23,18 @@ slug: /wiki/programming/solidity
 
 如需新增条目，保持与 Go/Rust 目录风格一致。
 
+
+
+## 本级目录 {#directory-index}
+
+### 本级文章 {#directory-articles}
+
+- [ERC 标准与接口](./erc-standards.md)
+- [Gas 优化与可观察性](./gas-optimizations.md)
+- [升级与代理（UUPS/Transparent）](./upgrades-proxies.md)
+- [合约设计模式](./patterns.md)
+- [安全与常见漏洞](./security.md)
+- [测试与工具链（Foundry/Hardhat）](./testing-tooling.md)
+- [语言基础与类型](./language-basics.md)
+
+返回[上一级：编程与数据库](./../README.md)。

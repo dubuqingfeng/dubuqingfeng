@@ -10,7 +10,7 @@ tags:
 excerpt: 在android中，利用 PreferenceFragment 快速完成设置界面以及一些思考。
 categories: Android
 permalink: 201506-android-Preference-fragment.html
-author: admin
+authors: [admin]
 toc: true
 ---
 

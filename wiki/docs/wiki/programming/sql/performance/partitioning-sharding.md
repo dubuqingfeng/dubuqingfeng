@@ -1,3 +1,6 @@
+---
+slug: "/Wiki/programming/sql/performance/partitioning-sharding"
+---
 ### 分区与分片
 
 单库分区与多库分片策略，对查询/写入/事务的一致性影响。

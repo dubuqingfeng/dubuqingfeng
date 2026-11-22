@@ -1,3 +1,6 @@
+---
+slug: "/Wiki/programming/css/architecture/bem"
+---
 ### 命名与组织（BEM 等）
 
 通过 BEM/OOCSS/ITCSS 等方法论组织样式，降低耦合与冲突。

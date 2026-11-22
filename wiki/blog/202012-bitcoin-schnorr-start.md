@@ -10,7 +10,7 @@ tags:
 categories: bitcoin
 excerpt: 在隔离见证（Segwit）实行以后，令开发者振奋的 Schnorr 签名也将踏上日程。本文主要讲述比特币新特性：Schnorr 签名系列的初识 Schnorr 签名。介绍什么是 Schnorr 签名，以及发展历程，如何实现 Schnorr 的多重签名，还有 BCH 在 Schnorr 签名上的探索。
 permalink: 202012-bitcoin-schnorr-start.html
-author: admin
+authors: [admin]
 toc: true
 ---
 
@@ -21,7 +21,7 @@ toc: true
 
 在前不久，比特币 Core 开发者将实现 BIP-340 Schnorr 签名的提交合并到了 [Secp256k1](https://github.com/bitcoin-core/secp256k1)，而 Bitcoin 代码也在 10 月 15 日时合并了[相关提交](https://github.com/bitcoin/bitcoin/pull/19953)，这将意味着会在 12 月份发布 0.21 的版本中，有相关的实现。并且按照 BIP 9 的软分叉规范，大概在近几年内，会进行实际投票通过软分叉的形式激活这些特性。
 
-在比特币上实现 Schnorr 签名具体可以追溯到 [BIP340]()，其中讨论了 Bitcoin Schnorr 的相关标准与实现，讲了一些特性，包括与之前的 ECDSA 的对比，以及具体的标准规范，具体的分析在下面 Schnorr 实现一节参阅。
+在比特币上实现 Schnorr 签名具体可以追溯到 [BIP340](https://github.com/bitcoin/bips/blob/master/bip-0340.mediawiki)，其中讨论了 Bitcoin Schnorr 的相关标准与实现，讲了一些特性，包括与之前的 ECDSA 的对比，以及具体的标准规范，具体的分析在下面 Schnorr 实现一节参阅。
 
 在 2017 年 8 月份，比特币激活了隔离见证（SegWit），解决了之前遗留的延展性问题，将签名部分的数据移到了见证部分，进一步节省了区块体积。
 

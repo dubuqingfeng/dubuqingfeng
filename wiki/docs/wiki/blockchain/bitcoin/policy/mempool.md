@@ -1,3 +1,6 @@
+---
+slug: "/Wiki/blockchain/bitcoin/policy/mempool"
+---
 ## Mempool 与中继策略
 
 Mempool 是未确认交易的暂存池。策略目标是“可用、抗 DoS、利于打包”。

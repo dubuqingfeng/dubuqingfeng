@@ -1,3 +1,6 @@
+---
+slug: "/Wiki/blockchain/bitcoin/transaction/structure"
+---
 ## 交易结构与序列化
 
 典型交易（非 SegWit）：

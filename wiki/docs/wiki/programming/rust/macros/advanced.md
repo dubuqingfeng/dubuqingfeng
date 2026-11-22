@@ -1,3 +1,6 @@
+---
+slug: "/Wiki/programming/rust/macros/advanced"
+---
 ### 宏进阶：过程宏实战
 
 #### 三类过程宏

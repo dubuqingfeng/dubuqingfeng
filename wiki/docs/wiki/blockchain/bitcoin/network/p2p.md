@@ -1,3 +1,6 @@
+---
+slug: "/Wiki/blockchain/bitcoin/network/p2p"
+---
 ## P2P 协议与消息
 
 Bitcoin P2P 使用 TCP，消息封装为：`magic | command[12] | length | checksum | payload`。

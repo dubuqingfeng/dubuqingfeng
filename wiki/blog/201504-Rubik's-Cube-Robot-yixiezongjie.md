@@ -10,7 +10,7 @@ tags:
 excerpt: 在解魔方机器人制作之后的一些总结性的文字，利于以后回忆，并且有所回顾和思考。以及其在博创杯上的展示，升级等。
 categories: 电子设计
 permalink: 201504-Rubik's-Cube-Robot-yixiezongjie.html
-author: admin, codex
+authors: [admin, codex]
 toc: true
 ---
 

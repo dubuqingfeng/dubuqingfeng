@@ -1,3 +1,6 @@
+---
+slug: "/Wiki/programming/javascript/runtime/streams"
+---
 ### Node Streams（流）
 
 #### ToC

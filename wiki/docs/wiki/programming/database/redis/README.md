@@ -41,3 +41,24 @@ slug: /wiki/programming/database/redis
 - [运维与调优](./ops-tuning.md)
 
 按需补充子页面，保持与 Go/Rust 目录组织一致。
+
+
+## 本级目录 {#directory-index}
+
+### 子目录 {#directory-children}
+
+- [Redis：源码阅读](./source/README.md)
+- [Redis：面试与练习](./interview/README.md)
+
+### 本级文章 {#directory-articles}
+
+- [一致性与缓存模式](./consistency-cache.md)
+- [内存与淘汰策略](./memory-eviction.md)
+- [分布式锁（含 Redlock）](./distributed-lock.md)
+- [分布式限流（Redis-Cell 等）](./rate-limiting.md)
+- [持久化（RDB/AOF）](./persistence.md)
+- [线程模型与性能](./thread-model.md)
+- [运维与调优](./ops-tuning.md)
+- [集群与高可用（Sentinel/Cluster）](./cluster-ha.md)
+
+返回[上一级：数据库](./../README.md)。

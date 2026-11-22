@@ -1,4 +1,5 @@
 ---
+slug: "/Wiki/programming/dart/collections-generics"
 title: 集合/泛型/扩展/枚举
 ---
 

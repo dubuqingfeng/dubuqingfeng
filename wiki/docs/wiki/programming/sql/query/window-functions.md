@@ -1,3 +1,6 @@
+---
+slug: "/Wiki/programming/sql/query/window-functions"
+---
 ### 窗口函数（Window Functions）
 
 以 `OVER(PARTITION BY … ORDER BY …)` 定义窗口，进行排名/累计/分组内计算。

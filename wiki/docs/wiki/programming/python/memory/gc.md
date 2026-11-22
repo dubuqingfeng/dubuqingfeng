@@ -1,3 +1,6 @@
+---
+slug: "/Wiki/programming/python/memory/gc"
+---
 ### Python 垃圾回收与内存管理
 
 核心机制：引用计数 + 循环检测分代 GC；对象池/小整数缓存；`__del__` 与弱引用。

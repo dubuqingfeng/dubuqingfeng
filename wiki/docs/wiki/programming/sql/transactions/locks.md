@@ -1,3 +1,6 @@
+---
+slug: "/Wiki/programming/sql/transactions/locks"
+---
 ### 锁与并发控制
 
 行锁/表锁/意向锁、死锁与诊断，避免大范围锁与热点争用。

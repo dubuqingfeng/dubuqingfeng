@@ -1,3 +1,6 @@
+---
+slug: "/Wiki/programming/javascript/toolchain/bundlers"
+---
 ### 打包与 Tree Shaking（Vite/Webpack/Rollup）
 
 #### 要点

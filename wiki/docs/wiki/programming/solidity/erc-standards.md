@@ -1,4 +1,5 @@
 ---
+slug: "/Wiki/programming/solidity/erc-standards"
 title: ERC 标准与接口
 ---
 

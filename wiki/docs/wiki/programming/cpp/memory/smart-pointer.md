@@ -1,3 +1,6 @@
+---
+slug: "/Wiki/programming/cpp/memory/smart-pointer"
+---
 ### 智能指针
 
 常用类型：

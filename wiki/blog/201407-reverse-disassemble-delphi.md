@@ -10,7 +10,7 @@ tags:
 excerpt: 下面以我的一个 delphi 程序为例，介绍 VMProtect sdk 和 EncryptPE 的一些加密方法，其他vc，或者易语言写的程序也可以使用其进行加密。
 categories: 逆向加密
 permalink: 201407-reverse-disassemble-delphi.html
-author: admin
+authors: [admin]
 toc: true
 ---
 

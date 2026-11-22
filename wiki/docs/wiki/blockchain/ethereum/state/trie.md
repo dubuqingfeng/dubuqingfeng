@@ -1,3 +1,6 @@
+---
+slug: "/Wiki/blockchain/ethereum/state/trie"
+---
 ## 状态与 Merkle-Patricia Trie（MPT）
 
 以太坊使用十六进制前缀压缩的 Merkle-Patricia Trie 存储：

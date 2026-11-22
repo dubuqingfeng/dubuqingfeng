@@ -1,3 +1,6 @@
+---
+slug: "/Wiki/programming/nodejs/concurrency/libuv-threadpool"
+---
 ### libuv 线程池要点
 
 Node 的部分 API 通过 libuv 线程池执行（默认 4 线程，可调），避免阻塞事件循环。

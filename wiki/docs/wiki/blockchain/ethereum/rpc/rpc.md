@@ -1,3 +1,6 @@
+---
+slug: "/Wiki/blockchain/ethereum/rpc/"
+---
 ### JSON-RPC 常用接口
 
 读取类：

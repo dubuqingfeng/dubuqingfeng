@@ -1,3 +1,6 @@
+---
+slug: "/Wiki/programming/nodejs/io/fs"
+---
 ### 文件系统（fs）
 
 异步优先、避免长时间同步 I/O；大文件使用流式处理，注意权限与跨平台路径。

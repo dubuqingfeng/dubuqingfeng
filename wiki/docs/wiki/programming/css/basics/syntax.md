@@ -1,3 +1,6 @@
+---
+slug: "/Wiki/programming/css/basics/syntax"
+---
 ### 语法与选择器概览
 
 覆盖选择器、伪类/伪元素、常见语法规则与调试要点。

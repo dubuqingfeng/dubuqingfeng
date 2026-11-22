@@ -1,3 +1,6 @@
+---
+slug: "/Wiki/programming/cpp/toolchain/sanitizers"
+---
 ### Sanitizers（ASan/UBSan/TSan）
 
 常用组合：

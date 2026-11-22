@@ -1,3 +1,6 @@
+---
+slug: "/Wiki/blockchain/ethereum/block/receipts"
+---
 ## 收据与日志 Bloom
 
 每笔交易执行结束会生成收据（receipt），包含：

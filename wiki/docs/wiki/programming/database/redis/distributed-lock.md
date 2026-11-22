@@ -1,4 +1,5 @@
 ---
+slug: "/Wiki/programming/database/redis/distributed-lock"
 title: 分布式锁（含 Redlock）
 ---
 

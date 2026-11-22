@@ -1,3 +1,6 @@
+---
+slug: "/Wiki/programming/html/security/"
+---
 ### 安全注意事项
 
 HTML 层面的常见安全要点：内容注入、外链与嵌入、安全策略与隔离。

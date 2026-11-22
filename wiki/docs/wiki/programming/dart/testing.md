@@ -1,4 +1,5 @@
 ---
+slug: "/Wiki/programming/dart/testing"
 title: 测试与覆盖率
 ---
 

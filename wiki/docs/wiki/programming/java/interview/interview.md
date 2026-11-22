@@ -1,3 +1,6 @@
+---
+slug: "/Wiki/programming/java/interview/"
+---
 ### Java 高频题要点
 
 整理一些常问知识点与速记：

@@ -1,3 +1,6 @@
+---
+slug: "/Wiki/programming/typescript/interview/"
+---
 ### TypeScript 高频题要点
 
 - 联合/交叉、可判别联合、控制流窄化；

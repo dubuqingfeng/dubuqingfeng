@@ -1,3 +1,6 @@
+---
+slug: "/Wiki/programming/rust/concurrency/threading"
+---
 ### 线程、共享内存与消息传递
 
 #### 线程与 Join

@@ -1,4 +1,5 @@
 ---
+slug: "/Wiki/programming/lua/basics"
 title: 语法与表（table）基础
 ---
 

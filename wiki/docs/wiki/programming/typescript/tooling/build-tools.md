@@ -1,3 +1,6 @@
+---
+slug: "/Wiki/programming/typescript/tooling/build-tools"
+---
 ### 构建工具（esbuild/Rollup/tsup）
 
 - esbuild：极快的打包/转译器；适合工具/服务端构建；

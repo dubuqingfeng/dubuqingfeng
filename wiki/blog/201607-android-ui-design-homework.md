@@ -11,7 +11,7 @@ tags:
 excerpt: 以一次作业为例，分析Android上常见的UI风格的实现，并整理一些链接及官方实现。
 categories: Android安全
 permalink: 201607-android-ui-design-homework.html
-author: admin
+authors: [admin]
 toc: true
 ---
 

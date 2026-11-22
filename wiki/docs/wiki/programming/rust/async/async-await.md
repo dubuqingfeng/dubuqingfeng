@@ -1,3 +1,6 @@
+---
+slug: "/Wiki/programming/rust/async/async-await"
+---
 ### 异步 async/await 与 Future
 
 #### 基础

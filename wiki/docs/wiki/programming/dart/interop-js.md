@@ -1,4 +1,5 @@
 ---
+slug: "/Wiki/programming/dart/interop-js"
 title: JS 互操作（Web）
 ---
 

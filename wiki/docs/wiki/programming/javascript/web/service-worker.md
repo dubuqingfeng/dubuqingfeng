@@ -1,3 +1,6 @@
+---
+slug: "/Wiki/programming/javascript/web/service-worker"
+---
 ### Service Worker 概览
 
 #### ToC

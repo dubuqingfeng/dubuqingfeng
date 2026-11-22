@@ -10,7 +10,7 @@ tags:
  - 技术
 categories: blockchain
 permalink: 202108-eth-scaling-and-eth2.0.html
-author: admin
+authors: [admin]
 toc: true
 ---
 

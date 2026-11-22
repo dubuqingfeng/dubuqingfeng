@@ -1,4 +1,5 @@
 ---
+slug: "/Wiki/programming/database/mysql/ops-tuning"
 title: 运维与性能调优
 ---
 

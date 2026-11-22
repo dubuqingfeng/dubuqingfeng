@@ -1,4 +1,5 @@
 ---
+slug: "/Wiki/programming/database/mysql/index-design"
 title: 索引设计与最佳实践
 ---
 

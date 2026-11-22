@@ -1,3 +1,6 @@
+---
+slug: "/Wiki/programming/cpp/language/exceptions"
+---
 ### 异常处理与 noexcept
 
 异常用于报告错误并进行栈展开，RAII 确保资源在异常路径自动释放。

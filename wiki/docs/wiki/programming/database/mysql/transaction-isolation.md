@@ -1,4 +1,5 @@
 ---
+slug: "/Wiki/programming/database/mysql/transaction-isolation"
 title: 事务与隔离（含 MVCC）
 ---
 

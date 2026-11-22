@@ -1,3 +1,6 @@
+---
+slug: "/Wiki/blockchain/ethereum/token/erc-20"
+---
 ### ERC-20 标准
 
 核心接口：

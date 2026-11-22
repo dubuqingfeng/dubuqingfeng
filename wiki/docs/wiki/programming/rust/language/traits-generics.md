@@ -1,3 +1,6 @@
+---
+slug: "/Wiki/programming/rust/language/traits-generics"
+---
 ### Traits 与泛型
 
 #### Traits（接口约束）

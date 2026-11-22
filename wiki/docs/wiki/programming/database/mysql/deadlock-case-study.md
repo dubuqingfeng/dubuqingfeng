@@ -1,4 +1,5 @@
 ---
+slug: "/Wiki/programming/database/mysql/deadlock-case-study"
 title: 死锁复现与诊断
 ---
 

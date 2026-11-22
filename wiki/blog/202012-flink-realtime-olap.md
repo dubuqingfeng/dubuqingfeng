@@ -12,7 +12,7 @@ tags:
 categories: flink
 excerpt: BTC.com 是一家区块链数据与服务提供商，目前提供各种区块链方向的解决方案。在业务发展的过程中，有着各种实时和准实时以及 OLAP 的需求场景，面临着从 0 到 1 的挑战；Flink 作为计算基础设施组件，业务目前覆盖了在线业务支持、实时报表统计等，处于不断发展中。本次主要介绍 BTC.com 实时计算的起步与当前的 OLAP 技术架构。
 permalink: 202012-flink-realtime-olap.html
-author: admin
+authors: [admin]
 toc: true
 ---
 

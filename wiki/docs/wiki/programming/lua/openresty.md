@@ -1,4 +1,5 @@
 ---
+slug: "/Wiki/programming/lua/openresty"
 title: OpenResty/Nginx + Lua 实战
 ---
 

@@ -36,3 +36,19 @@ slug: /wiki/programming/php
 
 若有新增条目或分类需要调整，按需补充即可。
 
+
+
+## 本级目录 {#directory-index}
+
+### 子目录 {#directory-children}
+
+- [PHP：Web](./web/README.md)
+- [PHP：内存模型](./memory/README.md)
+- [PHP：基础](./basics/README.md)
+- [PHP：工具链](./toolchain/README.md)
+- [PHP：并发](./concurrency/README.md)
+- [PHP：数据库](./database/README.md)
+- [PHP：框架](./framework/README.md)
+- [PHP：面向对象](./oop/README.md)
+
+返回[上一级：编程与数据库](./../README.md)。

@@ -1,3 +1,6 @@
+---
+slug: "/Wiki/blockchain/bitcoin/block/compact"
+---
 ## 紧凑区块（BIP152）
 
 紧凑区块通过“短 ID + 缺失交易按需拉取”的方式加速新区块传播，降低带宽并减少孤块概率。

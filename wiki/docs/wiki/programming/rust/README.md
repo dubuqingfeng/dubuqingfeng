@@ -48,3 +48,22 @@ slug: /wiki/programming/rust
 - [宏进阶：过程宏实战](./macros/advanced.md)
 
 如需新增条目或分类，保持与 Go/C++ 等目录一致的层级与命名即可。
+
+
+## 本级目录 {#directory-index}
+
+### 子目录 {#directory-children}
+
+- [Rust：FFI](./ffi/README.md)
+- [Rust：Web](./web/README.md)
+- [Rust：内存模型](./memory/README.md)
+- [Rust：宏](./macros/README.md)
+- [Rust：工具链](./toolchain/README.md)
+- [Rust：并发](./concurrency/README.md)
+- [Rust：异步](./async/README.md)
+- [Rust：性能优化](./perf/README.md)
+- [Rust：测试](./testing/README.md)
+- [Rust：语言特性](./language/README.md)
+- [Rust：错误处理](./error/README.md)
+
+返回[上一级：编程与数据库](./../README.md)。

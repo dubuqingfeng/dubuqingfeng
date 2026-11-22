@@ -1,3 +1,6 @@
+---
+slug: "/Wiki/programming/cpp/network/io-models"
+---
 ### IO 模型概览（select/poll/epoll/kqueue/IOCP）
 
 常见模型：

@@ -1,3 +1,6 @@
+---
+slug: "/Wiki/programming/javascript/runtime/node"
+---
 ### Node.js 运行时要点
 
 #### ToC

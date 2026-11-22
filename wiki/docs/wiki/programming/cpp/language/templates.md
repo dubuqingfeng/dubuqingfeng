@@ -1,3 +1,6 @@
+---
+slug: "/Wiki/programming/cpp/language/templates"
+---
 ### 模板与泛型编程
 
 函数模板与类模板示例：

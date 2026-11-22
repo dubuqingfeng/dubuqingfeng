@@ -1,3 +1,6 @@
+---
+slug: "/Wiki/programming/nodejs/web/http-server"
+---
 ### HTTP/网络基础
 
 从原生 `http`/`http2` 到常见框架（Express/Koa/Fastify），理解请求生命周期、路由与中间件。

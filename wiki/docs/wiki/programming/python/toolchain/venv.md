@@ -1,3 +1,6 @@
+---
+slug: "/Wiki/programming/python/toolchain/venv"
+---
 ### 虚拟环境 venv
 
 隔离依赖与解释器，多项目并行；常见于 `venv`、`virtualenv`、`conda`。

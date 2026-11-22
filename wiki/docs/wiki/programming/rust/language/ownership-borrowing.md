@@ -1,3 +1,6 @@
+---
+slug: "/Wiki/programming/rust/language/ownership-borrowing"
+---
 ### 所有权、借用与生命周期
 
 #### 核心规则

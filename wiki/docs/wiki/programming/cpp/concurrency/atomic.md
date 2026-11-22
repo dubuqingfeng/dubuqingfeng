@@ -1,3 +1,6 @@
+---
+slug: "/Wiki/programming/cpp/concurrency/atomic"
+---
 ### 原子操作 std::atomic
 
 `std::atomic<T>` 提供无锁/有锁的原子读写与 RMW 操作，默认使用 `seq_cst` 内存序。

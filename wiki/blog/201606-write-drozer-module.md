@@ -10,7 +10,7 @@ tags:
 excerpt: drozer 采用了模块化的设计，用户可以自由地定制一些Python模块和dex模块。
 categories: Android安全
 permalink: 201606-write-drozer-module.html
-author: admin
+authors: [admin]
 toc: true
 ---
 

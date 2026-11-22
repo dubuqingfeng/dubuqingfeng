@@ -1,3 +1,6 @@
+---
+slug: "/Wiki/programming/golang/chaos/"
+---
 ### Chaos 混沌工程（Golang）
 
 

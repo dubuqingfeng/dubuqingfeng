@@ -10,7 +10,7 @@ tags:
 excerpt: 当学习久了以后，就会意识到效率的重要性。计算机行业日新月异，作为一名计算机爱好者，同时也关注效率的人来说，需要不断的学习，才能跟得上发展。对自己的知识管理体系进行思考，并付诸实践。
 categories: 自我管理
 permalink: 201704-personal-knowledge-management.html
-author: admin
+authors: [admin]
 toc: true
 ---
 
@@ -106,7 +106,7 @@ mybase 作为自己的摘抄知识库。
 
 + [小土刀](http://wdxtub.com/2016/12/10/be-productive-guide/)
 + [刘未鹏](http://mindhacks.cn/)
-+ [吴军-硅谷来信]()
++ 吴军-硅谷来信
 
 # 后记
 

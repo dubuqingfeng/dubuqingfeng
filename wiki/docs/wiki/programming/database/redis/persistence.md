@@ -1,4 +1,5 @@
 ---
+slug: "/Wiki/programming/database/redis/persistence"
 title: 持久化（RDB/AOF）
 ---
 

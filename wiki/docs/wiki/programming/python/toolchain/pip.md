@@ -1,3 +1,6 @@
+---
+slug: "/Wiki/programming/python/toolchain/pip"
+---
 ### pip 包管理
 
 常用操作：安装/升级/卸载、源配置、冻结与锁定、私有源。

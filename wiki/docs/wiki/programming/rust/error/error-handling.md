@@ -1,3 +1,6 @@
+---
+slug: "/Wiki/programming/rust/error/error-handling"
+---
 ### 错误处理：Result/anyhow/thiserror
 
 #### 基础：Result 与 ? 运算符

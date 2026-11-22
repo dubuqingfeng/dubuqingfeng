@@ -1,3 +1,6 @@
+---
+slug: "/Wiki/programming/cpp/network/asio"
+---
 ### Boost.Asio / Asio 基础
 
 Asio 提供跨平台异步 IO，支持回调、`co_await`（C++20）。

@@ -1,4 +1,5 @@
 ---
+slug: "/Wiki/programming/database/clickhouse/backup-restore"
 title: 备份/快照与恢复
 ---
 

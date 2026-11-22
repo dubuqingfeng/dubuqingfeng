@@ -1,3 +1,6 @@
+---
+slug: "/Wiki/programming/javascript/async/event-loop"
+---
 ### 事件循环与任务队列
 
 #### ToC

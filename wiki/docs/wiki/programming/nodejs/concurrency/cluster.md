@@ -1,3 +1,6 @@
+---
+slug: "/Wiki/programming/nodejs/concurrency/cluster"
+---
 ### Cluster 多进程模型
 
 利用多核并行处理请求，主进程负责 fork/管理工作进程，常与反向代理配合。

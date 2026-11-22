@@ -1,3 +1,6 @@
+---
+slug: "/Wiki/programming/css/architecture/variables"
+---
 ### CSS 变量（自定义属性）
 
 通过 `--var` 与 `var()` 管理主题与可配置值，增强可维护性。

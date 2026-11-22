@@ -54,3 +54,20 @@ slug: /wiki/programming/sql
 
 若有新增条目或分类需要调整，按需补充即可。
 
+
+
+## 本级目录 {#directory-index}
+
+### 子目录 {#directory-children}
+
+- [SQL：事务](./transactions/README.md)
+- [SQL：基础](./basics/README.md)
+- [SQL：安全](./security/README.md)
+- [SQL：工具](./tooling/README.md)
+- [SQL：建模与设计](./design/README.md)
+- [SQL：性能](./performance/README.md)
+- [SQL：查询](./query/README.md)
+- [SQL：索引](./indexing/README.md)
+- [SQL：运维](./ops/README.md)
+
+返回[上一级：编程与数据库](./../README.md)。

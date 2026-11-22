@@ -1,3 +1,6 @@
+---
+slug: "/Wiki/devops/jenkins/docker"
+---
 ```
 version: '3'
 services:                                      # 集合

@@ -1,3 +1,6 @@
+---
+slug: "/Wiki/blockchain/bitcoin/address/taproot"
+---
 ## Taproot
 
 ### 相关 bip

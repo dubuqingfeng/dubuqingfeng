@@ -1,3 +1,6 @@
+---
+slug: "/Wiki/programming/css/basics/box-model"
+---
 ### 盒模型（Box Model）
 
 理解内容/内边距/边框/外边距与 `box-sizing` 的关系。

@@ -1,3 +1,6 @@
+---
+slug: "/Wiki/programming/golang/goroutine/gmp"
+---
 ### GMP 模型
 
 <!-- <img src="https://cdn.learnku.com/uploads/images/202105/12/81958/afJZIYgr3E.webp!large" alt="图片" style="zoom:50%;" /> -->

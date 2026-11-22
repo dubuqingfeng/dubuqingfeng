@@ -1,3 +1,6 @@
+---
+slug: "/Wiki/blockchain/bitcoin/address/p2pkh"
+---
 ## p2pkh
 
 Pay to Public Key Hash（支付到公钥哈希）

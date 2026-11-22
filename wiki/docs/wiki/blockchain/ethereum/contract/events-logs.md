@@ -1,3 +1,6 @@
+---
+slug: "/Wiki/blockchain/ethereum/contract/events-logs"
+---
 ## 事件与日志（Events & Logs）
 
 Solidity 的 `event` 会在链上生成日志：

@@ -1,3 +1,6 @@
+---
+slug: "/Wiki/programming/python/data-structure/dict"
+---
 ### Dict 字典
 
 特性：哈希表、插入有序（3.7+）、装载因子与冲突处理。

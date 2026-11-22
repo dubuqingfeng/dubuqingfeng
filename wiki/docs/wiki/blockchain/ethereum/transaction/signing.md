@@ -1,3 +1,6 @@
+---
+slug: "/Wiki/blockchain/ethereum/transaction/signing"
+---
 ## 签名与 y-parity/链 ID（EIP-155）
 
 交易签名使用 secp256k1（Keccak-256 摘要）。

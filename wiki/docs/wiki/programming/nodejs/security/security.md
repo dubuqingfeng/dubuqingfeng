@@ -1,3 +1,6 @@
+---
+slug: "/Wiki/programming/nodejs/security/"
+---
 ### 安全基线与常见风险
 
 从依赖供应链到服务端 API 防护，关注 SSRF/路径穿越/命令注入等攻击面。

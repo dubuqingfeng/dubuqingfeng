@@ -1,3 +1,6 @@
+---
+slug: "/Wiki/programming/typescript/tooling/tsconfig"
+---
 ### tsconfig 关键选项
 
 建议开启严格模式并按需增加安全选项：

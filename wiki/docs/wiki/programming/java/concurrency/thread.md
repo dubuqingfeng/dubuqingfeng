@@ -1,3 +1,6 @@
+---
+slug: "/Wiki/programming/java/concurrency/thread"
+---
 ### 线程与并发基础
 
 #### ToC

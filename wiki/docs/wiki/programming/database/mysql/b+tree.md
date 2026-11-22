@@ -1,3 +1,6 @@
+---
+slug: "/Wiki/programming/database/mysql/b+tree"
+---
 ### B+ Tree
 
 

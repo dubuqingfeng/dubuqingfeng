@@ -1,3 +1,6 @@
+---
+slug: "/Wiki/programming/common/gc/"
+---
 ### GC
 
 

@@ -11,7 +11,7 @@ tags:
 excerpt: 本文对 Android 反编译领域进行了简要的分析，如何进行反编译，以及如何混淆如何加密如何加壳，以及其对策，进行了实践和探索。
 categories: Android安全
 permalink: 201606-android-security-decompiler.html
-author: admin
+authors: [admin]
 toc: true
 ---
 

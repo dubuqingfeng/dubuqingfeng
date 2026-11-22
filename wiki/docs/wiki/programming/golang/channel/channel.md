@@ -1,3 +1,6 @@
+---
+slug: "/Wiki/programming/golang/channel/"
+---
 ### Channel 通道
 
 

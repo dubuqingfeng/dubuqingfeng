@@ -1,3 +1,6 @@
+---
+slug: "/Wiki/programming/python/basics/syntax"
+---
 ### Python 语法速览
 
 记录常用语法与易错点：缩进、切片、可变/不可变类型、推导式、上下文管理器等。

@@ -1,3 +1,6 @@
+---
+slug: "/Wiki/blockchain/bitcoin/block/merkle"
+---
 ## Merkle 树与见证承诺
 
 Merkle 树用于将交易集合压缩为 32 字节的根（merkle_root），便于轻客户端验证交易是否包含于区块。

@@ -1,3 +1,6 @@
+---
+slug: "/Wiki/blockchain/bitcoin/wallet/descriptor"
+---
 ## 输出描述符与 Miniscript
 
 描述符（Descriptors）用声明式语法描述输出模板与密钥来源，实现“可审核、可复现”的地址与脚本生成。

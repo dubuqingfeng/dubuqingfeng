@@ -1,4 +1,5 @@
 ---
+slug: "/Wiki/programming/solidity/patterns"
 title: 合约设计模式
 ---
 

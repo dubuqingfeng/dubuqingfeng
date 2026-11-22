@@ -1,3 +1,6 @@
+---
+slug: "/Wiki/programming/golang/data-structure/map"
+---
 ### map
 
 

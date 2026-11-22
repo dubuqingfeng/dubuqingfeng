@@ -1,3 +1,6 @@
+---
+slug: "/Wiki/blockchain/ethereum/evm/"
+---
 ### EVM 执行模型
 
 EVM 是 256 位字的栈式虚拟机。执行以“消息调用（message call）”为单位，在调用帧中维护栈、内存、程序计数器与剩余 gas。

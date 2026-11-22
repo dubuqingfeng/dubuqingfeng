@@ -1,3 +1,6 @@
+---
+slug: "/Wiki/blockchain/ethereum/contract/"
+---
 ### 合约基础与资源
 
 开发栈：Solidity + Hardhat/Foundry + Ethers.js/Web3.js。

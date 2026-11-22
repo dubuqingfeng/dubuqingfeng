@@ -1,3 +1,6 @@
+---
+slug: "/Wiki/programming/java/concurrency/volatile-jmm"
+---
 ### Java 内存模型 JMM 与 volatile
 
 #### ToC
@@ -42,6 +45,8 @@ holder.cfg = newCfg; // 对后续读线程可见
 // 读线程
 Config c = holder.cfg;
 ```
+
+<span id="final-字段�语义"></span>
 
 #### final 字段语义
 

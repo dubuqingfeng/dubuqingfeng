@@ -1,3 +1,6 @@
+---
+slug: "/Wiki/programming/rust/memory/aliasing-provenance-validity"
+---
 ### 别名（Aliasing）、起源（Provenance）与有效性（Validity）
 
 #### 关键概念

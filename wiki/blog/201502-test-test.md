@@ -10,7 +10,7 @@ tags:
 excerpt: 这是搭建pelican后的第一篇文章，还将会修改主题，建立一种编辑器环境。本文记述了如何搭建pelican的环境，写作环境，主题的编写，pelican插件配置，以及程序后续维护，域名、Rss等服务配置。
 categories: test
 permalink: 2015-create-blog.html
-author: admin
+authors: [admin]
 toc: true
 ---
 

@@ -1,3 +1,6 @@
+---
+slug: "/Wiki/programming/typescript/types/mapped-template"
+---
 ### 映射类型与模板字面量类型
 
 #### ToC

@@ -1,3 +1,6 @@
+---
+slug: "/Wiki/blockchain/bitcoin/transaction/locktime"
+---
 ## 时间锁与相对锁定（CLTV/CSV/BIP68/112/113）
 
 Bitcoin 提供绝对与相对时间锁，控制交易可被验证/打包的时间窗口。

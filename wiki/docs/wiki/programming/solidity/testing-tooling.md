@@ -1,4 +1,5 @@
 ---
+slug: "/Wiki/programming/solidity/testing-tooling"
 title: 测试与工具链（Foundry/Hardhat）
 ---
 

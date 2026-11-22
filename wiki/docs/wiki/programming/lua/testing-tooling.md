@@ -1,4 +1,5 @@
 ---
+slug: "/Wiki/programming/lua/testing-tooling"
 title: 测试与工具链
 ---
 

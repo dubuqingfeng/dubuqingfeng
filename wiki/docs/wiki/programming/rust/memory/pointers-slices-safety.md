@@ -1,3 +1,6 @@
+---
+slug: "/Wiki/programming/rust/memory/pointers-slices-safety"
+---
 ### 指针与切片安全边界（offset/add/wrapping 与 from_raw_parts 不变量）
 
 #### 指针算术与边界

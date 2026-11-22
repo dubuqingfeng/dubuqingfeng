@@ -1,3 +1,6 @@
+---
+slug: "/Wiki/programming/golang/source/map"
+---
 ### map 源码分析
 
 

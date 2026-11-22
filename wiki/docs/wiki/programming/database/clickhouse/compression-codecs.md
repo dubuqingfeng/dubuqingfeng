@@ -1,4 +1,5 @@
 ---
+slug: "/Wiki/programming/database/clickhouse/compression-codecs"
 title: 压缩与 Codec
 ---
 

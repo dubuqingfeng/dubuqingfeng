@@ -1,3 +1,6 @@
+---
+slug: "/Wiki/programming/rust/testing/"
+---
 ### 测试：单元、集成与基准
 
 #### 单元测试（与模块同文件）

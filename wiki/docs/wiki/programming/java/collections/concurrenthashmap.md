@@ -1,3 +1,6 @@
+---
+slug: "/Wiki/programming/java/collections/concurrenthashmap"
+---
 ### ConcurrentHashMap 并发设计（JDK 8）
 
 #### ToC

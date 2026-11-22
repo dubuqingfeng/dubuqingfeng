@@ -1,3 +1,6 @@
+---
+slug: "/Wiki/programming/sql/query/joins-subqueries"
+---
 ### 连接与子查询
 
 从内连接/外连接到相关子查询与派生表，理解执行策略与可替代写法。

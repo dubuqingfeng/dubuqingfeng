@@ -1,4 +1,5 @@
 ---
+slug: "/Wiki/programming/dart/ffi"
 title: FFI 与原生交互（dart:ffi）
 ---
 

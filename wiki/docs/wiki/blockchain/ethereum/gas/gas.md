@@ -1,3 +1,6 @@
+---
+slug: "/Wiki/blockchain/ethereum/gas/"
+---
 ## Gas 计费、退款与 BaseFee（EIP-1559/2929/3529）
 
 ### 计费模型

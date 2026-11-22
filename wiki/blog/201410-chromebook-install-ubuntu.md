@@ -10,7 +10,7 @@ tags:
 excerpt: 在入手了 chromebook 以后，原生的 ChromeOS 满足不了平时的需要，所以需要安装一些其它的系统，在贴吧等的指引下，安装配置好了ubuntu，记录一下安装的过程和软件。
 categories: chromebook
 permalink: 201410-chromebook-install-ubuntu.html
-author: admin
+authors: [admin]
 toc: true
 ---
 

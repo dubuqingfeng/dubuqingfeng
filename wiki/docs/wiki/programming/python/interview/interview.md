@@ -1,3 +1,6 @@
+---
+slug: "/Wiki/programming/python/interview/"
+---
 ### Python 面试题整理
 
 按主题汇总：语法题、并发/异步、性能优化、Web 实战、数据结构/算法应用等。

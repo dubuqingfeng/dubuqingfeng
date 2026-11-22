@@ -1,3 +1,6 @@
+---
+slug: "/Wiki/blockchain/ethereum/transaction/access-list"
+---
 ## 访问列表（EIP-2930）
 
 为缓解 EIP-2929 引入的冷访问成本，EIP-2930 允许交易声明访问列表：

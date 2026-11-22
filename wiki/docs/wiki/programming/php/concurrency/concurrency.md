@@ -1,3 +1,6 @@
+---
+slug: "/Wiki/programming/php/concurrency/"
+---
 ### 并发模型与协程生态
 
 PHP 传统 FPM 下每请求一个进程/Worker，协程与常驻内存需借助 Swoole/FPM 扩展或框架（如 RoadRunner）。

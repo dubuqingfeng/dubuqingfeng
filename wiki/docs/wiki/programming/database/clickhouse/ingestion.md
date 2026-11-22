@@ -1,4 +1,5 @@
 ---
+slug: "/Wiki/programming/database/clickhouse/ingestion"
 title: 批量写入与插入最佳实践
 ---
 

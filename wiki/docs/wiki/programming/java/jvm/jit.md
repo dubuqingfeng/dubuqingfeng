@@ -1,3 +1,6 @@
+---
+slug: "/Wiki/programming/java/jvm/jit"
+---
 ### JIT 与运行时优化
 
 #### ToC

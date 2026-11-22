@@ -1,3 +1,6 @@
+---
+slug: "/Wiki/programming/cpp/toolchain/format-lint"
+---
 ### 格式与静态检查（clang-format/clang-tidy）
 
 clang-format：在仓库根放置 `.clang-format` 配置，统一代码风格。

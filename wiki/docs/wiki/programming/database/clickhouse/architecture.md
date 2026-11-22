@@ -1,4 +1,5 @@
 ---
+slug: "/Wiki/programming/database/clickhouse/architecture"
 title: 架构与概念
 ---
 

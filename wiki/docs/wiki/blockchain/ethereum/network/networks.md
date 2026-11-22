@@ -1,3 +1,6 @@
+---
+slug: "/Wiki/blockchain/ethereum/network/networks"
+---
 ### 网络与链 ID
 
 - Mainnet：链 ID 1

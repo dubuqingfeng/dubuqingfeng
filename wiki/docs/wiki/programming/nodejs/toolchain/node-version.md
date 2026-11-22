@@ -1,3 +1,6 @@
+---
+slug: "/Wiki/programming/nodejs/toolchain/node-version"
+---
 ### Node 版本管理（nvm 等）
 
 多版本并存与切换、项目内约束与 CI 对齐。更多细节可参考 JavaScript 章节的[Node 版本管理](../../javascript/toolchain/node-version.md)。

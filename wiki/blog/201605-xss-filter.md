@@ -10,7 +10,7 @@ tags:
 excerpt: XSS 漏洞的Filter设计，并对一些语言，PHP、Python、Java进行了实践。
 categories: Web安全
 permalink: 201605-xss-filter.html
-author: admin
+authors: [admin]
 toc: true
 ---
 

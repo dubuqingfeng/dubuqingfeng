@@ -1,3 +1,6 @@
+---
+slug: "/Wiki/programming/php/oop/"
+---
 ### 面向对象 OOP 概览
 
 类与接口、Trait、可见性、继承与多态、魔术方法、命名空间。

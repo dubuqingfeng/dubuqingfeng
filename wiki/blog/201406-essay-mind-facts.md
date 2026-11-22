@@ -9,7 +9,7 @@ tags:
 excerpt: 这是因为被限制进行实践研究而写的一些胡言乱语，也许多年以后回顾起来只是一种不一样的感觉吧，慢慢会被磨平的。
 categories: 随笔
 permalink: 201406-essay-mind-facts.html
-author: admin
+authors: [admin]
 ---
 
 <br />

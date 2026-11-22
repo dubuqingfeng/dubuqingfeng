@@ -1,3 +1,6 @@
+---
+slug: "/Wiki/programming/cpp/stl/filesystem"
+---
 ### 文件系统 std::filesystem
 
 遍历目录与文件操作：

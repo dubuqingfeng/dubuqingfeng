@@ -1,3 +1,6 @@
+---
+slug: "/Wiki/programming/nodejs/ops/observability"
+---
 ### 可观测性（日志/指标/追踪）
 
 以结构化日志 + 指标 + 分布式追踪构建端到端可观测性，便于问题定位与容量规划。

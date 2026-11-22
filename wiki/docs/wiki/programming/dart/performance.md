@@ -1,4 +1,5 @@
 ---
+slug: "/Wiki/programming/dart/performance"
 title: 性能与构建优化
 ---
 

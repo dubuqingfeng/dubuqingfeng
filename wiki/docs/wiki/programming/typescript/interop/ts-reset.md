@@ -1,3 +1,6 @@
+---
+slug: "/Wiki/programming/typescript/interop/ts-reset"
+---
 ### ts-reset 实战
 
 - ts-reset 通过覆盖 lib 定义修正 JS 标准库的一些宽松类型（如 `Object.keys` 返回更窄的键联合）。

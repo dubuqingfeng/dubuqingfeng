@@ -10,7 +10,7 @@ tags:
 excerpt: 本文在上一篇解魔方机器人初步设计的基础上进行的详细设计，基于 Android 和控制板，后期可以扩展到 Arduino、树莓派等，逐步完善从识别到执行的整条链路。
 categories: 电子设计
 permalink: 201504-Rubik's-Cube-Robot-Ruanjiansheji.html
-author: admin, codex
+authors: [admin, codex]
 toc: true
 ---
 

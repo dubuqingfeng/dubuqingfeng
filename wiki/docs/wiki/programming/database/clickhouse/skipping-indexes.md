@@ -1,4 +1,5 @@
 ---
+slug: "/Wiki/programming/database/clickhouse/skipping-indexes"
 title: 跳过索引（minmax/bloom/ngram）
 ---
 

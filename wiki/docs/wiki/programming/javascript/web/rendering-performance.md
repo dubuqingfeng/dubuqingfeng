@@ -1,3 +1,6 @@
+---
+slug: "/Wiki/programming/javascript/web/rendering-performance"
+---
 ### 浏览器渲染与性能优化（概览）
 
 - 关键渲染路径：HTML/样式计算/布局/绘制/合成；

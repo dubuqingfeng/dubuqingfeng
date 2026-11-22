@@ -1,3 +1,6 @@
+---
+slug: "/Wiki/programming/cpp/toolchain/debugging"
+---
 ### 调试（gdb/lldb）
 
 编译带调试信息：`-g -O0` 或 `-g -Og`。

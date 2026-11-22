@@ -56,3 +56,20 @@ slug: /wiki/programming/javascript
 - [高频题要点](./interview/interview.md)
 
 若有新增条目或分类需要调整，按需补充即可。
+
+
+## 本级目录 {#directory-index}
+
+### 子目录 {#directory-children}
+
+- [JavaScript：Web](./web/README.md)
+- [JavaScript：内存模型](./memory/README.md)
+- [JavaScript：基础](./basics/README.md)
+- [JavaScript：安全](./security/README.md)
+- [JavaScript：工具链](./toolchain/README.md)
+- [JavaScript：异步](./async/README.md)
+- [JavaScript：数据结构](./data-structure/README.md)
+- [JavaScript：运行时](./runtime/README.md)
+- [JavaScript：面试与练习](./interview/README.md)
+
+返回[上一级：编程与数据库](./../README.md)。

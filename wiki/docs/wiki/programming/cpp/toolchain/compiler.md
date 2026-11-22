@@ -1,3 +1,6 @@
+---
+slug: "/Wiki/programming/cpp/toolchain/compiler"
+---
 ### 编译与链接（gcc/clang/msvc）
 
 常见命令与选项：

@@ -1,3 +1,6 @@
+---
+slug: "/Wiki/programming/javascript/data-structure/map-set"
+---
 ### Map/Set/WeakMap/WeakSet
 
 - `Map`：任意键；保持插入顺序；与 `Object` 相比适合频繁增删查；

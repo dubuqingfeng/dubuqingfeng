@@ -1,3 +1,6 @@
+---
+slug: "/Wiki/programming/nodejs/performance/memory-gc"
+---
 ### V8 内存与 GC（Node 视角）
 
 理解新生代/老生代与写屏障、调参与泄漏排查；服务端场景需结合长期运行与负载特性。

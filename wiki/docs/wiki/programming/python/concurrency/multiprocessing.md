@@ -1,3 +1,6 @@
+---
+slug: "/Wiki/programming/python/concurrency/multiprocessing"
+---
 ### Multiprocessing 进程
 
 概念要点：绕过 GIL、CPU 密集型适用、进程间通信与共享。

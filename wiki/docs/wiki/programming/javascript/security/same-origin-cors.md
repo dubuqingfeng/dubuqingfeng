@@ -1,3 +1,6 @@
+---
+slug: "/Wiki/programming/javascript/security/same-origin-cors"
+---
 ### 同源策略与 CORS（简明）
 
 - 同源策略限制脚本跨站读取敏感资源；

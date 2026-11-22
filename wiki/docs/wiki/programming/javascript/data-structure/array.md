@@ -1,3 +1,6 @@
+---
+slug: "/Wiki/programming/javascript/data-structure/array"
+---
 ### Array 常用算法与坑点
 
 要点：

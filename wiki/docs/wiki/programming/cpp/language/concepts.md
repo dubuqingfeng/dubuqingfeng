@@ -1,3 +1,6 @@
+---
+slug: "/Wiki/programming/cpp/language/concepts"
+---
 ### Concepts 约束
 
 用概念约束模板实参，提升可读性与错误信息质量。

@@ -10,7 +10,7 @@ tags:
 excerpt: 大家好，我们是 BTC.com 团队。 2020 年，我们有幸接触到了 Flink 和 PyFlink 生态，从团队自身需求出发，完善了团队内实时计算的任务和需求，搭建了流批一体的计算环境。在实现实时计算的过程中，我们在实践中收获了一些经验，在此分享一些这方面的心路历程。
 categories: flink
 permalink: 202008-pyfink-btccom-blockchain.html
-author: admin
+authors: [admin]
 toc: true
 ---
 

@@ -1,4 +1,5 @@
 ---
+slug: "/Wiki/programming/lua/luajit-ffi"
 title: LuaJIT FFI 实战
 ---
 

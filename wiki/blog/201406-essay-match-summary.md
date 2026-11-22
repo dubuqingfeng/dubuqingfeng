@@ -9,7 +9,7 @@ tags:
 excerpt: 作为社团一次活动的总结性文字，作为自我总结也好，回顾活动也罢。
 categories: 随笔
 permalink: 201406-essay-match-summary.html
-author: admin
+authors: [admin]
 ---
 
 <br />

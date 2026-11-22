@@ -1,3 +1,6 @@
+---
+slug: "/Wiki/programming/java/io-nio/nio"
+---
 ### NIO/NIO.2 核心概念
 
 #### ToC

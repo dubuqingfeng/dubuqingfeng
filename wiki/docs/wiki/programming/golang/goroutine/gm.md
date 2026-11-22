@@ -1,3 +1,6 @@
+---
+slug: "/Wiki/programming/golang/goroutine/gm"
+---
 ### GM 模型
 
 

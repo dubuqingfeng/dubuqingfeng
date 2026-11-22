@@ -1,3 +1,6 @@
+---
+slug: "/Wiki/programming/javascript/web/storage"
+---
 ### Web Storage 与 IndexedDB
 
 #### ToC

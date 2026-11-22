@@ -1,3 +1,6 @@
+---
+slug: "/Wiki/blockchain/gas/"
+---
 ### gas 优化
 
 

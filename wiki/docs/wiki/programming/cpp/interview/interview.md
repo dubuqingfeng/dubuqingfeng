@@ -1,3 +1,6 @@
+---
+slug: "/Wiki/programming/cpp/interview/"
+---
 ### 面试题整理
 
 常见考点索引：

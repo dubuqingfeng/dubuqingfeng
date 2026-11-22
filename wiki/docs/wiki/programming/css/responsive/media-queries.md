@@ -1,3 +1,6 @@
+---
+slug: "/Wiki/programming/css/responsive/media-queries"
+---
 ### 媒体查询（Media Queries）
 
 根据设备特性切换样式，适配不同屏幕与交互方式。

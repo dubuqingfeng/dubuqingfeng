@@ -1,3 +1,6 @@
+---
+slug: "/Wiki/blockchain/solana/token"
+---
 ## SPL Token
 
 SPL Token 是 Solana 上的代币标准（与以太坊的 ERC-20 类似）。常见概念：
@@ -54,4 +57,8 @@ const mintToIx = createMintToInstruction(mint, recipientATA, mintAuthority, 100_
 - 忘记创建 ATA 或初始化 → 余额查询/转账失败
 - 忘记按 decimals 换算金额 → 展示/汇总错误
 - 权限（mint authority、freeze authority）不正确 → 铸币/冻结失败
+
+### 余额与交易事件对账
+
+Token 原始金额、交易前后余额、账户写入和查询上下文的区别，见[交易执行与数据路径](./data-path.md#state)及[故障恢复与回填](./data-path.md#failures)。
 

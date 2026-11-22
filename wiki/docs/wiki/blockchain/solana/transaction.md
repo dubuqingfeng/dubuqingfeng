@@ -1,3 +1,6 @@
+---
+slug: "/Wiki/blockchain/solana/transaction"
+---
 ## Transaction
 
 Solana 交易由“签名集合 + 消息（Message）”组成。签名覆盖消息字节，消息中包括账户列表、最近区块哈希、指令等信息。
@@ -66,4 +69,8 @@ const feeIx = ComputeBudgetProgram.setComputeUnitPrice({ microLamports: 10_000 }
 - recentBlockhash 过期 → 交易被丢弃
 - 未满足 rent-exempt 最低余额 → 创建账户失败
 - 未设置足够 CU 或优先费 → 峰值时打包缓慢
+
+### 从发送到可消费数据
+
+签名返回之后，Leader 执行、Entry 与 shred 广播、跟随节点重放，以及 Geyser、Yellowstone、RPC 的观察边界，见[交易执行与数据路径](./data-path.md)。其中包含[已执行的只读对账实验](./data-path.md#experiment)，并说明确认等级、重复事件、分叉与历史账户状态的限制。
 
