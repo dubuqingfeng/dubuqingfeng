@@ -92,40 +92,40 @@ const languagesGridList: Array<GridItemType> = [
 const blockchainGridList: Array<GridItemType> = [
   gridItem(blockchainData.bitcoin, "/docs/wiki/blockchain/bitcoin", bitcoin),
   gridItem(blockchainData.ethereum, "/docs/wiki/blockchain/ethereum", ethereum),
-  gridItem(blockchainData.defi, "/docs/defi", defi),
+  gridItem(blockchainData.defi, "/docs/wiki/blockchain/defi", defi),
 ];
 
 const databaseGridList: Array<GridItemType> = [
-  gridItem(databaseData.mysql, "/docs/mysql", mysql),
-  gridItem(databaseData.redis, "/docs/redis", redis),
-  gridItem(databaseData.mongodb, "/docs/mongodb", mongodb),
-  gridItem(databaseData.clickhouse, "/docs/clickhouse", clickhouse),
+  gridItem(databaseData.mysql, "/docs/wiki/programming/database/mysql", mysql),
+  gridItem(databaseData.redis, "/docs/wiki/programming/database/redis", redis),
+  gridItem(databaseData.mongodb, "/docs/wiki/programming/database/mongodb", mongodb),
+  gridItem(databaseData.clickhouse, "/docs/wiki/programming/database/clickhouse", clickhouse),
 ];
 
 const devOpsGridList: Array<GridItemType> = [
-  gridItem(devOpsData.docker, "/docs/docker", docker),
-  gridItem(devOpsData.kubernetes, "/docs/kubernetes", kubernetes),
-  gridItem(devOpsData.cicd, "/docs/cicd", cicd),
-  gridItem(devOpsData.linux, "/docs/linux", linux),
+  gridItem(devOpsData.docker, "/docs/wiki/devops/docker", docker),
+  gridItem(devOpsData.kubernetes, "/docs/wiki/devops/kubernetes", kubernetes),
+  gridItem(devOpsData.cicd, "/docs/wiki/devops/jenkins", cicd),
+  gridItem(devOpsData.linux, "/docs/wiki/devops/linux", linux),
 ];
 
 const securityGridList: Array<GridItemType> = [
-  gridItem(securityData.web, "/docs/web", web),
-  gridItem(securityData.android, "/docs/android", android),
-  gridItem(securityData.bin, "/docs/bin", bin),
+  gridItem(securityData.web, "/docs/wiki/security/web", web),
+  gridItem(securityData.android, "/docs/wiki/security/android", android),
+  gridItem(securityData.bin, "/docs/wiki/security/bin", bin),
 ];
 
 const frameworkGridList: Array<GridItemType> = [
-  gridItem(frameworkData.react, "/docs/react", react),
-  gridItem(frameworkData.vue, "/docs/vue", vue),
-  gridItem(frameworkData.flutter, "/docs/flutter", flutter),
-  gridItem(frameworkData.laravel, "/docs/laravel", laravel),
-  gridItem(frameworkData.android, "/docs/android", android),
+  gridItem(frameworkData.react, "/docs/wiki/programming/typescript/interop/react-typing", react),
+  gridItem(frameworkData.vue, "/docs/wiki/programming/vue", vue),
+  gridItem(frameworkData.flutter, "/docs/wiki/programming/dart/flutter-basics", flutter),
+  gridItem(frameworkData.laravel, "/docs/wiki/programming/php/framework/laravel", laravel),
+  gridItem(frameworkData.android, "/docs/wiki/programming/android", android),
 ];
 
 const othersGridList: Array<GridItemType> = [
-  gridItem(othersData.flink, "/docs/flink", flink),
-  gridItem(othersData.latex, "/docs/latex", latex),
+  gridItem(othersData.flink, "/docs/wiki/programming/java/flink", flink),
+  gridItem(othersData.latex, "/docs/wiki/programming/latex", latex),
 ];
 
 export { languagesGridList, blockchainGridList, othersGridList, databaseGridList, devOpsGridList, securityGridList, frameworkGridList };

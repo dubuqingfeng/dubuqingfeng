@@ -1,0 +1,746 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Lightning 安全：违约、看门狗与恢复边界 · LND v0.21.8</title>
+  <meta name="description" content="用一条可播放的违约时间线理解 LND v0.21.8 的承诺交易、shachain 撤销、justice tx、watchtower 加密边界与 SCB 恢复边界。">
+  <script src="../../theme.js"></script>
+  <link rel="stylesheet" href="./style.css">
+  <script>document.documentElement.classList.add('js');</script>
+</head>
+<body>
+  <div class="progress" aria-hidden="true"><span id="progressBar"></span></div>
+
+  <a class="skip-link" href="#main">跳到正文</a>
+
+  <header class="site-header">
+    <a class="brand" href="./index.html">
+      <span class="brand-mark">⚡</span>
+      <span>Lightning Security</span>
+    </a>
+    <nav class="site-nav" aria-label="章节导航">
+      <a href="#timeline">违约时间线</a>
+      <a href="#asymmetry">两笔交易</a>
+      <a href="#watchtower">看门狗</a>
+      <a href="#scb">SCB</a>
+      <a href="#limits">上限</a>
+      <a href="#source">源码</a>
+    </nav>
+    <div class="header-actions">
+      <a class="back-link" href="/docs/Wiki/blockchain/lightning/security" target="_blank" rel="noreferrer">文档主文</a>
+      <a class="back-link" href="../../index.html">HTML 索引</a>
+      <button class="theme-toggle" type="button" data-theme-toggle aria-label="切换日间/夜间模式">
+        <span data-theme-icon aria-hidden="true">☾</span>
+      </button>
+    </div>
+  </header>
+
+  <main id="main">
+    <section class="hero">
+      <div class="hero-copy reveal">
+        <p class="eyebrow">LND v0.21.8-beta · Source Walkthrough</p>
+        <h1>旧状态广播后，<br><span>谁在什么时间拿走钱？</span></h1>
+        <p class="lede">
+          Lightning 的安全不是“链下更快”，而是
+          <strong>链下快速达成状态，链上保留可强制执行的合同</strong>。
+          对方广播已撤销的承诺交易时，决定结果的是三件事：
+          你还记不记得那个状态、还掌不掌握它的 secret、以及你是否在对方花掉输出前把 justice tx 发出去。
+        </p>
+        <div class="hero-actions">
+          <button class="button primary" type="button" data-play>播放违约时间线</button>
+          <a class="button" href="#watchtower">看门狗保护什么</a>
+        </div>
+        <div class="hero-meta">
+          <span>基线：<code>59dd7908</code></span>
+          <span>51 项源码断言</span>
+          <span>shachain 揭示窗口实验</span>
+        </div>
+      </div>
+
+      <div class="hero-visual reveal" aria-label="承诺交易与 justice tx 示意图">
+        <svg viewBox="0 0 760 380" role="img" aria-labelledby="heroTitle heroDesc">
+          <title id="heroTitle">同一频道状态的两笔承诺交易与 justice 路径</title>
+          <desc id="heroDesc">funding 输出连接两笔不同的 commitment：已撤销的 #N 进入 justice tx，当前的 #N+1 只能走普通 force close。</desc>
+          <defs>
+            <marker id="arrow" markerWidth="9" markerHeight="9" refX="8" refY="4.5" orient="auto">
+              <path d="M0 0L9 4.5L0 9Z" fill="currentColor"/>
+            </marker>
+            <marker id="arrowRed" markerWidth="9" markerHeight="9" refX="8" refY="4.5" orient="auto">
+              <path d="M0 0L9 4.5L0 9Z" fill="#dc2626"/>
+            </marker>
+            <linearGradient id="heroGlow" x1="0" x2="1">
+              <stop offset="0" stop-color="#2563eb" stop-opacity=".10"/>
+              <stop offset="1" stop-color="#0ea5e9" stop-opacity=".02"/>
+            </linearGradient>
+          </defs>
+
+          <rect x="14" y="14" width="732" height="352" rx="24" fill="url(#heroGlow)"/>
+
+          <g class="svg-node">
+            <rect x="44" y="148" width="158" height="84" rx="14"/>
+            <text x="123" y="180" text-anchor="middle" class="svg-title">funding 2-of-2</text>
+            <text x="123" y="202" text-anchor="middle" class="svg-sub">链上唯一锚点</text>
+          </g>
+
+          <g class="svg-node">
+            <rect x="292" y="52" width="236" height="92" rx="14" style="stroke:#dc2626"/>
+            <text x="410" y="82" text-anchor="middle" class="svg-title">commitment #N</text>
+            <text x="410" y="103" text-anchor="middle" class="svg-sub">已撤销 · to_local 有撤销分支</text>
+            <text x="410" y="123" text-anchor="middle" class="svg-label">state hint 藏在 sequence / locktime</text>
+          </g>
+
+          <g class="svg-node">
+            <rect x="292" y="242" width="236" height="88" rx="14" style="stroke:#059669"/>
+            <text x="410" y="272" text-anchor="middle" class="svg-title">commitment #N+1</text>
+            <text x="410" y="293" text-anchor="middle" class="svg-sub">当前状态 · 普通 force close</text>
+            <text x="410" y="313" text-anchor="middle" class="svg-label">没有惩罚，只按脚本结算</text>
+          </g>
+
+          <g class="svg-node">
+            <rect x="596" y="52" width="126" height="92" rx="14" style="stroke:#059669"/>
+            <text x="659" y="84" text-anchor="middle" class="svg-title">justice tx</text>
+            <text x="659" y="105" text-anchor="middle" class="svg-sub">撤销密钥</text>
+            <text x="659" y="125" text-anchor="middle" class="svg-sub">扫全部输出</text>
+          </g>
+
+          <path d="M202 172 L292 112" class="svg-line" marker-end="url(#arrow)"/>
+          <path d="M202 208 L292 276" class="svg-line" marker-end="url(#arrow)"/>
+
+          <path d="M528 98 L596 98" class="svg-danger" stroke-dasharray="7 6" marker-end="url(#arrowRed)"/>
+          <text x="562" y="86" text-anchor="middle" class="svg-label">匹配 + 解密</text>
+
+          <path d="M528 286 L690 286 L690 144" class="svg-line" stroke-dasharray="5 6" marker-end="url(#arrow)"/>
+          <text x="610" y="306" text-anchor="middle" class="svg-label">不进入 justice</text>
+
+          <circle cx="123" cy="190" r="5" fill="#2563eb" class="pulse-dot"/>
+          <circle cx="410" cy="98" r="5" fill="#dc2626" class="pulse-dot"/>
+          <circle cx="659" cy="98" r="5" fill="#059669" class="pulse-dot"/>
+
+          <path d="M44 330 L716 330" class="svg-line" stroke-dasharray="4 8" opacity=".45"/>
+          <text x="380" y="354" text-anchor="middle" class="svg-label">安全边界不是“对方不知道旧状态”，而是“我还拿得出惩罚它的证据”</text>
+        </svg>
+      </div>
+    </section>
+
+    <section class="section" id="timeline">
+      <div class="section-head reveal">
+        <div>
+          <p class="section-kicker">01 · Breach Timeline</p>
+          <h2>一笔已撤销的交易，如何变成 justice tx</h2>
+        </div>
+        <p class="section-note">
+          点击左侧步骤，或播放动画。右侧的 commitment 输出会随步骤变化：
+          先被标记为惩罚目标，再被 justice tx 扫走。
+        </p>
+      </div>
+
+      <div class="timeline-layout">
+        <ol class="steps reveal" aria-label="违约处理步骤">
+          <li class="step" data-step="0">
+            <span class="step-index">1</span>
+            <div>
+              <h3>对方广播已撤销状态 #N</h3>
+              <p>它持有这笔交易，也知道你签过名；广播旧状态就是违约。</p>
+            </div>
+          </li>
+          <li class="step" data-step="1">
+            <span class="step-index">2</span>
+            <div>
+              <h3>解状态号，查 revocation log</h3>
+              <p><code>handleCommitSpend</code> 解出 state hint；<code>FindPreviousState</code> 命中日志。</p>
+            </div>
+          </li>
+          <li class="step" data-step="2">
+            <span class="step-index">3</span>
+            <div>
+              <h3>取 secret，重建当时的脚本</h3>
+              <p><code>RevocationStore.LookUp(N)</code> + <code>DeriveCommitmentKeys</code>。</p>
+            </div>
+          </li>
+          <li class="step" data-step="3">
+            <span class="step-index">4</span>
+            <div>
+              <h3>先持久化 retribution，再 ACK</h3>
+              <p>崩溃后仍能从 retribution store 继续惩罚。</p>
+            </div>
+          </li>
+          <li class="step" data-step="4">
+            <span class="step-index">5</span>
+            <div>
+              <h3>构造 justice tx</h3>
+              <p><code>spendAll</code> 同时覆盖主输出与 HTLC；必要时拆成多个变体。</p>
+            </div>
+          </li>
+          <li class="step" data-step="5">
+            <span class="step-index">6</span>
+            <div>
+              <h3>1 确认后广播，抢花则重建</h3>
+              <p>对方先花掉某个输出时，<code>updateBreachInfo</code> 重建交易继续扫。</p>
+            </div>
+          </li>
+        </ol>
+
+        <div class="stage reveal" aria-live="polite">
+          <div class="stage-head">
+            <h3>链上视图</h3>
+            <span class="badge danger" id="stageBadge">REVOKED</span>
+          </div>
+
+          <div class="tx-card" id="txCard">
+            <div class="tx-head">
+              <span>commitment #N</span>
+              <small>funding: 2-of-2</small>
+            </div>
+            <div class="output" data-out="local">
+              <span>to_local · 违约方输出</span>
+              <span class="amt">CSV + 撤销分支</span>
+            </div>
+            <div class="output" data-out="remote">
+              <span>to_remote · 受害方输出</span>
+              <span class="amt">可直接花</span>
+            </div>
+            <div class="output htlc" data-out="htlc1">
+              <span>HTLC · 5,000 sat</span>
+              <span class="amt">第二层 timeout</span>
+            </div>
+            <div class="output htlc" data-out="htlc2">
+              <span>HTLC · 20,000 sat</span>
+              <span class="amt">第二层 success</span>
+            </div>
+          </div>
+
+          <div class="justice" id="justice">
+            <span>justice tx</span>
+            <strong>尚未构造</strong>
+          </div>
+
+          <div class="stage-status" id="stageStatus">
+            <strong>状态 0：</strong>对方广播了 #N。链上看起来只是一笔普通的 commitment，但它已经被撤销。
+          </div>
+
+          <div class="stage-controls">
+            <button class="button" type="button" id="btnPrev">上一步</button>
+            <button class="button" type="button" id="btnNext">下一步</button>
+            <button class="button primary" type="button" id="btnPlay">播放</button>
+            <span class="counter" id="stageCounter">1 / 6</span>
+          </div>
+        </div>
+      </div>
+
+      <div class="callout danger reveal">
+        <span class="icon">!</span>
+        <p>
+          <strong>关键边界：</strong>如果本地没有该状态的 revocation log，
+          <code>ErrLogEntryNotFound</code> 会让 LND 认为“这不是违约”，转入 DLP；
+          它只扫本地主输出，<strong>不恢复 HTLC</strong>。SCB-only 恢复正落在这个分支。
+        </p>
+      </div>
+    </section>
+
+    <section class="section" id="asymmetry">
+      <div class="section-head reveal">
+        <div>
+          <p class="section-kicker">02 · Two Commitments</p>
+          <h2>同一状态，为什么有两笔交易？</h2>
+        </div>
+        <p class="section-note">
+          承诺交易是非对称的。谁广播，决定了谁的输出带 CSV、谁可以直接花；
+          也决定了哪一侧带撤销分支。
+        </p>
+      </div>
+
+      <div class="asym" data-view="alice">
+        <div class="asym-controls reveal">
+          <button class="button active" type="button" data-asym="alice">Alice 的 commitment</button>
+          <button class="button" type="button" data-asym="bob">Bob 的 commitment</button>
+        </div>
+
+        <div class="grid-2">
+          <div class="commit-card reveal">
+            <h3>
+              <span class="when-alice">Alice 持有的本地 commitment</span>
+              <span class="when-bob">Bob 眼中的 Alice commitment</span>
+              <span class="badge neutral">广播方</span>
+            </h3>
+            <p class="sub">同一笔状态，Alice 的 to_local 带 CSV 和撤销分支。</p>
+            <ul>
+              <li><span>Alice 的 to_local</span><span class="delay when-alice">CSV 延迟 + 撤销分支</span><span class="immediate when-bob">CSV 延迟</span></li>
+              <li><span>Bob 的 to_remote</span><span class="immediate">直接支付</span></li>
+              <li><span>HTLC 输出</span><span>按第二层脚本</span></li>
+              <li><span>commit fee</span><span>由 Alice 承担</span></li>
+            </ul>
+          </div>
+
+          <div class="commit-card reveal">
+            <h3>
+              <span class="when-alice">Alice 眼中的 Bob commitment</span>
+              <span class="when-bob">Bob 持有的本地 commitment</span>
+              <span class="badge warn">被广播方</span>
+            </h3>
+            <p class="sub">Bob 的 to_local 带它自己的 CSV；Alice 的输出通常是 to_remote。</p>
+            <ul>
+              <li><span>Bob 的 to_local</span><span class="delay">CSV 延迟 + 撤销分支</span></li>
+              <li><span>Alice 的 to_remote</span><span class="immediate">直接支付</span></li>
+              <li><span>HTLC 输出</span><span>按第二层脚本</span></li>
+              <li><span>commit fee</span><span>由 Alice 承担</span></li>
+            </ul>
+          </div>
+        </div>
+      </div>
+
+      <div class="callout ok reveal">
+        <span class="icon">✓</span>
+        <p>
+          <strong>撤销密钥不是“另一个公钥”：</strong>
+          <code>R = revoke_base · H(revoke_base‖commit_point)</code>，
+          <code>C = commit_point · H(commit_point‖revoke_base)</code>，
+          <code>revocation_pubkey = R + C</code>。
+          要花撤销分支，必须同时有撤销基点私钥和该状态的 commitment secret。
+        </p>
+      </div>
+    </section>
+
+    <section class="section" id="watchtower">
+      <div class="section-head reveal">
+        <div>
+          <p class="section-kicker">03 · Watchtower</p>
+          <h2>看不到明文，凭什么替你惩罚？</h2>
+        </div>
+        <p class="section-note">
+          塔保存的是预签名的 justice tx 模板。breach tx 上链前它只有 hint 和密文；
+          上链后它才能从 txid 派生 key。
+        </p>
+      </div>
+
+      <div class="wt-flow reveal">
+        <div class="wt-node">
+          <strong>客户端</strong>
+          构造 justice tx<br>
+          签好 witness<br>
+          加密成 blob
+          <div class="cipher">
+            <span class="ciphertext">hint = SHA256(txid)[:16]<br>blob = AEAD(kit, key)</span>
+            <span class="plain">to_local + to_remote<br>预签名 witness<br>sweep 地址 + 塔奖励</span>
+          </div>
+        </div>
+        <div class="wt-arrow" aria-hidden="true">→</div>
+        <div class="wt-node">
+          <strong>看门狗</strong>
+          存 blob + hint<br>
+          扫每个新区块<br>
+          匹配到 txid 才解密
+          <div class="cipher">
+            <span class="ciphertext">只能看到密文<br>不知道频道 ID</span>
+            <span class="plain">key = SHA256(txid‖txid)<br>解密后构造 justice tx</span>
+          </div>
+        </div>
+        <div class="wt-arrow" aria-hidden="true">→</div>
+        <div class="wt-node">
+          <strong>链上</strong>
+          广播 justice tx<br>
+          扫主输出<br>
+          领取奖励
+          <div class="cipher">
+            <span class="ciphertext">尚未广播<br>没有可观察交易</span>
+            <span class="plain">justice tx 上链<br>to_local / to_remote 被扫</span>
+          </div>
+        </div>
+      </div>
+
+      <div class="reveal" style="margin-top:14px">
+        <button class="wt-toggle" type="button" id="wtToggle" aria-pressed="false">
+          <span class="knob" aria-hidden="true"></span>
+          <span>模拟 breach tx 上链</span>
+        </button>
+      </div>
+
+      <div class="grid-2" style="margin-top:18px">
+        <div class="card reveal" style="padding:16px">
+          <table class="compare">
+            <thead>
+              <tr><th>输出</th><th>本地 breach arbitrator</th><th>看门狗</th></tr>
+            </thead>
+            <tbody>
+              <tr><td>to_local</td><td class="yes">✓</td><td class="yes">✓</td></tr>
+              <tr><td>to_remote</td><td class="yes">✓</td><td class="yes">✓</td></tr>
+              <tr><td>commitment 级 HTLC</td><td class="yes">✓</td><td class="no">✗</td></tr>
+              <tr><td>第二层 HTLC</td><td class="yes">✓</td><td class="no">✗</td></tr>
+            </tbody>
+          </table>
+          <p style="margin:10px 0 0;color:var(--muted);font-size:11.5px">to_remote 仅在非 dust 且 kit 包含时覆盖。</p>
+        </div>
+        <div class="card reveal" style="padding:16px">
+          <h3 style="margin:0 0 8px;font-size:15px">策略默认值</h3>
+          <ul style="margin:0;padding-left:18px;color:var(--muted);font-size:13px;line-height:1.8">
+            <li>奖励：<code>10000 / 1e6</code> = 1%</li>
+            <li>sweep 费率：<code>2500 sat/kw</code> ≈ 10 sat/vB</li>
+            <li>最低费率：<code>1000 sat/kw</code> ≈ 4 sat/vB</li>
+            <li>单会话最多：<code>1024</code> 个 blob</li>
+          </ul>
+        </div>
+      </div>
+
+      <div class="callout danger reveal">
+        <span class="icon">!</span>
+        <p>
+          <strong>看门狗不保护 HTLC。</strong>
+          <code>JusticeKit</code> 只有 <code>ToLocalOutputSpendInfo</code> 和
+          <code>ToRemoteOutputSpendInfo</code>；HTLC 的惩罚需要本地
+          <code>BreachRetribution.HtlcRetributions</code> 和 revocation log。
+        </p>
+      </div>
+    </section>
+
+    <section class="section" id="scb">
+      <div class="section-head reveal">
+        <div>
+          <p class="section-kicker">04 · Static Channel Backup</p>
+          <h2>SCB 恢复后，为什么不能主动退出？</h2>
+        </div>
+        <p class="section-note">
+          SCB 是“频道外壳”，不是频道状态。它包含 key locator 和 shachain 根，
+          但不含当前 commitment tx 和 revocation log。
+        </p>
+      </div>
+
+      <div class="scb-flow">
+        <div class="scb-step reveal">
+          <span class="n">1</span>
+          <strong>恢复外壳</strong>
+          <p>容量、funding outpoint、本地 key locator、远端公钥、shachain 根。</p>
+        </div>
+        <div class="scb-step reveal">
+          <span class="n">2</span>
+          <strong>连接 peer</strong>
+          <p>用 SCB 里的地址连接；对方必须在线，才可能触发后续流程。</p>
+        </div>
+        <div class="scb-step reveal">
+          <span class="n">3</span>
+          <strong>DLP</strong>
+          <p><code>ErrCommitSyncLocalDataLoss</code> 携带对方的 commit point；<code>MarkDataLoss</code>，不 force close。</p>
+        </div>
+        <div class="scb-step bad reveal">
+          <span class="n">4</span>
+          <strong>只取回主输出</strong>
+          <p>对方 force close 后扫本地输出；空 commitment，<strong>HTLC 不恢复</strong>。</p>
+        </div>
+      </div>
+
+      <div class="grid-2" style="margin-top:18px">
+        <div class="card reveal" style="padding:16px">
+          <h3 style="margin:0 0 10px;font-size:15px">SCB 能做什么</h3>
+          <ul style="margin:0;padding-left:18px;color:var(--muted);font-size:13px;line-height:1.8">
+            <li>识别频道、连接 peer</li>
+            <li>从种子重新派生本地密钥</li>
+            <li>恢复 shachain 根</li>
+            <li>在对方 force close 后取回本地主输出</li>
+          </ul>
+        </div>
+        <div class="card reveal" style="padding:16px">
+          <h3 style="margin:0 0 10px;font-size:15px">SCB 不能做什么</h3>
+          <ul style="margin:0;padding-left:18px;color:var(--muted);font-size:13px;line-height:1.8">
+            <li>主动 force close（没有当前 commitment tx）</li>
+            <li>惩罚对方广播的旧状态（没有 revocation log）</li>
+            <li>恢复 HTLC 或在途支付</li>
+            <li>保证你能退出（对方必须 force close）</li>
+          </ul>
+        </div>
+      </div>
+
+      <div class="callout danger reveal">
+        <span class="icon">!</span>
+        <p>
+          <strong>“我有 SCB，所以安全”是危险的。</strong>
+          v0.21.8 的 <code>rpcserver.go</code> 明确拒绝对
+          <code>ChanStatusRestored</code> / <code>ChanStatusLocalDataLoss</code>
+          的 coop/force close；恢复后的频道只能等对方关闭。
+        </p>
+      </div>
+    </section>
+
+    <section class="section" id="limits">
+      <div class="section-head reveal">
+        <div>
+          <p class="section-kicker">05 · Resource Bounds</p>
+          <h2>转发侧的安全，主要是“上限”</h2>
+        </div>
+        <p class="section-note">
+          这些数字不是经济攻击的完整解，但它们把“一个连接/一笔 HTLC 无限占用资源”
+          变成有边界的成本。
+        </p>
+      </div>
+
+      <div class="limits">
+        <div class="limit reveal"><div class="value">483</div><div class="label">max_accepted_htlcs</div><div class="why">单侧最多 483 个在途 HTLC，BOLT02 上限。</div></div>
+        <div class="limit reveal"><div class="value">966</div><div class="label">MaxHTLCNumber</div><div class="why">单笔 commitment 最多 966 个 HTLC，保证 justice tx 不超标准重量。</div></div>
+        <div class="limit reveal"><div class="value">2016</div><div class="label">max CLTV expiry</div><div class="why">约两周；同时限制 delta 和绝对高度。</div></div>
+        <div class="limit reveal"><div class="value">500k sat</div><div class="label">max fee exposure</div><div class="why">dust + commit fee 的最坏暴露上限。</div></div>
+        <div class="limit reveal"><div class="value">10 sat/vB</div><div class="label">anchor commit fee cap</div><div class="why">anchor 频道 commitment 费用率默认上限。</div></div>
+        <div class="limit reveal"><div class="value">253 sat/kw</div><div class="label">FeePerKwFloor</div><div class="why">commitment 费率下限，约 1 sat/vB。</div></div>
+        <div class="limit reveal"><div class="value">10 / 200</div><div class="label">ping rate / burst</div><div class="why">每秒 10 token，burst 200；Pong 字节按 6554 B/token 计费。</div></div>
+        <div class="limit reveal"><div class="value">200 MiB</div><div class="label">gRPC max message</div><div class="why">admin macaroon 泄露后，大请求的上限。</div></div>
+      </div>
+
+      <div class="callout reveal">
+        <span class="icon">i</span>
+        <p>
+          <strong>版本边界：</strong>onion message 限速在 v0.21.0；
+          ping 回复限速在 v0.21.3；v0.21.4 改为“每个合法 Ping 都回复”；
+          v0.21.6 关闭 MPTCP 监听；v0.21.8 修复一批状态持久化/关闭边界。
+        </p>
+      </div>
+    </section>
+
+    <section class="section" id="source">
+      <div class="section-head reveal">
+        <div>
+          <p class="section-kicker">06 · Source Map</p>
+          <h2>固定提交下的源码入口</h2>
+        </div>
+        <p class="section-note">
+          所有链接指向 <code>59dd7908b33710b511c960d848ecb24c47916c3a</code>。
+          完整推导、失败分支表和实验脚本见文档主文。
+        </p>
+      </div>
+
+      <div class="table-wrap reveal">
+        <table class="source-table">
+          <thead>
+            <tr><th>路径</th><th>关键符号</th><th>说明</th></tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td>lnwallet/commitment.go</td>
+              <td><a href="https://github.com/lightningnetwork/lnd/blob/59dd7908b33710b511c960d848ecb24c47916c3a/lnwallet/commitment.go#L106">DeriveCommitmentKeys</a></td>
+              <td>按状态点推导 to_local / to_remote / revocation / HTLC 密钥。</td>
+            </tr>
+            <tr>
+              <td>input/script_utils.go</td>
+              <td><a href="https://github.com/lightningnetwork/lnd/blob/59dd7908b33710b511c960d848ecb24c47916c3a/input/script_utils.go#L3098">DeriveRevocationPubkey</a></td>
+              <td>撤销公钥的代数；对应 witness 在 <code>CommitSpendRevoke</code>。</td>
+            </tr>
+            <tr>
+              <td>shachain/store.go</td>
+              <td><a href="https://github.com/lightningnetwork/lnd/blob/59dd7908b33710b511c960d848ecb24c47916c3a/shachain/store.go#L108">LookUp</a></td>
+              <td>从已揭示 secret 恢复更早的 secret；48 个桶。</td>
+            </tr>
+            <tr>
+              <td>lnwallet/channel.go</td>
+              <td><a href="https://github.com/lightningnetwork/lnd/blob/59dd7908b33710b511c960d848ecb24c47916c3a/lnwallet/channel.go#L2116">NewBreachRetribution</a></td>
+              <td>日志 + secret + 状态点 → 可花的违约输出。</td>
+            </tr>
+            <tr>
+              <td>contractcourt/chain_watcher.go</td>
+              <td><a href="https://github.com/lightningnetwork/lnd/blob/59dd7908b33710b511c960d848ecb24c47916c3a/contractcourt/chain_watcher.go#L1160">handlePossibleBreach</a></td>
+              <td>没有 log 就不认定为违约；交易哈希也要匹配。</td>
+            </tr>
+            <tr>
+              <td>contractcourt/breach_arbitrator.go</td>
+              <td><a href="https://github.com/lightningnetwork/lnd/blob/59dd7908b33710b511c960d848ecb24c47916c3a/contractcourt/breach_arbitrator.go#L985">handleBreachHandoff</a></td>
+              <td>先持久化再 ACK；1 确认后执行 justice。</td>
+            </tr>
+            <tr>
+              <td>watchtower/blob/justice_kit.go</td>
+              <td><a href="https://github.com/lightningnetwork/lnd/blob/59dd7908b33710b511c960d848ecb24c47916c3a/watchtower/blob/justice_kit.go#L25">JusticeKit</a></td>
+              <td>只有 to_local / to_remote；没有 HTLC。</td>
+            </tr>
+            <tr>
+              <td>watchtower/lookout/lookout.go</td>
+              <td><a href="https://github.com/lightningnetwork/lnd/blob/59dd7908b33710b511c960d848ecb24c47916c3a/watchtower/lookout/lookout.go#L212">processEpoch</a></td>
+              <td>扫块、匹配 hint、用 txid 派生 key 解密。</td>
+            </tr>
+            <tr>
+              <td>chanbackup/single.go</td>
+              <td><a href="https://github.com/lightningnetwork/lnd/blob/59dd7908b33710b511c960d848ecb24c47916c3a/chanbackup/single.go#L352">Single.Serialize</a></td>
+              <td>SCB 的字段：容量、key locator、shachain 根。</td>
+            </tr>
+            <tr>
+              <td>chanrestore.go</td>
+              <td><a href="https://github.com/lightningnetwork/lnd/blob/59dd7908b33710b511c960d848ecb24c47916c3a/chanrestore.go#L49">openChannelShell</a></td>
+              <td>恢复外壳；没有 commitment tx。</td>
+            </tr>
+            <tr>
+              <td>htlcswitch/link.go</td>
+              <td><a href="https://github.com/lightningnetwork/lnd/blob/59dd7908b33710b511c960d848ecb24c47916c3a/htlcswitch/link.go#L2554">CheckHtlcForward</a></td>
+              <td>费用、CLTV、金额、带宽的转发检查。</td>
+            </tr>
+            <tr>
+              <td>peer/ping_limits.go</td>
+              <td><a href="https://github.com/lightningnetwork/lnd/blob/59dd7908b33710b511c960d848ecb24c47916c3a/peer/ping_limits.go">pingLimiter</a></td>
+              <td>10/s、burst 200、按 Pong 字节计费。</td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+
+      <div class="hero-actions reveal" style="margin-top:22px">
+        <a class="button primary" href="/docs/Wiki/blockchain/lightning/security" target="_blank" rel="noreferrer">阅读完整文档主文</a>
+        <a class="button" href="https://github.com/lightningnetwork/lnd/tree/59dd7908b33710b511c960d848ecb24c47916c3a">LND v0.21.8-beta 源码</a>
+      </div>
+    </section>
+  </main>
+
+  <footer class="footer">
+    <p><strong>Lightning Security · LND v0.21.8-beta</strong> · commit <code>59dd7908</code> · 2026-11-21</p>
+    <p>源码结论以固定提交为准；违约演练与 watchtower 端到端实验未执行，详见文档主文的证据边界。本文不是审计报告。</p>
+    <p><a href="../../index.html">返回 HTML 索引</a> · <a href="/docs/Wiki/blockchain/lightning/security" target="_blank" rel="noreferrer">文档主文</a></p>
+  </footer>
+
+  <script>
+    (function () {
+      const bar = document.getElementById('progressBar');
+      const onScroll = () => {
+        const h = document.documentElement.scrollHeight - window.innerHeight;
+        bar.style.width = (h > 0 ? (window.scrollY / h) * 100 : 0) + '%';
+      };
+      window.addEventListener('scroll', onScroll, { passive: true });
+      onScroll();
+
+      const io = new IntersectionObserver((entries) => {
+        entries.forEach((entry) => {
+          if (entry.isIntersecting) {
+            entry.target.classList.add('is-visible');
+            io.unobserve(entry.target);
+          }
+        });
+      }, { threshold: 0.12 });
+      document.querySelectorAll('.reveal').forEach((el) => io.observe(el));
+
+      const steps = Array.from(document.querySelectorAll('.step'));
+      const txCard = document.getElementById('txCard');
+      const justice = document.getElementById('justice');
+      const justiceState = justice.querySelector('strong');
+      const stageStatus = document.getElementById('stageStatus');
+      const stageCounter = document.getElementById('stageCounter');
+      const stageBadge = document.getElementById('stageBadge');
+      const btnPrev = document.getElementById('btnPrev');
+      const btnNext = document.getElementById('btnNext');
+      const btnPlay = document.getElementById('btnPlay');
+      const playHero = document.querySelector('[data-play]');
+
+      const outs = {
+        local: document.querySelector('[data-out="local"]'),
+        remote: document.querySelector('[data-out="remote"]'),
+        htlc1: document.querySelector('[data-out="htlc1"]'),
+        htlc2: document.querySelector('[data-out="htlc2"]')
+      };
+
+      const texts = [
+        '<strong>状态 0：</strong>对方广播了 #N。链上看起来只是一笔普通的 commitment，但它已经被撤销。',
+        '<strong>状态 1：</strong><code>handleCommitSpend</code> 从 sequence / locktime 解出 state hint；<code>FindPreviousState(N)</code> 命中 revocation log。',
+        '<strong>状态 2：</strong><code>RevocationStore.LookUp(N)</code> 取出 secret，<code>DeriveCommitmentKeys</code> 重建当时的 to_local、to_remote 和 HTLC 脚本。',
+        '<strong>状态 3：</strong><code>handleBreachHandoff</code> 先 <code>Store.Add(retribution)</code>，再 ACK。即使随后崩溃，重启仍能继续惩罚。',
+        '<strong>状态 4：</strong><code>createJusticeTx</code> 构造 <code>spendAll</code>：主输出、commitment 级 HTLC、第二层 HTLC 都在输入里。',
+        '<strong>状态 5：</strong>breach tx 1 确认后广播 justice tx。若对方先花掉某个输出，<code>waitForSpendEvent</code> 触发 <code>updateBreachInfo</code> 重建。'
+      ];
+
+      let current = 0;
+      let timer = null;
+
+      function clearStates() {
+        txCard.classList.remove('scan', 'revoked');
+        justice.classList.remove('on');
+        justiceState.textContent = '尚未构造';
+        Object.values(outs).forEach((o) => {
+          o.classList.remove('target', 'swept', 'contested', 'dim');
+        });
+      }
+
+      function render(i) {
+        current = Math.max(0, Math.min(steps.length - 1, i));
+        clearStates();
+        steps.forEach((step, idx) => {
+          step.classList.toggle('active', idx === current);
+          step.classList.toggle('done', idx < current);
+        });
+        stageCounter.textContent = (current + 1) + ' / ' + steps.length;
+        stageStatus.innerHTML = texts[current];
+        stageBadge.textContent = current >= 5 ? 'JUSTICE' : 'REVOKED';
+        stageBadge.className = 'badge ' + (current >= 5 ? 'ok' : 'danger');
+
+        txCard.classList.add('revoked');
+        if (current >= 1) txCard.classList.add('scan');
+        if (current >= 2) {
+          ['local', 'remote', 'htlc1', 'htlc2'].forEach((k) => outs[k].classList.add('target'));
+        }
+        if (current >= 3) {
+          justice.classList.add('on');
+          justiceState.textContent = 'retribution stored';
+        }
+        if (current >= 4) {
+          justiceState.textContent = 'spendAll built';
+        }
+        if (current >= 5) {
+          justiceState.textContent = 'justice broadcast';
+          Object.values(outs).forEach((o) => {
+            o.classList.remove('target');
+            o.classList.add('swept');
+          });
+        }
+      }
+
+      function stopTimer() {
+        if (timer) {
+          clearInterval(timer);
+          timer = null;
+        }
+        btnPlay.textContent = '播放';
+      }
+
+      function play() {
+        if (timer) {
+          stopTimer();
+          return;
+        }
+        if (current >= steps.length - 1) render(0);
+        btnPlay.textContent = '暂停';
+        timer = setInterval(() => {
+          if (current >= steps.length - 1) {
+            stopTimer();
+            btnPlay.textContent = '重新播放';
+            return;
+          }
+          render(current + 1);
+        }, 1700);
+      }
+
+      steps.forEach((step) => {
+        step.addEventListener('click', () => {
+          stopTimer();
+          render(Number(step.dataset.step));
+        });
+      });
+      btnPrev.addEventListener('click', () => { stopTimer(); render(current - 1); });
+      btnNext.addEventListener('click', () => { stopTimer(); render(current + 1); });
+      btnPlay.addEventListener('click', play);
+      if (playHero) {
+        playHero.addEventListener('click', () => {
+          document.getElementById('timeline').scrollIntoView({ behavior: 'smooth', block: 'start' });
+          if (!timer) play();
+        });
+      }
+      render(0);
+
+      document.querySelectorAll('[data-asym]').forEach((btn) => {
+        btn.addEventListener('click', () => {
+          document.querySelector('.asym').dataset.view = btn.dataset.asym;
+          document.querySelectorAll('[data-asym]').forEach((b) => {
+            b.classList.toggle('active', b === btn);
+          });
+        });
+      });
+
+      const wtToggle = document.getElementById('wtToggle');
+      if (wtToggle) {
+        wtToggle.addEventListener('click', () => {
+          const on = wtToggle.getAttribute('aria-pressed') === 'true';
+          wtToggle.setAttribute('aria-pressed', String(!on));
+          document.querySelectorAll('.cipher').forEach((c) => c.classList.toggle('revealed', !on));
+          wtToggle.querySelector('span:last-child').textContent = !on ? '恢复为 breach tx 上链前' : '模拟 breach tx 上链';
+        });
+      }
+    })();
+  </script>
+</body>
+</html>

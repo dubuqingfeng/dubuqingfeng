@@ -1,0 +1,188 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>HTML 索引</title>
+  <script src="./theme.js"></script>
+  <style>
+    :root {
+      color-scheme: light dark;
+      --bg: #f8fafc;
+      --card: #ffffff;
+      --text: #172033;
+      --muted: #475569;
+      --accent: #2563eb;
+      --border: #dbe3ef;
+    }
+
+    @media (prefers-color-scheme: dark) {
+      :root {
+        --bg: #0f172a;
+        --card: #172033;
+        --text: #e2e8f0;
+        --muted: #94a3b8;
+        --accent: #60a5fa;
+        --border: #334155;
+      }
+    }
+
+    :root[data-theme="light"] {
+      --bg: #f8fafc;
+      --card: #ffffff;
+      --text: #172033;
+      --muted: #475569;
+      --accent: #2563eb;
+      --border: #dbe3ef;
+    }
+
+    :root[data-theme="dark"] {
+      --bg: #0f172a;
+      --card: #172033;
+      --text: #e2e8f0;
+      --muted: #94a3b8;
+      --accent: #60a5fa;
+      --border: #334155;
+    }
+
+    * { box-sizing: border-box; }
+
+    body {
+      margin: 0;
+      min-height: 100vh;
+      padding: 48px 20px;
+      background: var(--bg);
+      color: var(--text);
+      font-family: system-ui, -apple-system, "PingFang SC", "Microsoft YaHei", sans-serif;
+      line-height: 1.6;
+    }
+
+    main {
+      width: min(820px, 100%);
+      margin: 0 auto;
+    }
+
+    header {
+      margin-bottom: 28px;
+    }
+
+    .page-header {
+      display: flex;
+      align-items: flex-start;
+      justify-content: space-between;
+      gap: 18px;
+    }
+
+    .theme-toggle {
+      display: grid;
+      place-items: center;
+      flex: 0 0 34px;
+      width: 34px;
+      height: 34px;
+      padding: 0;
+      border: 1px solid var(--border);
+      border-radius: 10px;
+      background: var(--card);
+      color: var(--text);
+      font-size: 16px;
+      cursor: pointer;
+      transition: border-color 0.15s, transform 0.15s;
+    }
+
+    .theme-toggle:hover {
+      border-color: var(--accent);
+      transform: translateY(-1px);
+    }
+
+    h1 {
+      margin: 0 0 8px;
+      font-size: clamp(1.8rem, 4vw, 2.4rem);
+      letter-spacing: -0.02em;
+    }
+
+    .list {
+      display: grid;
+      gap: 14px;
+    }
+
+    .item {
+      display: block;
+      padding: 20px 22px;
+      border: 1px solid var(--border);
+      border-radius: 12px;
+      background: var(--card);
+      color: var(--text);
+      text-decoration: none;
+      transition: border-color 0.15s ease, transform 0.15s ease;
+    }
+
+    .item { scroll-margin-top: 24px; }
+
+    .item:hover {
+      border-color: var(--accent);
+      transform: translateY(-1px);
+    }
+
+    .item:target {
+      border-color: var(--accent);
+      box-shadow: 0 0 0 3px color-mix(in srgb, var(--accent) 16%, transparent);
+    }
+
+    .item h2 {
+      margin: 0 0 4px;
+      font-size: 1.1rem;
+    }
+
+    .item p {
+      margin: 0;
+      color: var(--muted);
+      font-size: 0.95rem;
+    }
+
+    code {
+      padding: 2px 6px;
+      border-radius: 6px;
+      background: color-mix(in srgb, var(--accent) 10%, transparent);
+      color: var(--accent);
+    }
+  </style>
+</head>
+<body>
+  <main>
+    <header class="page-header">
+      <h1>HTML 索引</h1>
+      <button class="theme-toggle" type="button" data-theme-toggle aria-label="切换日间/夜间模式">
+        <span data-theme-icon aria-hidden="true">☾</span>
+      </button>
+    </header>
+
+    <section class="list" aria-label="HTML 页面列表">
+      <a class="item" id="ethereum-state" href="./ethereum/state/index.html">
+        <h2>Ethereum State 源码分析</h2>
+        <p>从 StateAccount、余额、nonce、存储槽到 MPT、StateDB、TrieDB、PathDB、HashDB，理解一次状态写入如何变成 stateRoot。附 MPT 查找演示与交易场景拆解。</p>
+      </a>
+
+      <a class="item" id="parallel-execution" href="./blockchain/parallel-execution/index.html">
+        <h2>并行执行的主流原理：从 Sealevel 到 Block-STM</h2>
+        <p>静态声明、乐观并发、Block-STM、BAL、Monad、Sei、Solana、Sui、MegaETH、Hyperliquid 的机制、源码与取舍，附冲突模拟器。</p>
+      </a>
+
+      <a class="item" id="lightning-security" href="./blockchain/lightning-security/index.html">
+        <h2>Lightning 安全：违约、看门狗与恢复边界</h2>
+        <p>用可播放的违约时间线理解 LND v0.21.8 的承诺交易、shachain 撤销、justice tx、watchtower 与 SCB 边界。</p>
+      </a>
+
+      <a class="item" id="accountsdb" href="./solana/accountsdb/index.html">
+        <h2>Solana AccountsDB 源码分析</h2>
+        <p>用动画理解写缓存、root 落盘、AppendVec、索引、clean、快照与 LtHash。</p>
+      </a>
+
+      <a class="item" id="bank" href="./solana/bank/index.html">
+        <h2>Solana Bank 源码分析</h2>
+        <p>从 new_from_parent 到 freeze、squash/root 和 Bank drop，理解执行状态视图。</p>
+      </a>
+
+    </section>
+  </main>
+</body>
+</html>

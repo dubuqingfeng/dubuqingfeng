@@ -46,8 +46,29 @@ slug: /wiki/programming/java
 
 - [Spring/Spring Boot 概览](./web/spring.md)
 
+## 流处理
+
+- [Flink：事件时间、状态与 checkpoint](./flink/README.md)
+
 ## 面试与练习
 
 - [Java 高频题要点](./interview/interview.md)
 
 如有新增条目或分类需要调整，按需补充即可。
+
+
+## 本级目录 {#directory-index}
+
+### 子目录 {#directory-children}
+
+- [Java：I/O 与 NIO](./io-nio/README.md)
+- [Java：JVM](./jvm/README.md)
+- [Java：Web](./web/README.md)
+- [Java：工具链](./toolchain/README.md)
+- [Java：并发](./concurrency/README.md)
+- [Java：语言特性](./language/README.md)
+- [Java：集合](./collections/README.md)
+- [Java：Flink](./flink/README.md)
+- [Java：面试与练习](./interview/README.md)
+
+返回[上一级：编程与数据库](./../README.md)。
