@@ -41,8 +41,6 @@ const config = {
     //     },
     // },
   },
-  themes: ["docusaurus-theme-openapi-docs"],
-
   presets: [
     [
       'classic',
@@ -100,7 +98,7 @@ const config = {
             label: 'Intro',
           },
           {
-            to: "/docs/wiki",
+            to: "/docs/wiki/contents",
             position: 'left',
             label: 'Wiki',
           },
@@ -115,13 +113,14 @@ const config = {
             label: "SiteNav",
           },
           {
+            type: "html",
+            position: "left",
+            value: '<a class="navbar__link" href="/html">HTML</a>',
+          },
+          {
             position: "left",
             label: "Tools",
             items: [
-              {
-                href: "https://json.cn",
-                label: "JSON",
-              },
               {
                 label: "URL Parameter Tool",
                 to: "/tools/urlparam",
@@ -191,20 +190,12 @@ const config = {
             title: 'Internal',
             items: [
               {
-                label: 'Crawlab',
-                href: 'http://crawlab.lab',
-              },
-              {
                 label: 'Note',
                 href: 'http://note.lab',
               },
               {
                 label: 'NAS',
                 href: 'http://nas.lab',
-              },
-              {
-                label: 'Coder',
-                href: 'http://coder.lab',
               },
             ],
           },
@@ -256,34 +247,6 @@ const config = {
           enabled: false,
           verbose: true,
           personalAccessToken: process.env.GITHUB_PERSONAL_ACCESS_TOKEN || 'token',
-        },
-      ],
-      [
-        '@docusaurus/plugin-content-docs',
-        {
-          id: 'openapi-classic',
-          path: 'openapi',
-          routeBasePath: 'openapi',
-          docRootComponent: "@theme/DocRoot", // add @theme/DocRoot
-          docItemComponent: "@theme/ApiItem" // Derived from docusaurus-theme-openapi-docs
-          // sidebarPath: './sidebarsCommunity.js',
-          // ... other options
-        },
-      ],
-      [
-        'docusaurus-plugin-openapi-docs',
-        {
-          id: "openapi", // plugin id
-          docsPluginId: "openapi-classic", // id of plugin-content-docs or preset for rendering docs
-          config: {
-            okxord: {
-              specPath: "src/openapi/okx/ord/openapi.json",
-              outputDir: "openapi/okx-ord",
-              sidebarOptions: { // optional, instructs plugin to generate sidebar.js
-                groupPathsBy: "tag", // group sidebar items by operation "tag"
-              },
-            }
-          }
         },
       ],
       [

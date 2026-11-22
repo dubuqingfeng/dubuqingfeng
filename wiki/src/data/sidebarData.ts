@@ -5,7 +5,6 @@ const ToolsSidebarData = [
     items: [
       { type: "link", href: "/tools/urlparam", label: "URL Parameter Tool" },
       { type: "link", href: "/tools/imageocr", label: "图片文字识别" },
-      { type: "link", href: "/tools/realtime", label: "实时消息" },
     ],
   },
   {
@@ -26,34 +25,8 @@ const ToolsSidebarData = [
     items: [
       {
         type: "link",
-        href: "/tools/bitcoin/publishtx",
-        label: "Publish Tx",
-      },
-      {
-        type: "link",
         href: "/tools/bitcoin/verifysignature",
         label: "Verify Signature",
-      },
-      {
-        type: "link",
-        href: "/tools/bitcoin/decodetx",
-        label: "Decode Tx",
-      },
-    ],
-  },
-  {
-    label: "Ethereum",
-    type: "category",
-    items: [
-      {
-        type: "link",
-        href: "/tools/ethereum/publishtx",
-        label: "Publish Tx",
-      },
-      {
-        type: "link",
-        href: "/tools/ethereum/decodetx",
-        label: "Decode Tx",
       },
     ],
   },

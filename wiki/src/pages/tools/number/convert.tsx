@@ -36,7 +36,7 @@ export default function DecodeTX() {
       <div className={DocRootStyles.docRoot}>
         <PageSidebar
           sidebar={ToolsSidebarData}
-          path="/tools/ethereum/decodetx"
+          path="/tools/number/convert"
         ></PageSidebar>
         <main className={clsx(MainStyles.docMainContainer)}>
           <div

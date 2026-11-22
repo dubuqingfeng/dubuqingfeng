@@ -24,8 +24,6 @@ jobs:
 
       - name: Install dependencies
         run: npm ci
-      - name: Generate Open API docs
-        run: npm run gen-api-docs all
       - name: Build website
         run: npm run build
 
