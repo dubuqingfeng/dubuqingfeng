@@ -1,0 +1,38 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1120" height="680" viewBox="0 0 1120 680" role="img" aria-labelledby="title desc">
+ <title id="title">Uniswap V3 跨 tick 与原子结算</title>
+ <desc id="desc">Router 负责用户保护，Pool 循环计算交换并跨越初始化 tick，然后先付输出、回调收款、校验余额。失败整笔回滚。本地实验直接由夹具调用 Pool。</desc>
+ <defs><marker id="arrow" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="8" markerHeight="8" orient="auto-start-reverse"><path d="M0 0L10 5L0 10z" fill="#52657b"/></marker></defs>
+ <rect width="1120" height="680" rx="16" fill="#f4f7fb"/>
+ <g font-family="system-ui, sans-serif" fill="#172d46">
+  <text x="32" y="42" font-size="25" font-weight="700">一次 token0 → token1：计算、跨 tick、回调与结算</text>
+  <rect x="30" y="68" width="320" height="116" rx="12" fill="#e7edf6" stroke="#8094ad" stroke-dasharray="6 4"/>
+  <text x="48" y="97" font-size="20" font-weight="600">用户 → SwapRouter（源码核对）</text>
+  <text x="48" y="125" font-size="16">deadline、amountOutMinimum /</text><text x="48" y="149" font-size="16">amountInMaximum、回调来源验证</text><text x="48" y="173" font-size="14">本地夹具直接调用 Pool，未部署 Router</text>
+  <path d="M350 126H400" fill="none" stroke="#52657b" stroke-width="2" marker-end="url(#arrow)"/>
+  <rect x="405" y="68" width="680" height="116" rx="12" fill="#dcefe7" stroke="#3c8069"/>
+  <text x="425" y="98" font-size="21" font-weight="600">Pool.swap：校验非零金额、方向与价格限制 → 上锁</text>
+  <text x="425" y="128" font-size="17">amountSpecified &gt; 0：exact input；&lt; 0：exact output</text>
+  <text x="425" y="156" font-size="17">循环直到金额满足，或 sqrtPriceX96 到达限制</text>
+  <path d="M745 184V215" fill="none" stroke="#52657b" stroke-width="2" marker-end="url(#arrow)"/>
+  <rect x="30" y="220" width="1055" height="193" rx="12" fill="#fff" stroke="#3c8069"/>
+  <text x="50" y="250" font-size="20" font-weight="600">TickBitmap 找边界 → SwapMath 算一步 → Tick.cross 更新活跃流动性</text>
+  <text x="50" y="282" font-size="17">价格向左移动　←　输入 token0，输出 token1；手续费以输入币计</text>
+  <rect x="75" y="308" width="410" height="60" fill="#dcefe7"/><rect x="485" y="308" width="410" height="60" fill="#e3eafa"/>
+  <text x="95" y="335" font-size="16">[-240, -120)：L = 2 × 10¹²</text><text x="95" y="357" font-size="15">第二步在 tick -160 耗尽输入</text>
+  <text x="505" y="335" font-size="16">[-120, 120)：L = 10¹²</text><text x="505" y="357" font-size="15">从 tick 0 到 -120：第一步</text>
+  <path d="M805 382H300" fill="none" stroke="#3c8069" stroke-width="3" marker-end="url(#arrow)"/>
+  <text x="913" y="330" font-size="15">-120 已初始化</text><text x="913" y="353" font-size="15">向左取反 net</text><text x="913" y="376" font-size="15">L 增加 10¹²</text>
+  <path d="M555 413V443" fill="none" stroke="#52657b" stroke-width="2" marker-end="url(#arrow)"/>
+  <rect x="30" y="450" width="330" height="110" rx="12" fill="#dcefe7" stroke="#3c8069"/>
+  <text x="48" y="480" font-size="20" font-weight="600">① 先转出 token1</text><text x="48" y="509" font-size="17">9,879.206227</text><text x="48" y="537" font-size="15">状态已写入，但交易尚可回滚</text>
+  <path d="M360 502H390" fill="none" stroke="#52657b" stroke-width="2" marker-end="url(#arrow)"/>
+  <rect x="397" y="450" width="330" height="110" rx="12" fill="#dcefe7" stroke="#3c8069"/>
+  <text x="415" y="480" font-size="20" font-weight="600">② 回调 msg.sender</text><text x="415" y="509" font-size="17">应付 token0 = 10,000</text><text x="415" y="537" font-size="15">同池重入 swap → LOK</text>
+  <path d="M727 502H757" fill="none" stroke="#52657b" stroke-width="2" marker-end="url(#arrow)"/>
+  <rect x="765" y="450" width="320" height="110" rx="12" fill="#dcefe7" stroke="#3c8069"/>
+  <text x="783" y="480" font-size="20" font-weight="600">③ 核对输入币余额</text><text x="783" y="509" font-size="17">增加额 ≥ 应付额</text><text x="783" y="537" font-size="15">通过 → Swap 事件 → 解锁</text>
+  <rect x="30" y="584" width="1055" height="66" rx="12" fill="#fbe9df" stroke="#b36b43"/>
+  <text x="48" y="611" font-size="18" font-weight="600">少付 0.000001 token0 → IIA：输出转账、付款、tick、手续费和事件全部回滚</text>
+  <text x="48" y="637" font-size="15">绿色流程已在本地 EVM 实测；Router 保护仅作固定源码核查；未验证主网部署、真实代币及 MEV。</text>
+ </g>
+</svg>

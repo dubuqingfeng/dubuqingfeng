@@ -1,0 +1,1849 @@
+{
+  "environment": {
+    "platform": "darwin",
+    "arch": "arm64",
+    "node": "v25.2.1",
+    "solc": "0.7.6+commit.7338295f.Emscripten.clang",
+    "ethers": "6.15.0",
+    "ganache": "7.9.2",
+    "core": "1.0.1",
+    "periphery": "1.4.4",
+    "chainId": 1337,
+    "hardfork": "istanbul",
+    "fixtureOptimizerRuns": 200
+  },
+  "addresses": {
+    "factory": "0x05EaAfF3FE7e1F09f2b0693D42e3FDC8642c3592",
+    "pool": "0x0d5a49d36bd70B315a5C1167BCdBA7FEd9C2672E",
+    "fixture": "0x4b0442AD1c73A061914739fA8781a80B6c39df23",
+    "token0": "0x36bb99cd615540Db9d24621cfA3b5C1C9A8dCDa0",
+    "token1": "0x44753545198dE3E10eEd2E01ec93067812b70A1D"
+  },
+  "decimals": [
+    "6",
+    "6"
+  ],
+  "artifacts": {
+    "UniswapV3Factory": {
+      "creationKeccak256": "0xa9cb11ffa1b1bf9a9a2b70b66f6a22db3e8328b37ec44e6ce602749081efdb6d"
+    },
+    "UniswapV3Pool": {
+      "creationKeccak256": "0xe34f199b19b2b4f47f68442619d555527d244f78a3297ea89325f843f87b8b54"
+    },
+    "poolRuntimeKeccak256": "0x934f20e5204f6664cd31454101eb7e2d9d13e9a1d8ac70d41b66282bfb9a1e16",
+    "fixtureSourceSha256": "36b5dede973747377d4a07fb19c7c2464a5f536c0ca28e33a7d52354df0de3d6"
+  },
+  "cases": [
+    {
+      "name": "cross-exact-input",
+      "input": {
+        "zeroForOne": true,
+        "amountSpecified": "10000000000",
+        "limitTick": -180,
+        "sqrtPriceLimitX96": "78518343518507372664916416552",
+        "shortPay": false,
+        "reenter": false
+      },
+      "before": {
+        "sqrtPriceX96": "79228162514264337593543950336",
+        "tick": "0",
+        "unlocked": true,
+        "feeProtocol": "0",
+        "liquidity": "1000000000000",
+        "feeGrowthGlobal0X128": "0",
+        "feeGrowthGlobal1X128": "0",
+        "protocolFees": [
+          "0",
+          "0"
+        ],
+        "ticks": {
+          "0": {
+            "liquidityGross": "0",
+            "liquidityNet": "0",
+            "feeGrowthOutside0X128": "0",
+            "feeGrowthOutside1X128": "0",
+            "initialized": false
+          },
+          "120": {
+            "liquidityGross": "3000000000000",
+            "liquidityNet": "1000000000000",
+            "feeGrowthOutside0X128": "0",
+            "feeGrowthOutside1X128": "0",
+            "initialized": true
+          },
+          "240": {
+            "liquidityGross": "2000000000000",
+            "liquidityNet": "-2000000000000",
+            "feeGrowthOutside0X128": "0",
+            "feeGrowthOutside1X128": "0",
+            "initialized": true
+          },
+          "-240": {
+            "liquidityGross": "2000000000000",
+            "liquidityNet": "2000000000000",
+            "feeGrowthOutside0X128": "0",
+            "feeGrowthOutside1X128": "0",
+            "initialized": true
+          },
+          "-120": {
+            "liquidityGross": "3000000000000",
+            "liquidityNet": "-1000000000000",
+            "feeGrowthOutside0X128": "0",
+            "feeGrowthOutside1X128": "0",
+            "initialized": true
+          }
+        },
+        "poolBalances": [
+          "17873650909",
+          "17873650909"
+        ],
+        "fixtureBalances": [
+          "999999982126349091",
+          "999999982126349091"
+        ]
+      },
+      "callReturn": [
+        "10000000000",
+        "-9879206227"
+      ],
+      "receipt": {
+        "hash": "0x521e18bc73b8447af1881d7d6adc9bb914fdaeaa6e1eb22c6165ce3e0fbac0da",
+        "blockNumber": 10,
+        "status": 1,
+        "gasUsed": "177683",
+        "rawLogs": [
+          {
+            "address": "0x44753545198dE3E10eEd2E01ec93067812b70A1D",
+            "topics": [
+              "0xddf252ad1be2c89b69c2b068fc378daa952ba7f163c4a11628f55a4df523b3ef",
+              "0x0000000000000000000000000d5a49d36bd70b315a5c1167bcdba7fed9c2672e",
+              "0x0000000000000000000000004b0442ad1c73a061914739fa8781a80b6c39df23"
+            ],
+            "data": "0x000000000000000000000000000000000000000000000000000000024cd8b953"
+          },
+          {
+            "address": "0x36bb99cd615540Db9d24621cfA3b5C1C9A8dCDa0",
+            "topics": [
+              "0xddf252ad1be2c89b69c2b068fc378daa952ba7f163c4a11628f55a4df523b3ef",
+              "0x0000000000000000000000004b0442ad1c73a061914739fa8781a80b6c39df23",
+              "0x0000000000000000000000000d5a49d36bd70b315a5c1167bcdba7fed9c2672e"
+            ],
+            "data": "0x00000000000000000000000000000000000000000000000000000002540be400"
+          },
+          {
+            "address": "0x4b0442AD1c73A061914739fA8781a80B6c39df23",
+            "topics": [
+              "0x958e08ef2f883de81f5021dff83af22299ef0b986c2641e3c3bcf779844bf61b"
+            ],
+            "data": "0x00000000000000000000000000000000000000000000000000000002540be400fffffffffffffffffffffffffffffffffffffffffffffffffffffffdb32746ad00000000000000000000000000000000000000000000000000000002540be4000000000000000000000000000000000000000000000000000000000000000000"
+          },
+          {
+            "address": "0x0d5a49d36bd70B315a5C1167BCdBA7FEd9C2672E",
+            "topics": [
+              "0xc42079f94a6350d7e6235f29174924f928cc2ac818eb64fed8004e115fbcca67",
+              "0x0000000000000000000000004b0442ad1c73a061914739fa8781a80b6c39df23",
+              "0x0000000000000000000000004b0442ad1c73a061914739fa8781a80b6c39df23"
+            ],
+            "data": "0x00000000000000000000000000000000000000000000000000000002540be400fffffffffffffffffffffffffffffffffffffffffffffffffffffffdb32746ad0000000000000000000000000000000000000000fdf844c2246b879c06fdcd8c000000000000000000000000000000000000000000000000000001d1a94a2000ffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff60"
+          },
+          {
+            "address": "0x4b0442AD1c73A061914739fA8781a80B6c39df23",
+            "topics": [
+              "0xb9ac6e937252223484a5271cb741ed7336791c73663cca1363a8eae26c81c2c6"
+            ],
+            "data": "0x00000000000000000000000000000000000000000000000000000002540be400fffffffffffffffffffffffffffffffffffffffffffffffffffffffdb32746ad"
+          }
+        ]
+      },
+      "events": [
+        {
+          "contract": "fixture",
+          "name": "Payment",
+          "args": [
+            "10000000000",
+            "-9879206227",
+            "10000000000",
+            "0"
+          ]
+        },
+        {
+          "contract": "pool",
+          "name": "Swap",
+          "args": [
+            "0x4b0442AD1c73A061914739fA8781a80B6c39df23",
+            "0x4b0442AD1c73A061914739fA8781a80B6c39df23",
+            "10000000000",
+            "-9879206227",
+            "78599845790278256170299673996",
+            "2000000000000",
+            "-160"
+          ]
+        },
+        {
+          "contract": "fixture",
+          "name": "Returned",
+          "args": [
+            "10000000000",
+            "-9879206227"
+          ]
+        }
+      ],
+      "after": {
+        "sqrtPriceX96": "78599845790278256170299673996",
+        "tick": "-160",
+        "unlocked": true,
+        "feeProtocol": "0",
+        "liquidity": "2000000000000",
+        "feeGrowthGlobal0X128": "8185071577136476998201403719069094",
+        "feeGrowthGlobal1X128": "0",
+        "protocolFees": [
+          "0",
+          "0"
+        ],
+        "ticks": {
+          "0": {
+            "liquidityGross": "0",
+            "liquidityNet": "0",
+            "feeGrowthOutside0X128": "0",
+            "feeGrowthOutside1X128": "0",
+            "initialized": false
+          },
+          "120": {
+            "liquidityGross": "3000000000000",
+            "liquidityNet": "1000000000000",
+            "feeGrowthOutside0X128": "0",
+            "feeGrowthOutside1X128": "0",
+            "initialized": true
+          },
+          "240": {
+            "liquidityGross": "2000000000000",
+            "liquidityNet": "-2000000000000",
+            "feeGrowthOutside0X128": "0",
+            "feeGrowthOutside1X128": "0",
+            "initialized": true
+          },
+          "-240": {
+            "liquidityGross": "2000000000000",
+            "liquidityNet": "2000000000000",
+            "feeGrowthOutside0X128": "0",
+            "feeGrowthOutside1X128": "0",
+            "initialized": true
+          },
+          "-120": {
+            "liquidityGross": "3000000000000",
+            "liquidityNet": "-1000000000000",
+            "feeGrowthOutside0X128": "6161671806362433171563105751810536",
+            "feeGrowthOutside1X128": "0",
+            "initialized": true
+          }
+        },
+        "poolBalances": [
+          "27873650909",
+          "7994444682"
+        ],
+        "fixtureBalances": [
+          "999999972126349091",
+          "999999992005555318"
+        ]
+      },
+      "steps": [
+        {
+          "startX96": "79228162514264337593543950336",
+          "targetX96": "78754240422856966435523493930",
+          "liquidity": "1000000000000",
+          "remaining": "10000000000",
+          "nextX96": "78754240422856966435523493930",
+          "amountIn": "6017734269",
+          "amountOut": "5981737760",
+          "fee": "18107526"
+        },
+        {
+          "startX96": "78754240422856966435523493930",
+          "targetX96": "78518343518507372664916416552",
+          "liquidity": "2000000000000",
+          "remaining": "3964158205",
+          "nextX96": "78599845790278256170299673996",
+          "amountIn": "3952265730",
+          "amountOut": "3897468467",
+          "fee": "11892475"
+        }
+      ],
+      "remaining": "0"
+    },
+    {
+      "name": "price-limit-partial-input",
+      "input": {
+        "zeroForOne": true,
+        "amountSpecified": "20000000000",
+        "limitTick": -180,
+        "sqrtPriceLimitX96": "78518343518507372664916416552",
+        "shortPay": false,
+        "reenter": false
+      },
+      "before": {
+        "sqrtPriceX96": "79228162514264337593543950336",
+        "tick": "0",
+        "unlocked": true,
+        "feeProtocol": "0",
+        "liquidity": "1000000000000",
+        "feeGrowthGlobal0X128": "0",
+        "feeGrowthGlobal1X128": "0",
+        "protocolFees": [
+          "0",
+          "0"
+        ],
+        "ticks": {
+          "0": {
+            "liquidityGross": "0",
+            "liquidityNet": "0",
+            "feeGrowthOutside0X128": "0",
+            "feeGrowthOutside1X128": "0",
+            "initialized": false
+          },
+          "120": {
+            "liquidityGross": "3000000000000",
+            "liquidityNet": "1000000000000",
+            "feeGrowthOutside0X128": "0",
+            "feeGrowthOutside1X128": "0",
+            "initialized": true
+          },
+          "240": {
+            "liquidityGross": "2000000000000",
+            "liquidityNet": "-2000000000000",
+            "feeGrowthOutside0X128": "0",
+            "feeGrowthOutside1X128": "0",
+            "initialized": true
+          },
+          "-240": {
+            "liquidityGross": "2000000000000",
+            "liquidityNet": "2000000000000",
+            "feeGrowthOutside0X128": "0",
+            "feeGrowthOutside1X128": "0",
+            "initialized": true
+          },
+          "-120": {
+            "liquidityGross": "3000000000000",
+            "liquidityNet": "-1000000000000",
+            "feeGrowthOutside0X128": "0",
+            "feeGrowthOutside1X128": "0",
+            "initialized": true
+          }
+        },
+        "poolBalances": [
+          "17873650909",
+          "17873650909"
+        ],
+        "fixtureBalances": [
+          "999999982126349091",
+          "999999982126349091"
+        ]
+      },
+      "callReturn": [
+        "12098897899",
+        "-11936612816"
+      ],
+      "receipt": {
+        "hash": "0x8496e9c17293a62d02a5aabb32ca936a1f76b88fd112d62b82b2de320872df59",
+        "blockNumber": 10,
+        "status": 1,
+        "gasUsed": "177613",
+        "rawLogs": [
+          {
+            "address": "0x44753545198dE3E10eEd2E01ec93067812b70A1D",
+            "topics": [
+              "0xddf252ad1be2c89b69c2b068fc378daa952ba7f163c4a11628f55a4df523b3ef",
+              "0x0000000000000000000000000d5a49d36bd70b315a5c1167bcdba7fed9c2672e",
+              "0x0000000000000000000000004b0442ad1c73a061914739fa8781a80b6c39df23"
+            ],
+            "data": "0x00000000000000000000000000000000000000000000000000000002c77a41d0"
+          },
+          {
+            "address": "0x36bb99cd615540Db9d24621cfA3b5C1C9A8dCDa0",
+            "topics": [
+              "0xddf252ad1be2c89b69c2b068fc378daa952ba7f163c4a11628f55a4df523b3ef",
+              "0x0000000000000000000000004b0442ad1c73a061914739fa8781a80b6c39df23",
+              "0x0000000000000000000000000d5a49d36bd70b315a5c1167bcdba7fed9c2672e"
+            ],
+            "data": "0x00000000000000000000000000000000000000000000000000000002d12687eb"
+          },
+          {
+            "address": "0x4b0442AD1c73A061914739fA8781a80B6c39df23",
+            "topics": [
+              "0x958e08ef2f883de81f5021dff83af22299ef0b986c2641e3c3bcf779844bf61b"
+            ],
+            "data": "0x00000000000000000000000000000000000000000000000000000002d12687ebfffffffffffffffffffffffffffffffffffffffffffffffffffffffd3885be3000000000000000000000000000000000000000000000000000000002d12687eb0000000000000000000000000000000000000000000000000000000000000000"
+          },
+          {
+            "address": "0x0d5a49d36bd70B315a5C1167BCdBA7FEd9C2672E",
+            "topics": [
+              "0xc42079f94a6350d7e6235f29174924f928cc2ac818eb64fed8004e115fbcca67",
+              "0x0000000000000000000000004b0442ad1c73a061914739fa8781a80b6c39df23",
+              "0x0000000000000000000000004b0442ad1c73a061914739fa8781a80b6c39df23"
+            ],
+            "data": "0x00000000000000000000000000000000000000000000000000000002d12687ebfffffffffffffffffffffffffffffffffffffffffffffffffffffffd3885be300000000000000000000000000000000000000000fdb4d9fb22edcbc497ce1828000000000000000000000000000000000000000000000000000001d1a94a2000ffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff4c"
+          },
+          {
+            "address": "0x4b0442AD1c73A061914739fA8781a80B6c39df23",
+            "topics": [
+              "0xb9ac6e937252223484a5271cb741ed7336791c73663cca1363a8eae26c81c2c6"
+            ],
+            "data": "0x00000000000000000000000000000000000000000000000000000002d12687ebfffffffffffffffffffffffffffffffffffffffffffffffffffffffd3885be30"
+          }
+        ]
+      },
+      "events": [
+        {
+          "contract": "fixture",
+          "name": "Payment",
+          "args": [
+            "12098897899",
+            "-11936612816",
+            "12098897899",
+            "0"
+          ]
+        },
+        {
+          "contract": "pool",
+          "name": "Swap",
+          "args": [
+            "0x4b0442AD1c73A061914739fA8781a80B6c39df23",
+            "0x4b0442AD1c73A061914739fA8781a80B6c39df23",
+            "12098897899",
+            "-11936612816",
+            "78518343518507372664916416552",
+            "2000000000000",
+            "-180"
+          ]
+        },
+        {
+          "contract": "fixture",
+          "name": "Returned",
+          "args": [
+            "12098897899",
+            "-11936612816"
+          ]
+        }
+      ],
+      "after": {
+        "sqrtPriceX96": "78518343518507372664916416552",
+        "tick": "-180",
+        "unlocked": true,
+        "feeProtocol": "0",
+        "liquidity": "2000000000000",
+        "feeGrowthGlobal0X128": "9256398546184912846830928774253079",
+        "feeGrowthGlobal1X128": "0",
+        "protocolFees": [
+          "0",
+          "0"
+        ],
+        "ticks": {
+          "0": {
+            "liquidityGross": "0",
+            "liquidityNet": "0",
+            "feeGrowthOutside0X128": "0",
+            "feeGrowthOutside1X128": "0",
+            "initialized": false
+          },
+          "120": {
+            "liquidityGross": "3000000000000",
+            "liquidityNet": "1000000000000",
+            "feeGrowthOutside0X128": "0",
+            "feeGrowthOutside1X128": "0",
+            "initialized": true
+          },
+          "240": {
+            "liquidityGross": "2000000000000",
+            "liquidityNet": "-2000000000000",
+            "feeGrowthOutside0X128": "0",
+            "feeGrowthOutside1X128": "0",
+            "initialized": true
+          },
+          "-240": {
+            "liquidityGross": "2000000000000",
+            "liquidityNet": "2000000000000",
+            "feeGrowthOutside0X128": "0",
+            "feeGrowthOutside1X128": "0",
+            "initialized": true
+          },
+          "-120": {
+            "liquidityGross": "3000000000000",
+            "liquidityNet": "-1000000000000",
+            "feeGrowthOutside0X128": "6161671806362433171563105751810536",
+            "feeGrowthOutside1X128": "0",
+            "initialized": true
+          }
+        },
+        "poolBalances": [
+          "29972548808",
+          "5937038093"
+        ],
+        "fixtureBalances": [
+          "999999970027451192",
+          "999999994062961907"
+        ]
+      },
+      "steps": [
+        {
+          "startX96": "79228162514264337593543950336",
+          "targetX96": "78754240422856966435523493930",
+          "liquidity": "1000000000000",
+          "remaining": "20000000000",
+          "nextX96": "78754240422856966435523493930",
+          "amountIn": "6017734269",
+          "amountOut": "5981737760",
+          "fee": "18107526"
+        },
+        {
+          "startX96": "78754240422856966435523493930",
+          "targetX96": "78518343518507372664916416552",
+          "liquidity": "2000000000000",
+          "remaining": "13964158205",
+          "nextX96": "78518343518507372664916416552",
+          "amountIn": "6044866935",
+          "amountOut": "5954875056",
+          "fee": "18189169"
+        }
+      ],
+      "remaining": "7901102101"
+    },
+    {
+      "name": "cross-exact-output",
+      "input": {
+        "zeroForOne": true,
+        "amountSpecified": "-9000000000",
+        "limitTick": -180,
+        "sqrtPriceLimitX96": "78518343518507372664916416552",
+        "shortPay": false,
+        "reenter": false
+      },
+      "before": {
+        "sqrtPriceX96": "79228162514264337593543950336",
+        "tick": "0",
+        "unlocked": true,
+        "feeProtocol": "0",
+        "liquidity": "1000000000000",
+        "feeGrowthGlobal0X128": "0",
+        "feeGrowthGlobal1X128": "0",
+        "protocolFees": [
+          "0",
+          "0"
+        ],
+        "ticks": {
+          "0": {
+            "liquidityGross": "0",
+            "liquidityNet": "0",
+            "feeGrowthOutside0X128": "0",
+            "feeGrowthOutside1X128": "0",
+            "initialized": false
+          },
+          "120": {
+            "liquidityGross": "3000000000000",
+            "liquidityNet": "1000000000000",
+            "feeGrowthOutside0X128": "0",
+            "feeGrowthOutside1X128": "0",
+            "initialized": true
+          },
+          "240": {
+            "liquidityGross": "2000000000000",
+            "liquidityNet": "-2000000000000",
+            "feeGrowthOutside0X128": "0",
+            "feeGrowthOutside1X128": "0",
+            "initialized": true
+          },
+          "-240": {
+            "liquidityGross": "2000000000000",
+            "liquidityNet": "2000000000000",
+            "feeGrowthOutside0X128": "0",
+            "feeGrowthOutside1X128": "0",
+            "initialized": true
+          },
+          "-120": {
+            "liquidityGross": "3000000000000",
+            "liquidityNet": "-1000000000000",
+            "feeGrowthOutside0X128": "0",
+            "feeGrowthOutside1X128": "0",
+            "initialized": true
+          }
+        },
+        "poolBalances": [
+          "17873650909",
+          "17873650909"
+        ],
+        "fixtureBalances": [
+          "999999982126349091",
+          "999999982126349091"
+        ]
+      },
+      "callReturn": [
+        "9104389914",
+        "-9000000000"
+      ],
+      "receipt": {
+        "hash": "0xc1c305b23fa2ff69661043e045ae313ed49d083a748db14f0646e8eb1db6eb05",
+        "blockNumber": 10,
+        "status": 1,
+        "gasUsed": "177937",
+        "rawLogs": [
+          {
+            "address": "0x44753545198dE3E10eEd2E01ec93067812b70A1D",
+            "topics": [
+              "0xddf252ad1be2c89b69c2b068fc378daa952ba7f163c4a11628f55a4df523b3ef",
+              "0x0000000000000000000000000d5a49d36bd70b315a5c1167bcdba7fed9c2672e",
+              "0x0000000000000000000000004b0442ad1c73a061914739fa8781a80b6c39df23"
+            ],
+            "data": "0x0000000000000000000000000000000000000000000000000000000218711a00"
+          },
+          {
+            "address": "0x36bb99cd615540Db9d24621cfA3b5C1C9A8dCDa0",
+            "topics": [
+              "0xddf252ad1be2c89b69c2b068fc378daa952ba7f163c4a11628f55a4df523b3ef",
+              "0x0000000000000000000000004b0442ad1c73a061914739fa8781a80b6c39df23",
+              "0x0000000000000000000000000d5a49d36bd70b315a5c1167bcdba7fed9c2672e"
+            ],
+            "data": "0x000000000000000000000000000000000000000000000000000000021ea9f71a"
+          },
+          {
+            "address": "0x4b0442AD1c73A061914739fA8781a80B6c39df23",
+            "topics": [
+              "0x958e08ef2f883de81f5021dff83af22299ef0b986c2641e3c3bcf779844bf61b"
+            ],
+            "data": "0x000000000000000000000000000000000000000000000000000000021ea9f71afffffffffffffffffffffffffffffffffffffffffffffffffffffffde78ee600000000000000000000000000000000000000000000000000000000021ea9f71a0000000000000000000000000000000000000000000000000000000000000000"
+          },
+          {
+            "address": "0x0d5a49d36bd70B315a5C1167BCdBA7FEd9C2672E",
+            "topics": [
+              "0xc42079f94a6350d7e6235f29174924f928cc2ac818eb64fed8004e115fbcca67",
+              "0x0000000000000000000000004b0442ad1c73a061914739fa8781a80b6c39df23",
+              "0x0000000000000000000000004b0442ad1c73a061914739fa8781a80b6c39df23"
+            ],
+            "data": "0x000000000000000000000000000000000000000000000000000000021ea9f71afffffffffffffffffffffffffffffffffffffffffffffffffffffffde78ee6000000000000000000000000000000000000000000fe15141323bbf7061d4e7e5b000000000000000000000000000000000000000000000000000001d1a94a2000ffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff69"
+          },
+          {
+            "address": "0x4b0442AD1c73A061914739fA8781a80B6c39df23",
+            "topics": [
+              "0xb9ac6e937252223484a5271cb741ed7336791c73663cca1363a8eae26c81c2c6"
+            ],
+            "data": "0x000000000000000000000000000000000000000000000000000000021ea9f71afffffffffffffffffffffffffffffffffffffffffffffffffffffffde78ee600"
+          }
+        ]
+      },
+      "events": [
+        {
+          "contract": "fixture",
+          "name": "Payment",
+          "args": [
+            "9104389914",
+            "-9000000000",
+            "9104389914",
+            "0"
+          ]
+        },
+        {
+          "contract": "pool",
+          "name": "Swap",
+          "args": [
+            "0x4b0442AD1c73A061914739fA8781a80B6c39df23",
+            "0x4b0442AD1c73A061914739fA8781a80B6c39df23",
+            "9104389914",
+            "-9000000000",
+            "78634674737226272679754890843",
+            "2000000000000",
+            "-151"
+          ]
+        },
+        {
+          "contract": "fixture",
+          "name": "Returned",
+          "args": [
+            "9104389914",
+            "-9000000000"
+          ]
+        }
+      ],
+      "after": {
+        "sqrtPriceX96": "78634674737226272679754890843",
+        "tick": "-151",
+        "unlocked": true,
+        "feeProtocol": "0",
+        "liquidity": "2000000000000",
+        "feeGrowthGlobal0X128": "7727931141179384452307754320826145",
+        "feeGrowthGlobal1X128": "0",
+        "protocolFees": [
+          "0",
+          "0"
+        ],
+        "ticks": {
+          "0": {
+            "liquidityGross": "0",
+            "liquidityNet": "0",
+            "feeGrowthOutside0X128": "0",
+            "feeGrowthOutside1X128": "0",
+            "initialized": false
+          },
+          "120": {
+            "liquidityGross": "3000000000000",
+            "liquidityNet": "1000000000000",
+            "feeGrowthOutside0X128": "0",
+            "feeGrowthOutside1X128": "0",
+            "initialized": true
+          },
+          "240": {
+            "liquidityGross": "2000000000000",
+            "liquidityNet": "-2000000000000",
+            "feeGrowthOutside0X128": "0",
+            "feeGrowthOutside1X128": "0",
+            "initialized": true
+          },
+          "-240": {
+            "liquidityGross": "2000000000000",
+            "liquidityNet": "2000000000000",
+            "feeGrowthOutside0X128": "0",
+            "feeGrowthOutside1X128": "0",
+            "initialized": true
+          },
+          "-120": {
+            "liquidityGross": "3000000000000",
+            "liquidityNet": "-1000000000000",
+            "feeGrowthOutside0X128": "6161671806362433171563105751810536",
+            "feeGrowthOutside1X128": "0",
+            "initialized": true
+          }
+        },
+        "poolBalances": [
+          "26978040823",
+          "8873650909"
+        ],
+        "fixtureBalances": [
+          "999999973021959177",
+          "999999991126349091"
+        ]
+      },
+      "steps": [
+        {
+          "startX96": "79228162514264337593543950336",
+          "targetX96": "78754240422856966435523493930",
+          "liquidity": "1000000000000",
+          "remaining": "-9000000000",
+          "nextX96": "78754240422856966435523493930",
+          "amountIn": "6017734269",
+          "amountOut": "5981737760",
+          "fee": "18107526"
+        },
+        {
+          "startX96": "78754240422856966435523493930",
+          "targetX96": "78518343518507372664916416552",
+          "liquidity": "2000000000000",
+          "remaining": "-3018262240",
+          "nextX96": "78634674737226272679754890843",
+          "amountIn": "3059342474",
+          "amountOut": "3018262240",
+          "fee": "9205645"
+        }
+      ],
+      "remaining": "0"
+    },
+    {
+      "name": "price-limit-partial-output",
+      "input": {
+        "zeroForOne": true,
+        "amountSpecified": "-20000000000",
+        "limitTick": -180,
+        "sqrtPriceLimitX96": "78518343518507372664916416552",
+        "shortPay": false,
+        "reenter": false
+      },
+      "before": {
+        "sqrtPriceX96": "79228162514264337593543950336",
+        "tick": "0",
+        "unlocked": true,
+        "feeProtocol": "0",
+        "liquidity": "1000000000000",
+        "feeGrowthGlobal0X128": "0",
+        "feeGrowthGlobal1X128": "0",
+        "protocolFees": [
+          "0",
+          "0"
+        ],
+        "ticks": {
+          "0": {
+            "liquidityGross": "0",
+            "liquidityNet": "0",
+            "feeGrowthOutside0X128": "0",
+            "feeGrowthOutside1X128": "0",
+            "initialized": false
+          },
+          "120": {
+            "liquidityGross": "3000000000000",
+            "liquidityNet": "1000000000000",
+            "feeGrowthOutside0X128": "0",
+            "feeGrowthOutside1X128": "0",
+            "initialized": true
+          },
+          "240": {
+            "liquidityGross": "2000000000000",
+            "liquidityNet": "-2000000000000",
+            "feeGrowthOutside0X128": "0",
+            "feeGrowthOutside1X128": "0",
+            "initialized": true
+          },
+          "-240": {
+            "liquidityGross": "2000000000000",
+            "liquidityNet": "2000000000000",
+            "feeGrowthOutside0X128": "0",
+            "feeGrowthOutside1X128": "0",
+            "initialized": true
+          },
+          "-120": {
+            "liquidityGross": "3000000000000",
+            "liquidityNet": "-1000000000000",
+            "feeGrowthOutside0X128": "0",
+            "feeGrowthOutside1X128": "0",
+            "initialized": true
+          }
+        },
+        "poolBalances": [
+          "17873650909",
+          "17873650909"
+        ],
+        "fixtureBalances": [
+          "999999982126349091",
+          "999999982126349091"
+        ]
+      },
+      "callReturn": [
+        "12098897899",
+        "-11936612816"
+      ],
+      "receipt": {
+        "hash": "0x536045bbfc39b9fde9f8bdbcd99e7c1abe74049dd855f00e72272a9cb9a284d1",
+        "blockNumber": 10,
+        "status": 1,
+        "gasUsed": "177167",
+        "rawLogs": [
+          {
+            "address": "0x44753545198dE3E10eEd2E01ec93067812b70A1D",
+            "topics": [
+              "0xddf252ad1be2c89b69c2b068fc378daa952ba7f163c4a11628f55a4df523b3ef",
+              "0x0000000000000000000000000d5a49d36bd70b315a5c1167bcdba7fed9c2672e",
+              "0x0000000000000000000000004b0442ad1c73a061914739fa8781a80b6c39df23"
+            ],
+            "data": "0x00000000000000000000000000000000000000000000000000000002c77a41d0"
+          },
+          {
+            "address": "0x36bb99cd615540Db9d24621cfA3b5C1C9A8dCDa0",
+            "topics": [
+              "0xddf252ad1be2c89b69c2b068fc378daa952ba7f163c4a11628f55a4df523b3ef",
+              "0x0000000000000000000000004b0442ad1c73a061914739fa8781a80b6c39df23",
+              "0x0000000000000000000000000d5a49d36bd70b315a5c1167bcdba7fed9c2672e"
+            ],
+            "data": "0x00000000000000000000000000000000000000000000000000000002d12687eb"
+          },
+          {
+            "address": "0x4b0442AD1c73A061914739fA8781a80B6c39df23",
+            "topics": [
+              "0x958e08ef2f883de81f5021dff83af22299ef0b986c2641e3c3bcf779844bf61b"
+            ],
+            "data": "0x00000000000000000000000000000000000000000000000000000002d12687ebfffffffffffffffffffffffffffffffffffffffffffffffffffffffd3885be3000000000000000000000000000000000000000000000000000000002d12687eb0000000000000000000000000000000000000000000000000000000000000000"
+          },
+          {
+            "address": "0x0d5a49d36bd70B315a5C1167BCdBA7FEd9C2672E",
+            "topics": [
+              "0xc42079f94a6350d7e6235f29174924f928cc2ac818eb64fed8004e115fbcca67",
+              "0x0000000000000000000000004b0442ad1c73a061914739fa8781a80b6c39df23",
+              "0x0000000000000000000000004b0442ad1c73a061914739fa8781a80b6c39df23"
+            ],
+            "data": "0x00000000000000000000000000000000000000000000000000000002d12687ebfffffffffffffffffffffffffffffffffffffffffffffffffffffffd3885be300000000000000000000000000000000000000000fdb4d9fb22edcbc497ce1828000000000000000000000000000000000000000000000000000001d1a94a2000ffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff4c"
+          },
+          {
+            "address": "0x4b0442AD1c73A061914739fA8781a80B6c39df23",
+            "topics": [
+              "0xb9ac6e937252223484a5271cb741ed7336791c73663cca1363a8eae26c81c2c6"
+            ],
+            "data": "0x00000000000000000000000000000000000000000000000000000002d12687ebfffffffffffffffffffffffffffffffffffffffffffffffffffffffd3885be30"
+          }
+        ]
+      },
+      "events": [
+        {
+          "contract": "fixture",
+          "name": "Payment",
+          "args": [
+            "12098897899",
+            "-11936612816",
+            "12098897899",
+            "0"
+          ]
+        },
+        {
+          "contract": "pool",
+          "name": "Swap",
+          "args": [
+            "0x4b0442AD1c73A061914739fA8781a80B6c39df23",
+            "0x4b0442AD1c73A061914739fA8781a80B6c39df23",
+            "12098897899",
+            "-11936612816",
+            "78518343518507372664916416552",
+            "2000000000000",
+            "-180"
+          ]
+        },
+        {
+          "contract": "fixture",
+          "name": "Returned",
+          "args": [
+            "12098897899",
+            "-11936612816"
+          ]
+        }
+      ],
+      "after": {
+        "sqrtPriceX96": "78518343518507372664916416552",
+        "tick": "-180",
+        "unlocked": true,
+        "feeProtocol": "0",
+        "liquidity": "2000000000000",
+        "feeGrowthGlobal0X128": "9256398546184912846830928774253079",
+        "feeGrowthGlobal1X128": "0",
+        "protocolFees": [
+          "0",
+          "0"
+        ],
+        "ticks": {
+          "0": {
+            "liquidityGross": "0",
+            "liquidityNet": "0",
+            "feeGrowthOutside0X128": "0",
+            "feeGrowthOutside1X128": "0",
+            "initialized": false
+          },
+          "120": {
+            "liquidityGross": "3000000000000",
+            "liquidityNet": "1000000000000",
+            "feeGrowthOutside0X128": "0",
+            "feeGrowthOutside1X128": "0",
+            "initialized": true
+          },
+          "240": {
+            "liquidityGross": "2000000000000",
+            "liquidityNet": "-2000000000000",
+            "feeGrowthOutside0X128": "0",
+            "feeGrowthOutside1X128": "0",
+            "initialized": true
+          },
+          "-240": {
+            "liquidityGross": "2000000000000",
+            "liquidityNet": "2000000000000",
+            "feeGrowthOutside0X128": "0",
+            "feeGrowthOutside1X128": "0",
+            "initialized": true
+          },
+          "-120": {
+            "liquidityGross": "3000000000000",
+            "liquidityNet": "-1000000000000",
+            "feeGrowthOutside0X128": "6161671806362433171563105751810536",
+            "feeGrowthOutside1X128": "0",
+            "initialized": true
+          }
+        },
+        "poolBalances": [
+          "29972548808",
+          "5937038093"
+        ],
+        "fixtureBalances": [
+          "999999970027451192",
+          "999999994062961907"
+        ]
+      },
+      "steps": [
+        {
+          "startX96": "79228162514264337593543950336",
+          "targetX96": "78754240422856966435523493930",
+          "liquidity": "1000000000000",
+          "remaining": "-20000000000",
+          "nextX96": "78754240422856966435523493930",
+          "amountIn": "6017734269",
+          "amountOut": "5981737760",
+          "fee": "18107526"
+        },
+        {
+          "startX96": "78754240422856966435523493930",
+          "targetX96": "78518343518507372664916416552",
+          "liquidity": "2000000000000",
+          "remaining": "-14018262240",
+          "nextX96": "78518343518507372664916416552",
+          "amountIn": "6044866935",
+          "amountOut": "5954875056",
+          "fee": "18189169"
+        }
+      ],
+      "remaining": "-8063387184"
+    },
+    {
+      "name": "reverse-exact-input",
+      "input": {
+        "zeroForOne": false,
+        "amountSpecified": "10000000000",
+        "limitTick": 180,
+        "sqrtPriceLimitX96": "79944398392805115537206921893",
+        "shortPay": false,
+        "reenter": false
+      },
+      "before": {
+        "sqrtPriceX96": "79228162514264337593543950336",
+        "tick": "0",
+        "unlocked": true,
+        "feeProtocol": "0",
+        "liquidity": "1000000000000",
+        "feeGrowthGlobal0X128": "0",
+        "feeGrowthGlobal1X128": "0",
+        "protocolFees": [
+          "0",
+          "0"
+        ],
+        "ticks": {
+          "0": {
+            "liquidityGross": "0",
+            "liquidityNet": "0",
+            "feeGrowthOutside0X128": "0",
+            "feeGrowthOutside1X128": "0",
+            "initialized": false
+          },
+          "120": {
+            "liquidityGross": "3000000000000",
+            "liquidityNet": "1000000000000",
+            "feeGrowthOutside0X128": "0",
+            "feeGrowthOutside1X128": "0",
+            "initialized": true
+          },
+          "240": {
+            "liquidityGross": "2000000000000",
+            "liquidityNet": "-2000000000000",
+            "feeGrowthOutside0X128": "0",
+            "feeGrowthOutside1X128": "0",
+            "initialized": true
+          },
+          "-240": {
+            "liquidityGross": "2000000000000",
+            "liquidityNet": "2000000000000",
+            "feeGrowthOutside0X128": "0",
+            "feeGrowthOutside1X128": "0",
+            "initialized": true
+          },
+          "-120": {
+            "liquidityGross": "3000000000000",
+            "liquidityNet": "-1000000000000",
+            "feeGrowthOutside0X128": "0",
+            "feeGrowthOutside1X128": "0",
+            "initialized": true
+          }
+        },
+        "poolBalances": [
+          "17873650909",
+          "17873650909"
+        ],
+        "fixtureBalances": [
+          "999999982126349091",
+          "999999982126349091"
+        ]
+      },
+      "callReturn": [
+        "-9879206227",
+        "10000000000"
+      ],
+      "receipt": {
+        "hash": "0x4ec158802c99b15af79a11a110559378ad856ed55c7a7ec4609f9b5f834ca6b4",
+        "blockNumber": 10,
+        "status": 1,
+        "gasUsed": "171700",
+        "rawLogs": [
+          {
+            "address": "0x36bb99cd615540Db9d24621cfA3b5C1C9A8dCDa0",
+            "topics": [
+              "0xddf252ad1be2c89b69c2b068fc378daa952ba7f163c4a11628f55a4df523b3ef",
+              "0x0000000000000000000000000d5a49d36bd70b315a5c1167bcdba7fed9c2672e",
+              "0x0000000000000000000000004b0442ad1c73a061914739fa8781a80b6c39df23"
+            ],
+            "data": "0x000000000000000000000000000000000000000000000000000000024cd8b953"
+          },
+          {
+            "address": "0x44753545198dE3E10eEd2E01ec93067812b70A1D",
+            "topics": [
+              "0xddf252ad1be2c89b69c2b068fc378daa952ba7f163c4a11628f55a4df523b3ef",
+              "0x0000000000000000000000004b0442ad1c73a061914739fa8781a80b6c39df23",
+              "0x0000000000000000000000000d5a49d36bd70b315a5c1167bcdba7fed9c2672e"
+            ],
+            "data": "0x00000000000000000000000000000000000000000000000000000002540be400"
+          },
+          {
+            "address": "0x4b0442AD1c73A061914739fA8781a80B6c39df23",
+            "topics": [
+              "0x958e08ef2f883de81f5021dff83af22299ef0b986c2641e3c3bcf779844bf61b"
+            ],
+            "data": "0xfffffffffffffffffffffffffffffffffffffffffffffffffffffffdb32746ad00000000000000000000000000000000000000000000000000000002540be400000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000002540be400"
+          },
+          {
+            "address": "0x0d5a49d36bd70B315a5C1167BCdBA7FEd9C2672E",
+            "topics": [
+              "0xc42079f94a6350d7e6235f29174924f928cc2ac818eb64fed8004e115fbcca67",
+              "0x0000000000000000000000004b0442ad1c73a061914739fa8781a80b6c39df23",
+              "0x0000000000000000000000004b0442ad1c73a061914739fa8781a80b6c39df23"
+            ],
+            "data": "0xfffffffffffffffffffffffffffffffffffffffffffffffffffffffdb32746ad00000000000000000000000000000000000000000000000000000002540be4000000000000000000000000000000000000000001020be2d5e8878be685593892000000000000000000000000000000000000000000000000000001d1a94a2000000000000000000000000000000000000000000000000000000000000000009f"
+          },
+          {
+            "address": "0x4b0442AD1c73A061914739fA8781a80B6c39df23",
+            "topics": [
+              "0xb9ac6e937252223484a5271cb741ed7336791c73663cca1363a8eae26c81c2c6"
+            ],
+            "data": "0xfffffffffffffffffffffffffffffffffffffffffffffffffffffffdb32746ad00000000000000000000000000000000000000000000000000000002540be400"
+          }
+        ]
+      },
+      "events": [
+        {
+          "contract": "fixture",
+          "name": "Payment",
+          "args": [
+            "-9879206227",
+            "10000000000",
+            "0",
+            "10000000000"
+          ]
+        },
+        {
+          "contract": "pool",
+          "name": "Swap",
+          "args": [
+            "0x4b0442AD1c73A061914739fA8781a80B6c39df23",
+            "0x4b0442AD1c73A061914739fA8781a80B6c39df23",
+            "-9879206227",
+            "10000000000",
+            "79861501918659919652719245458",
+            "2000000000000",
+            "159"
+          ]
+        },
+        {
+          "contract": "fixture",
+          "name": "Returned",
+          "args": [
+            "-9879206227",
+            "10000000000"
+          ]
+        }
+      ],
+      "after": {
+        "sqrtPriceX96": "79861501918659919652719245458",
+        "tick": "159",
+        "unlocked": true,
+        "feeProtocol": "0",
+        "liquidity": "2000000000000",
+        "feeGrowthGlobal0X128": "0",
+        "feeGrowthGlobal1X128": "8185071577136476998201403719069094",
+        "protocolFees": [
+          "0",
+          "0"
+        ],
+        "ticks": {
+          "0": {
+            "liquidityGross": "0",
+            "liquidityNet": "0",
+            "feeGrowthOutside0X128": "0",
+            "feeGrowthOutside1X128": "0",
+            "initialized": false
+          },
+          "120": {
+            "liquidityGross": "3000000000000",
+            "liquidityNet": "1000000000000",
+            "feeGrowthOutside0X128": "0",
+            "feeGrowthOutside1X128": "6161671806362433171563105751810536",
+            "initialized": true
+          },
+          "240": {
+            "liquidityGross": "2000000000000",
+            "liquidityNet": "-2000000000000",
+            "feeGrowthOutside0X128": "0",
+            "feeGrowthOutside1X128": "0",
+            "initialized": true
+          },
+          "-240": {
+            "liquidityGross": "2000000000000",
+            "liquidityNet": "2000000000000",
+            "feeGrowthOutside0X128": "0",
+            "feeGrowthOutside1X128": "0",
+            "initialized": true
+          },
+          "-120": {
+            "liquidityGross": "3000000000000",
+            "liquidityNet": "-1000000000000",
+            "feeGrowthOutside0X128": "0",
+            "feeGrowthOutside1X128": "0",
+            "initialized": true
+          }
+        },
+        "poolBalances": [
+          "7994444682",
+          "27873650909"
+        ],
+        "fixtureBalances": [
+          "999999992005555318",
+          "999999972126349091"
+        ]
+      },
+      "steps": [
+        {
+          "startX96": "79228162514264337593543950336",
+          "targetX96": "79704936542881920863903188246",
+          "liquidity": "1000000000000",
+          "remaining": "10000000000",
+          "nextX96": "79704936542881920863903188246",
+          "amountIn": "6017734269",
+          "amountOut": "5981737760",
+          "fee": "18107526"
+        },
+        {
+          "startX96": "79704936542881920863903188246",
+          "targetX96": "79944398392805115537206921893",
+          "liquidity": "2000000000000",
+          "remaining": "3964158205",
+          "nextX96": "79861501918659919652719245458",
+          "amountIn": "3952265730",
+          "amountOut": "3897468467",
+          "fee": "11892475"
+        }
+      ],
+      "remaining": "0"
+    },
+    {
+      "name": "reverse-exact-output",
+      "input": {
+        "zeroForOne": false,
+        "amountSpecified": "-9000000000",
+        "limitTick": 180,
+        "sqrtPriceLimitX96": "79944398392805115537206921893",
+        "shortPay": false,
+        "reenter": false
+      },
+      "before": {
+        "sqrtPriceX96": "79228162514264337593543950336",
+        "tick": "0",
+        "unlocked": true,
+        "feeProtocol": "0",
+        "liquidity": "1000000000000",
+        "feeGrowthGlobal0X128": "0",
+        "feeGrowthGlobal1X128": "0",
+        "protocolFees": [
+          "0",
+          "0"
+        ],
+        "ticks": {
+          "0": {
+            "liquidityGross": "0",
+            "liquidityNet": "0",
+            "feeGrowthOutside0X128": "0",
+            "feeGrowthOutside1X128": "0",
+            "initialized": false
+          },
+          "120": {
+            "liquidityGross": "3000000000000",
+            "liquidityNet": "1000000000000",
+            "feeGrowthOutside0X128": "0",
+            "feeGrowthOutside1X128": "0",
+            "initialized": true
+          },
+          "240": {
+            "liquidityGross": "2000000000000",
+            "liquidityNet": "-2000000000000",
+            "feeGrowthOutside0X128": "0",
+            "feeGrowthOutside1X128": "0",
+            "initialized": true
+          },
+          "-240": {
+            "liquidityGross": "2000000000000",
+            "liquidityNet": "2000000000000",
+            "feeGrowthOutside0X128": "0",
+            "feeGrowthOutside1X128": "0",
+            "initialized": true
+          },
+          "-120": {
+            "liquidityGross": "3000000000000",
+            "liquidityNet": "-1000000000000",
+            "feeGrowthOutside0X128": "0",
+            "feeGrowthOutside1X128": "0",
+            "initialized": true
+          }
+        },
+        "poolBalances": [
+          "17873650909",
+          "17873650909"
+        ],
+        "fixtureBalances": [
+          "999999982126349091",
+          "999999982126349091"
+        ]
+      },
+      "callReturn": [
+        "-9000000000",
+        "9104389914"
+      ],
+      "receipt": {
+        "hash": "0xef7c7c500360cc86bc9879624ffe95051aef130fa440e79f0266f824e0b3fb99",
+        "blockNumber": 10,
+        "status": 1,
+        "gasUsed": "173048",
+        "rawLogs": [
+          {
+            "address": "0x36bb99cd615540Db9d24621cfA3b5C1C9A8dCDa0",
+            "topics": [
+              "0xddf252ad1be2c89b69c2b068fc378daa952ba7f163c4a11628f55a4df523b3ef",
+              "0x0000000000000000000000000d5a49d36bd70b315a5c1167bcdba7fed9c2672e",
+              "0x0000000000000000000000004b0442ad1c73a061914739fa8781a80b6c39df23"
+            ],
+            "data": "0x0000000000000000000000000000000000000000000000000000000218711a00"
+          },
+          {
+            "address": "0x44753545198dE3E10eEd2E01ec93067812b70A1D",
+            "topics": [
+              "0xddf252ad1be2c89b69c2b068fc378daa952ba7f163c4a11628f55a4df523b3ef",
+              "0x0000000000000000000000004b0442ad1c73a061914739fa8781a80b6c39df23",
+              "0x0000000000000000000000000d5a49d36bd70b315a5c1167bcdba7fed9c2672e"
+            ],
+            "data": "0x000000000000000000000000000000000000000000000000000000021ea9f71a"
+          },
+          {
+            "address": "0x4b0442AD1c73A061914739fA8781a80B6c39df23",
+            "topics": [
+              "0x958e08ef2f883de81f5021dff83af22299ef0b986c2641e3c3bcf779844bf61b"
+            ],
+            "data": "0xfffffffffffffffffffffffffffffffffffffffffffffffffffffffde78ee600000000000000000000000000000000000000000000000000000000021ea9f71a0000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000021ea9f71a"
+          },
+          {
+            "address": "0x0d5a49d36bd70B315a5C1167BCdBA7FEd9C2672E",
+            "topics": [
+              "0xc42079f94a6350d7e6235f29174924f928cc2ac818eb64fed8004e115fbcca67",
+              "0x0000000000000000000000004b0442ad1c73a061914739fa8781a80b6c39df23",
+              "0x0000000000000000000000004b0442ad1c73a061914739fa8781a80b6c39df23"
+            ],
+            "data": "0xfffffffffffffffffffffffffffffffffffffffffffffffffffffffde78ee600000000000000000000000000000000000000000000000000000000021ea9f71a000000000000000000000000000000000000000101eea073d0e1a9c408e312c9000000000000000000000000000000000000000000000000000001d1a94a20000000000000000000000000000000000000000000000000000000000000000096"
+          },
+          {
+            "address": "0x4b0442AD1c73A061914739fA8781a80B6c39df23",
+            "topics": [
+              "0xb9ac6e937252223484a5271cb741ed7336791c73663cca1363a8eae26c81c2c6"
+            ],
+            "data": "0xfffffffffffffffffffffffffffffffffffffffffffffffffffffffde78ee600000000000000000000000000000000000000000000000000000000021ea9f71a"
+          }
+        ]
+      },
+      "events": [
+        {
+          "contract": "fixture",
+          "name": "Payment",
+          "args": [
+            "-9000000000",
+            "9104389914",
+            "0",
+            "9104389914"
+          ]
+        },
+        {
+          "contract": "pool",
+          "name": "Swap",
+          "args": [
+            "0x4b0442AD1c73A061914739fA8781a80B6c39df23",
+            "0x4b0442AD1c73A061914739fA8781a80B6c39df23",
+            "-9000000000",
+            "9104389914",
+            "79826129584218290114758120137",
+            "2000000000000",
+            "150"
+          ]
+        },
+        {
+          "contract": "fixture",
+          "name": "Returned",
+          "args": [
+            "-9000000000",
+            "9104389914"
+          ]
+        }
+      ],
+      "after": {
+        "sqrtPriceX96": "79826129584218290114758120137",
+        "tick": "150",
+        "unlocked": true,
+        "feeProtocol": "0",
+        "liquidity": "2000000000000",
+        "feeGrowthGlobal0X128": "0",
+        "feeGrowthGlobal1X128": "7727931141179384452307754320826145",
+        "protocolFees": [
+          "0",
+          "0"
+        ],
+        "ticks": {
+          "0": {
+            "liquidityGross": "0",
+            "liquidityNet": "0",
+            "feeGrowthOutside0X128": "0",
+            "feeGrowthOutside1X128": "0",
+            "initialized": false
+          },
+          "120": {
+            "liquidityGross": "3000000000000",
+            "liquidityNet": "1000000000000",
+            "feeGrowthOutside0X128": "0",
+            "feeGrowthOutside1X128": "6161671806362433171563105751810536",
+            "initialized": true
+          },
+          "240": {
+            "liquidityGross": "2000000000000",
+            "liquidityNet": "-2000000000000",
+            "feeGrowthOutside0X128": "0",
+            "feeGrowthOutside1X128": "0",
+            "initialized": true
+          },
+          "-240": {
+            "liquidityGross": "2000000000000",
+            "liquidityNet": "2000000000000",
+            "feeGrowthOutside0X128": "0",
+            "feeGrowthOutside1X128": "0",
+            "initialized": true
+          },
+          "-120": {
+            "liquidityGross": "3000000000000",
+            "liquidityNet": "-1000000000000",
+            "feeGrowthOutside0X128": "0",
+            "feeGrowthOutside1X128": "0",
+            "initialized": true
+          }
+        },
+        "poolBalances": [
+          "8873650909",
+          "26978040823"
+        ],
+        "fixtureBalances": [
+          "999999991126349091",
+          "999999973021959177"
+        ]
+      },
+      "steps": [
+        {
+          "startX96": "79228162514264337593543950336",
+          "targetX96": "79704936542881920863903188246",
+          "liquidity": "1000000000000",
+          "remaining": "-9000000000",
+          "nextX96": "79704936542881920863903188246",
+          "amountIn": "6017734269",
+          "amountOut": "5981737760",
+          "fee": "18107526"
+        },
+        {
+          "startX96": "79704936542881920863903188246",
+          "targetX96": "79944398392805115537206921893",
+          "liquidity": "2000000000000",
+          "remaining": "-3018262240",
+          "nextX96": "79826129584218290114758120137",
+          "amountIn": "3059342474",
+          "amountOut": "3018262240",
+          "fee": "9205645"
+        }
+      ],
+      "remaining": "0"
+    },
+    {
+      "name": "callback-lock",
+      "input": {
+        "zeroForOne": true,
+        "amountSpecified": "10000000000",
+        "limitTick": -180,
+        "sqrtPriceLimitX96": "78518343518507372664916416552",
+        "shortPay": false,
+        "reenter": true
+      },
+      "before": {
+        "sqrtPriceX96": "79228162514264337593543950336",
+        "tick": "0",
+        "unlocked": true,
+        "feeProtocol": "0",
+        "liquidity": "1000000000000",
+        "feeGrowthGlobal0X128": "0",
+        "feeGrowthGlobal1X128": "0",
+        "protocolFees": [
+          "0",
+          "0"
+        ],
+        "ticks": {
+          "0": {
+            "liquidityGross": "0",
+            "liquidityNet": "0",
+            "feeGrowthOutside0X128": "0",
+            "feeGrowthOutside1X128": "0",
+            "initialized": false
+          },
+          "120": {
+            "liquidityGross": "3000000000000",
+            "liquidityNet": "1000000000000",
+            "feeGrowthOutside0X128": "0",
+            "feeGrowthOutside1X128": "0",
+            "initialized": true
+          },
+          "240": {
+            "liquidityGross": "2000000000000",
+            "liquidityNet": "-2000000000000",
+            "feeGrowthOutside0X128": "0",
+            "feeGrowthOutside1X128": "0",
+            "initialized": true
+          },
+          "-240": {
+            "liquidityGross": "2000000000000",
+            "liquidityNet": "2000000000000",
+            "feeGrowthOutside0X128": "0",
+            "feeGrowthOutside1X128": "0",
+            "initialized": true
+          },
+          "-120": {
+            "liquidityGross": "3000000000000",
+            "liquidityNet": "-1000000000000",
+            "feeGrowthOutside0X128": "0",
+            "feeGrowthOutside1X128": "0",
+            "initialized": true
+          }
+        },
+        "poolBalances": [
+          "17873650909",
+          "17873650909"
+        ],
+        "fixtureBalances": [
+          "999999982126349091",
+          "999999982126349091"
+        ]
+      },
+      "callReturn": [
+        "10000000000",
+        "-9879206227"
+      ],
+      "receipt": {
+        "hash": "0xd6f3cfa5b8e69cdcd1596e6adf43477c954a2a70fe426b7ee15376d38e39142e",
+        "blockNumber": 10,
+        "status": 1,
+        "gasUsed": "188564",
+        "rawLogs": [
+          {
+            "address": "0x44753545198dE3E10eEd2E01ec93067812b70A1D",
+            "topics": [
+              "0xddf252ad1be2c89b69c2b068fc378daa952ba7f163c4a11628f55a4df523b3ef",
+              "0x0000000000000000000000000d5a49d36bd70b315a5c1167bcdba7fed9c2672e",
+              "0x0000000000000000000000004b0442ad1c73a061914739fa8781a80b6c39df23"
+            ],
+            "data": "0x000000000000000000000000000000000000000000000000000000024cd8b953"
+          },
+          {
+            "address": "0x4b0442AD1c73A061914739fA8781a80B6c39df23",
+            "topics": [
+              "0xd39622a080493b2181a89aa51776ad8901b0873a8e54fb9d36121950e1c5c432"
+            ],
+            "data": "0x000000000000000000000000000000000000000000000000000000000000002000000000000000000000000000000000000000000000000000000000000000034c4f4b0000000000000000000000000000000000000000000000000000000000"
+          },
+          {
+            "address": "0x36bb99cd615540Db9d24621cfA3b5C1C9A8dCDa0",
+            "topics": [
+              "0xddf252ad1be2c89b69c2b068fc378daa952ba7f163c4a11628f55a4df523b3ef",
+              "0x0000000000000000000000004b0442ad1c73a061914739fa8781a80b6c39df23",
+              "0x0000000000000000000000000d5a49d36bd70b315a5c1167bcdba7fed9c2672e"
+            ],
+            "data": "0x00000000000000000000000000000000000000000000000000000002540be400"
+          },
+          {
+            "address": "0x4b0442AD1c73A061914739fA8781a80B6c39df23",
+            "topics": [
+              "0x958e08ef2f883de81f5021dff83af22299ef0b986c2641e3c3bcf779844bf61b"
+            ],
+            "data": "0x00000000000000000000000000000000000000000000000000000002540be400fffffffffffffffffffffffffffffffffffffffffffffffffffffffdb32746ad00000000000000000000000000000000000000000000000000000002540be4000000000000000000000000000000000000000000000000000000000000000000"
+          },
+          {
+            "address": "0x0d5a49d36bd70B315a5C1167BCdBA7FEd9C2672E",
+            "topics": [
+              "0xc42079f94a6350d7e6235f29174924f928cc2ac818eb64fed8004e115fbcca67",
+              "0x0000000000000000000000004b0442ad1c73a061914739fa8781a80b6c39df23",
+              "0x0000000000000000000000004b0442ad1c73a061914739fa8781a80b6c39df23"
+            ],
+            "data": "0x00000000000000000000000000000000000000000000000000000002540be400fffffffffffffffffffffffffffffffffffffffffffffffffffffffdb32746ad0000000000000000000000000000000000000000fdf844c2246b879c06fdcd8c000000000000000000000000000000000000000000000000000001d1a94a2000ffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff60"
+          },
+          {
+            "address": "0x4b0442AD1c73A061914739fA8781a80B6c39df23",
+            "topics": [
+              "0xb9ac6e937252223484a5271cb741ed7336791c73663cca1363a8eae26c81c2c6"
+            ],
+            "data": "0x00000000000000000000000000000000000000000000000000000002540be400fffffffffffffffffffffffffffffffffffffffffffffffffffffffdb32746ad"
+          }
+        ]
+      },
+      "events": [
+        {
+          "contract": "fixture",
+          "name": "ReentryRejected",
+          "args": [
+            "LOK"
+          ]
+        },
+        {
+          "contract": "fixture",
+          "name": "Payment",
+          "args": [
+            "10000000000",
+            "-9879206227",
+            "10000000000",
+            "0"
+          ]
+        },
+        {
+          "contract": "pool",
+          "name": "Swap",
+          "args": [
+            "0x4b0442AD1c73A061914739fA8781a80B6c39df23",
+            "0x4b0442AD1c73A061914739fA8781a80B6c39df23",
+            "10000000000",
+            "-9879206227",
+            "78599845790278256170299673996",
+            "2000000000000",
+            "-160"
+          ]
+        },
+        {
+          "contract": "fixture",
+          "name": "Returned",
+          "args": [
+            "10000000000",
+            "-9879206227"
+          ]
+        }
+      ],
+      "after": {
+        "sqrtPriceX96": "78599845790278256170299673996",
+        "tick": "-160",
+        "unlocked": true,
+        "feeProtocol": "0",
+        "liquidity": "2000000000000",
+        "feeGrowthGlobal0X128": "8185071577136476998201403719069094",
+        "feeGrowthGlobal1X128": "0",
+        "protocolFees": [
+          "0",
+          "0"
+        ],
+        "ticks": {
+          "0": {
+            "liquidityGross": "0",
+            "liquidityNet": "0",
+            "feeGrowthOutside0X128": "0",
+            "feeGrowthOutside1X128": "0",
+            "initialized": false
+          },
+          "120": {
+            "liquidityGross": "3000000000000",
+            "liquidityNet": "1000000000000",
+            "feeGrowthOutside0X128": "0",
+            "feeGrowthOutside1X128": "0",
+            "initialized": true
+          },
+          "240": {
+            "liquidityGross": "2000000000000",
+            "liquidityNet": "-2000000000000",
+            "feeGrowthOutside0X128": "0",
+            "feeGrowthOutside1X128": "0",
+            "initialized": true
+          },
+          "-240": {
+            "liquidityGross": "2000000000000",
+            "liquidityNet": "2000000000000",
+            "feeGrowthOutside0X128": "0",
+            "feeGrowthOutside1X128": "0",
+            "initialized": true
+          },
+          "-120": {
+            "liquidityGross": "3000000000000",
+            "liquidityNet": "-1000000000000",
+            "feeGrowthOutside0X128": "6161671806362433171563105751810536",
+            "feeGrowthOutside1X128": "0",
+            "initialized": true
+          }
+        },
+        "poolBalances": [
+          "27873650909",
+          "7994444682"
+        ],
+        "fixtureBalances": [
+          "999999972126349091",
+          "999999992005555318"
+        ]
+      },
+      "steps": [
+        {
+          "startX96": "79228162514264337593543950336",
+          "targetX96": "78754240422856966435523493930",
+          "liquidity": "1000000000000",
+          "remaining": "10000000000",
+          "nextX96": "78754240422856966435523493930",
+          "amountIn": "6017734269",
+          "amountOut": "5981737760",
+          "fee": "18107526"
+        },
+        {
+          "startX96": "78754240422856966435523493930",
+          "targetX96": "78518343518507372664916416552",
+          "liquidity": "2000000000000",
+          "remaining": "3964158205",
+          "nextX96": "78599845790278256170299673996",
+          "amountIn": "3952265730",
+          "amountOut": "3897468467",
+          "fee": "11892475"
+        }
+      ],
+      "remaining": "0"
+    },
+    {
+      "name": "underpayment",
+      "input": {
+        "zeroForOne": true,
+        "amountSpecified": "10000000000",
+        "limitTick": -180,
+        "sqrtPriceLimitX96": "78518343518507372664916416552",
+        "shortPay": true,
+        "reenter": false
+      },
+      "before": {
+        "sqrtPriceX96": "79228162514264337593543950336",
+        "tick": "0",
+        "unlocked": true,
+        "feeProtocol": "0",
+        "liquidity": "1000000000000",
+        "feeGrowthGlobal0X128": "0",
+        "feeGrowthGlobal1X128": "0",
+        "protocolFees": [
+          "0",
+          "0"
+        ],
+        "ticks": {
+          "0": {
+            "liquidityGross": "0",
+            "liquidityNet": "0",
+            "feeGrowthOutside0X128": "0",
+            "feeGrowthOutside1X128": "0",
+            "initialized": false
+          },
+          "120": {
+            "liquidityGross": "3000000000000",
+            "liquidityNet": "1000000000000",
+            "feeGrowthOutside0X128": "0",
+            "feeGrowthOutside1X128": "0",
+            "initialized": true
+          },
+          "240": {
+            "liquidityGross": "2000000000000",
+            "liquidityNet": "-2000000000000",
+            "feeGrowthOutside0X128": "0",
+            "feeGrowthOutside1X128": "0",
+            "initialized": true
+          },
+          "-240": {
+            "liquidityGross": "2000000000000",
+            "liquidityNet": "2000000000000",
+            "feeGrowthOutside0X128": "0",
+            "feeGrowthOutside1X128": "0",
+            "initialized": true
+          },
+          "-120": {
+            "liquidityGross": "3000000000000",
+            "liquidityNet": "-1000000000000",
+            "feeGrowthOutside0X128": "0",
+            "feeGrowthOutside1X128": "0",
+            "initialized": true
+          }
+        },
+        "poolBalances": [
+          "17873650909",
+          "17873650909"
+        ],
+        "fixtureBalances": [
+          "999999982126349091",
+          "999999982126349091"
+        ]
+      },
+      "callError": {
+        "reason": "IIA",
+        "data": "0x08c379a0000000000000000000000000000000000000000000000000000000000000002000000000000000000000000000000000000000000000000000000000000000034949410000000000000000000000000000000000000000000000000000000000",
+        "code": "CALL_EXCEPTION"
+      },
+      "transactionError": {
+        "code": "CALL_EXCEPTION",
+        "shortMessage": "transaction execution reverted"
+      },
+      "receipt": {
+        "hash": "0x5cfe25fdb108653228c176a3b29305f947d15e317c99fddb20ab688f6a159863",
+        "blockNumber": 10,
+        "status": 0,
+        "gasUsed": "175749",
+        "rawLogs": []
+      },
+      "events": [],
+      "after": {
+        "sqrtPriceX96": "79228162514264337593543950336",
+        "tick": "0",
+        "unlocked": true,
+        "feeProtocol": "0",
+        "liquidity": "1000000000000",
+        "feeGrowthGlobal0X128": "0",
+        "feeGrowthGlobal1X128": "0",
+        "protocolFees": [
+          "0",
+          "0"
+        ],
+        "ticks": {
+          "0": {
+            "liquidityGross": "0",
+            "liquidityNet": "0",
+            "feeGrowthOutside0X128": "0",
+            "feeGrowthOutside1X128": "0",
+            "initialized": false
+          },
+          "120": {
+            "liquidityGross": "3000000000000",
+            "liquidityNet": "1000000000000",
+            "feeGrowthOutside0X128": "0",
+            "feeGrowthOutside1X128": "0",
+            "initialized": true
+          },
+          "240": {
+            "liquidityGross": "2000000000000",
+            "liquidityNet": "-2000000000000",
+            "feeGrowthOutside0X128": "0",
+            "feeGrowthOutside1X128": "0",
+            "initialized": true
+          },
+          "-240": {
+            "liquidityGross": "2000000000000",
+            "liquidityNet": "2000000000000",
+            "feeGrowthOutside0X128": "0",
+            "feeGrowthOutside1X128": "0",
+            "initialized": true
+          },
+          "-120": {
+            "liquidityGross": "3000000000000",
+            "liquidityNet": "-1000000000000",
+            "feeGrowthOutside0X128": "0",
+            "feeGrowthOutside1X128": "0",
+            "initialized": true
+          }
+        },
+        "poolBalances": [
+          "17873650909",
+          "17873650909"
+        ],
+        "fixtureBalances": [
+          "999999982126349091",
+          "999999982126349091"
+        ]
+      }
+    }
+  ],
+  "assertions": "All eight cases passed: cross initialized tick, amounts/events/balances, step sums, fee growth, partial fills, LOK and IIA rollback."
+}

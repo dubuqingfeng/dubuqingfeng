@@ -1,0 +1,39 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1060" height="510" viewBox="0 0 1060 510" role="img" aria-labelledby="title desc">
+<title id="title">Engine：有效性、规范链、持久化分层</title><desc id="desc">实跑只涵盖执行器状态选择/保持及 Berlin 创建规则；未测试 Engine/Tree/落盘。；getPayload 仅取候选；provider commit 也不等同 CL 最终性或所有存储的同一原子提交。</desc>
+<defs><marker id="arrow" markerWidth="8" markerHeight="8" refX="7" refY="4" orient="auto"><path d="M0 0 L8 4 L0 8Z" fill="#64748b"/></marker></defs>
+<rect width="1060" height="510" fill="#f8fafc"/>
+<text x="32" y="36" font-family="sans-serif" font-size="22" fill="#0f172a">Engine：有效性、规范链、持久化分层</text>
+<path d="M260 120 L345 120" stroke="#64748b" stroke-width="2" marker-end="url(#arrow)"/>
+<path d="M645 120 L730 120" stroke="#64748b" stroke-width="2" marker-end="url(#arrow)"/>
+<path d="M880 165 L495 280" stroke="#64748b" stroke-width="2" marker-end="url(#arrow)"/>
+<text x="692.5" y="214.5" font-family="sans-serif" font-size="13" fill="#334155">可用执行分支</text>
+<path d="M260 325 L345 325" stroke="#64748b" stroke-width="2" marker-end="url(#arrow)"/>
+<path d="M645 325 L730 325" stroke="#64748b" stroke-width="2" marker-end="url(#arrow)"/>
+<text x="692.5" y="317.0" font-family="sans-serif" font-size="13" fill="#334155">异步 SaveBlocks</text>
+<rect x="30" y="75" width="230" height="90" rx="9" fill="#e0f2fe" stroke="#0284c7"/>
+<text x="145.0" y="102" text-anchor="middle" font-family="sans-serif" font-size="15" fill="#0f172a">newPayload</text>
+<text x="145.0" y="125" text-anchor="middle" font-family="sans-serif" font-size="15" fill="#0f172a">版本/结构与祖先检查</text>
+<text x="145.0" y="148" text-anchor="middle" font-family="sans-serif" font-size="15" fill="#0f172a">缺 parent → 缓冲 / SYNCING</text>
+<rect x="345" y="75" width="300" height="90" rx="9" fill="#e0f2fe" stroke="#0284c7"/>
+<text x="495.0" y="102" text-anchor="middle" font-family="sans-serif" font-size="15" fill="#0f172a">BasicEngineValidator → evm2</text>
+<text x="495.0" y="125" text-anchor="middle" font-family="sans-serif" font-size="15" fill="#0f172a">执行 / 收据 / 状态根汇合校验</text>
+<text x="495.0" y="148" text-anchor="middle" font-family="sans-serif" font-size="15" fill="#0f172a">通过后得到 ExecutedBlock</text>
+<rect x="730" y="75" width="300" height="90" rx="9" fill="#e0f2fe" stroke="#0284c7"/>
+<text x="880.0" y="102" text-anchor="middle" font-family="sans-serif" font-size="15" fill="#0f172a">内存 Tree / pending</text>
+<text x="880.0" y="125" text-anchor="middle" font-family="sans-serif" font-size="15" fill="#0f172a">有效块可属于非 canonical 分支</text>
+<text x="880.0" y="148" text-anchor="middle" font-family="sans-serif" font-size="15" fill="#0f172a">sync-target 有 MakeCanonical 例外</text>
+<rect x="30" y="280" width="230" height="90" rx="9" fill="#e0f2fe" stroke="#0284c7"/>
+<text x="145.0" y="307" text-anchor="middle" font-family="sans-serif" font-size="15" fill="#0f172a">CL forkchoiceUpdated</text>
+<text x="145.0" y="330" text-anchor="middle" font-family="sans-serif" font-size="15" fill="#0f172a">head / safe / finalized</text>
+<text x="145.0" y="353" text-anchor="middle" font-family="sans-serif" font-size="15" fill="#0f172a">检查后应用链选择</text>
+<rect x="345" y="280" width="300" height="90" rx="9" fill="#e0f2fe" stroke="#0284c7"/>
+<text x="495.0" y="307" text-anchor="middle" font-family="sans-serif" font-size="15" fill="#0f172a">CanonicalInMemoryState</text>
+<text x="495.0" y="330" text-anchor="middle" font-family="sans-serif" font-size="15" fill="#0f172a">规范链 / overlay / 通知</text>
+<text x="495.0" y="353" text-anchor="middle" font-family="sans-serif" font-size="15" fill="#0f172a">非 finalized 部分可能重组</text>
+<rect x="730" y="280" width="300" height="90" rx="9" fill="#e0f2fe" stroke="#0284c7"/>
+<text x="880.0" y="307" text-anchor="middle" font-family="sans-serif" font-size="15" fill="#0f172a">PersistenceService</text>
+<text x="880.0" y="330" text-anchor="middle" font-family="sans-serif" font-size="15" fill="#0f172a">save_blocks → provider commit</text>
+<text x="880.0" y="353" text-anchor="middle" font-family="sans-serif" font-size="15" fill="#0f172a">之后反馈持久化前沿</text>
+<text x="32" y="435" font-family="sans-serif" font-size="15" fill="#334155">实跑只涵盖执行器状态选择/保持及 Berlin 创建规则；未测试 Engine/Tree/落盘。</text>
+<text x="32" y="461" font-family="sans-serif" font-size="15" fill="#334155">getPayload 仅取候选；provider commit 也不等同 CL 最终性或所有存储的同一原子提交。</text>
+</svg>

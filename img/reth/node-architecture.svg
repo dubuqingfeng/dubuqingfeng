@@ -1,0 +1,38 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1060" height="510" viewBox="0 0 1060 510" role="img" aria-labelledby="title desc">
+<title id="title">Reth v2.11.0：装配与运行是不同边界</title><desc id="desc">组件中的 consensus 验证 EL 规则，不执行 Beacon 选叉/投票。；图为固定源码边界；本批未运行整节点启动或退出测试。</desc>
+<defs><marker id="arrow" markerWidth="8" markerHeight="8" refX="7" refY="4" orient="auto"><path d="M0 0 L8 4 L0 8Z" fill="#64748b"/></marker></defs>
+<rect width="1060" height="510" fill="#f8fafc"/>
+<text x="32" y="36" font-family="sans-serif" font-size="22" fill="#0f172a">Reth v2.11.0：装配与运行是不同边界</text>
+<path d="M230 111 L300 111" stroke="#64748b" stroke-width="2" marker-end="url(#arrow)"/>
+<path d="M520 111 L600 111" stroke="#64748b" stroke-width="2" marker-end="url(#arrow)"/>
+<path d="M805 150 L805 215" stroke="#64748b" stroke-width="2" marker-end="url(#arrow)"/>
+<path d="M805 215 L520 260" stroke="#64748b" stroke-width="2" marker-end="url(#arrow)"/>
+<text x="667.5" y="229.5" font-family="sans-serif" font-size="13" fill="#334155">服务接线</text>
+<path d="M285 305 L380 305" stroke="#64748b" stroke-width="2" marker-end="url(#arrow)"/>
+<text x="337.5" y="297.0" font-family="sans-serif" font-size="13" fill="#334155">消息</text>
+<path d="M660 305 L760 305" stroke="#64748b" stroke-width="2" marker-end="url(#arrow)"/>
+<text x="715.0" y="297.0" font-family="sans-serif" font-size="13" fill="#334155">生命周期</text>
+<rect x="35" y="75" width="195" height="75" rx="9" fill="#e0f2fe" stroke="#0284c7"/>
+<text x="132.5" y="102" text-anchor="middle" font-family="sans-serif" font-size="15" fill="#0f172a">CLI / NodeCommand</text>
+<text x="132.5" y="125" text-anchor="middle" font-family="sans-serif" font-size="15" fill="#0f172a">配置 · DB · NodeBuilder</text>
+<rect x="300" y="75" width="220" height="75" rx="9" fill="#e0f2fe" stroke="#0284c7"/>
+<text x="410.0" y="102" text-anchor="middle" font-family="sans-serif" font-size="15" fill="#0f172a">EthereumNode</text>
+<text x="410.0" y="125" text-anchor="middle" font-family="sans-serif" font-size="15" fill="#0f172a">选择组件实现与类型</text>
+<rect x="600" y="75" width="410" height="75" rx="9" fill="#e0f2fe" stroke="#0284c7"/>
+<text x="805.0" y="102" text-anchor="middle" font-family="sans-serif" font-size="15" fill="#0f172a">build_components 的实际顺序</text>
+<text x="805.0" y="125" text-anchor="middle" font-family="sans-serif" font-size="15" fill="#0f172a">EVM → Pool → Network → Payload → Consensus</text>
+<rect x="35" y="260" width="250" height="95" rx="9" fill="#e0f2fe" stroke="#0284c7"/>
+<text x="160.0" y="287" text-anchor="middle" font-family="sans-serif" font-size="15" fill="#0f172a">普通 RPC / 认证 Engine API</text>
+<text x="160.0" y="310" text-anchor="middle" font-family="sans-serif" font-size="15" fill="#0f172a">共享 pool / provider</text>
+<text x="160.0" y="333" text-anchor="middle" font-family="sans-serif" font-size="15" fill="#0f172a">端口就绪 ≠ 同步完成</text>
+<rect x="380" y="260" width="280" height="95" rx="9" fill="#e0f2fe" stroke="#0284c7"/>
+<text x="520.0" y="287" text-anchor="middle" font-family="sans-serif" font-size="15" fill="#0f172a">EngineOrchestrator</text>
+<text x="520.0" y="310" text-anchor="middle" font-family="sans-serif" font-size="15" fill="#0f172a">实时 Tree ↔ backfill/pipeline</text>
+<text x="520.0" y="333" text-anchor="middle" font-family="sans-serif" font-size="15" fill="#0f172a">外部 CL 提供 forkchoice</text>
+<rect x="760" y="260" width="250" height="95" rx="9" fill="#e0f2fe" stroke="#0284c7"/>
+<text x="885.0" y="287" text-anchor="middle" font-family="sans-serif" font-size="15" fill="#0f172a">TaskExecutor / NodeHandle</text>
+<text x="885.0" y="310" text-anchor="middle" font-family="sans-serif" font-size="15" fill="#0f172a">critical task · shutdown</text>
+<text x="885.0" y="333" text-anchor="middle" font-family="sans-serif" font-size="15" fill="#0f172a">CLI 等待节点退出</text>
+<text x="32" y="435" font-family="sans-serif" font-size="15" fill="#334155">组件中的 consensus 验证 EL 规则，不执行 Beacon 选叉/投票。</text>
+<text x="32" y="461" font-family="sans-serif" font-size="15" fill="#334155">图为固定源码边界；本批未运行整节点启动或退出测试。</text>
+</svg>

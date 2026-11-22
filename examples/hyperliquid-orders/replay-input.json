@@ -1,0 +1,649 @@
+{
+  "scope": "Synthetic fixture shaped from captured official schemas; ETH/oid/times/fees/statuses invented, no real account activity",
+  "user": "0xaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+  "tracked": [
+    "0x00000000000000000000000000000001",
+    "0x00000000000000000000000000000002",
+    "0x00000000000000000000000000000003",
+    "0x00000000000000000000000000000004",
+    "0x00000000000000000000000000000005"
+  ],
+  "beforeDisconnect": [
+    {
+      "channel": "orderUpdates",
+      "data": [
+        {
+          "order": {
+            "coin": "ETH",
+            "side": "B",
+            "limitPx": "100",
+            "sz": "1",
+            "oid": 101,
+            "timestamp": 1700000000000,
+            "origSz": "1",
+            "cloid": "0x00000000000000000000000000000001"
+          },
+          "status": "open",
+          "statusTimestamp": 1700000000100
+        }
+      ]
+    },
+    {
+      "channel": "userFills",
+      "data": {
+        "user": "0xaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+        "isSnapshot": false,
+        "fills": [
+          {
+            "coin": "ETH",
+            "px": "100",
+            "sz": "0.4",
+            "side": "B",
+            "time": 1700000000200,
+            "startPosition": "0",
+            "dir": "Open Long",
+            "closedPnl": "0",
+            "hash": "0x0000000000000000000000000000000000000000000000000000000000000001",
+            "oid": 101,
+            "crossed": false,
+            "fee": "0.04",
+            "feeToken": "USDC",
+            "tid": 1
+          }
+        ]
+      }
+    },
+    {
+      "channel": "orderUpdates",
+      "data": [
+        {
+          "order": {
+            "coin": "ETH",
+            "side": "B",
+            "limitPx": "100",
+            "sz": "0.6",
+            "oid": 101,
+            "timestamp": 1700000000000,
+            "origSz": "1",
+            "cloid": "0x00000000000000000000000000000001"
+          },
+          "status": "open",
+          "statusTimestamp": 1700000000210
+        }
+      ]
+    },
+    {
+      "channel": "userFills",
+      "data": {
+        "user": "0xaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+        "isSnapshot": false,
+        "fills": [
+          {
+            "coin": "ETH",
+            "px": "100",
+            "sz": "0.4",
+            "side": "B",
+            "time": 1700000000200,
+            "startPosition": "0",
+            "dir": "Open Long",
+            "closedPnl": "0",
+            "hash": "0x0000000000000000000000000000000000000000000000000000000000000001",
+            "oid": 101,
+            "crossed": false,
+            "fee": "0.04",
+            "feeToken": "USDC",
+            "tid": 1
+          }
+        ]
+      }
+    }
+  ],
+  "bufferedAfterReconnect": [
+    {
+      "channel": "orderUpdates",
+      "data": [
+        {
+          "order": {
+            "coin": "ETH",
+            "side": "B",
+            "limitPx": "100",
+            "sz": "0.5",
+            "oid": 101,
+            "timestamp": 1700000000000,
+            "origSz": "1",
+            "cloid": "0x00000000000000000000000000000001"
+          },
+          "status": "canceled",
+          "statusTimestamp": 1700000000400
+        }
+      ]
+    },
+    {
+      "channel": "orderUpdates",
+      "data": [
+        {
+          "order": {
+            "coin": "ETH",
+            "side": "B",
+            "limitPx": "100",
+            "sz": "1",
+            "oid": 101,
+            "timestamp": 1700000000000,
+            "origSz": "1",
+            "cloid": "0x00000000000000000000000000000001"
+          },
+          "status": "open",
+          "statusTimestamp": 1700000000100
+        }
+      ]
+    },
+    {
+      "channel": "orderUpdates",
+      "data": [
+        {
+          "order": {
+            "coin": "ETH",
+            "side": "B",
+            "limitPx": "100",
+            "sz": "0.2",
+            "oid": 102,
+            "timestamp": 1700000000000,
+            "origSz": "0.2",
+            "cloid": "0x00000000000000000000000000000002"
+          },
+          "status": "rejected",
+          "statusTimestamp": 1700000000450
+        }
+      ]
+    },
+    {
+      "channel": "orderUpdates",
+      "data": [
+        {
+          "order": {
+            "coin": "ETH",
+            "side": "B",
+            "limitPx": "100",
+            "sz": "0.5",
+            "oid": 101,
+            "timestamp": 1700000000000,
+            "origSz": "1",
+            "cloid": "0x00000000000000000000000000000001"
+          },
+          "status": "canceled",
+          "statusTimestamp": 1700000000400
+        }
+      ]
+    },
+    {
+      "channel": "userFills",
+      "data": {
+        "user": "0xaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+        "isSnapshot": true,
+        "fills": [
+          {
+            "coin": "ETH",
+            "px": "100",
+            "sz": "0.4",
+            "side": "B",
+            "time": 1700000000200,
+            "startPosition": "0",
+            "dir": "Open Long",
+            "closedPnl": "0",
+            "hash": "0x0000000000000000000000000000000000000000000000000000000000000001",
+            "oid": 101,
+            "crossed": false,
+            "fee": "0.04",
+            "feeToken": "USDC",
+            "tid": 1
+          },
+          {
+            "coin": "ETH",
+            "px": "100",
+            "sz": "0.1",
+            "side": "B",
+            "time": 1700000000350,
+            "startPosition": "0.4",
+            "dir": "Open Long",
+            "closedPnl": "0",
+            "hash": "0x0000000000000000000000000000000000000000000000000000000000000002",
+            "oid": 101,
+            "crossed": false,
+            "fee": "0.01",
+            "feeToken": "USDC",
+            "tid": 2
+          },
+          {
+            "coin": "ETH",
+            "px": "100",
+            "sz": "0.25",
+            "side": "B",
+            "time": 1700000000550,
+            "startPosition": "0.5",
+            "dir": "Open Long",
+            "closedPnl": "0",
+            "hash": "0x0000000000000000000000000000000000000000000000000000000000000003",
+            "oid": 103,
+            "crossed": false,
+            "fee": "0.025",
+            "feeToken": "USDC",
+            "tid": 3
+          }
+        ]
+      }
+    },
+    {
+      "channel": "orderUpdates",
+      "data": [
+        {
+          "order": {
+            "coin": "ETH",
+            "side": "B",
+            "limitPx": "100",
+            "sz": "1",
+            "oid": 101,
+            "timestamp": 1700000000000,
+            "origSz": "1",
+            "cloid": "0x00000000000000000000000000000001"
+          },
+          "status": "open",
+          "statusTimestamp": 1700000000100
+        }
+      ]
+    }
+  ],
+  "restRounds": [
+    {
+      "openOrders": [
+        {
+          "coin": "ETH",
+          "side": "B",
+          "limitPx": "100",
+          "sz": "0.2",
+          "oid": 104,
+          "timestamp": 1700000000000
+        }
+      ],
+      "orderStatus": {
+        "0x00000000000000000000000000000001": {
+          "status": "order",
+          "order": {
+            "order": {
+              "coin": "ETH",
+              "side": "B",
+              "limitPx": "100",
+              "sz": "0.5",
+              "oid": 101,
+              "timestamp": 1700000000000,
+              "origSz": "1",
+              "cloid": "0x00000000000000000000000000000001"
+            },
+            "status": "canceled",
+            "statusTimestamp": 1700000000400
+          }
+        },
+        "0x00000000000000000000000000000002": {
+          "status": "order",
+          "order": {
+            "order": {
+              "coin": "ETH",
+              "side": "B",
+              "limitPx": "100",
+              "sz": "0.2",
+              "oid": 102,
+              "timestamp": 1700000000000,
+              "origSz": "0.2",
+              "cloid": "0x00000000000000000000000000000002"
+            },
+            "status": "rejected",
+            "statusTimestamp": 1700000000450
+          }
+        },
+        "0x00000000000000000000000000000003": {
+          "status": "order",
+          "order": {
+            "order": {
+              "coin": "ETH",
+              "side": "B",
+              "limitPx": "100",
+              "sz": "0",
+              "oid": 103,
+              "timestamp": 1700000000000,
+              "origSz": "0.25",
+              "cloid": "0x00000000000000000000000000000003"
+            },
+            "status": "filled",
+            "statusTimestamp": 1700000000550
+          }
+        },
+        "0x00000000000000000000000000000004": {
+          "status": "order",
+          "order": {
+            "order": {
+              "coin": "ETH",
+              "side": "B",
+              "limitPx": "100",
+              "sz": "0.2",
+              "oid": 104,
+              "timestamp": 1700000000000,
+              "origSz": "0.2",
+              "cloid": "0x00000000000000000000000000000004"
+            },
+            "status": "open",
+            "statusTimestamp": 1700000000600
+          }
+        },
+        "0x00000000000000000000000000000005": {
+          "status": "unknownOid"
+        }
+      },
+      "userFillsByTime": [
+        {
+          "coin": "ETH",
+          "px": "100",
+          "sz": "0.4",
+          "side": "B",
+          "time": 1700000000200,
+          "startPosition": "0",
+          "dir": "Open Long",
+          "closedPnl": "0",
+          "hash": "0x0000000000000000000000000000000000000000000000000000000000000001",
+          "oid": 101,
+          "crossed": false,
+          "fee": "0.04",
+          "feeToken": "USDC",
+          "tid": 1
+        },
+        {
+          "coin": "ETH",
+          "px": "100",
+          "sz": "0.1",
+          "side": "B",
+          "time": 1700000000350,
+          "startPosition": "0.4",
+          "dir": "Open Long",
+          "closedPnl": "0",
+          "hash": "0x0000000000000000000000000000000000000000000000000000000000000002",
+          "oid": 101,
+          "crossed": false,
+          "fee": "0.01",
+          "feeToken": "USDC",
+          "tid": 2
+        },
+        {
+          "coin": "ETH",
+          "px": "100",
+          "sz": "0.25",
+          "side": "B",
+          "time": 1700000000550,
+          "startPosition": "0.5",
+          "dir": "Open Long",
+          "closedPnl": "0",
+          "hash": "0x0000000000000000000000000000000000000000000000000000000000000003",
+          "oid": 103,
+          "crossed": false,
+          "fee": "0.025",
+          "feeToken": "USDC",
+          "tid": 3
+        }
+      ],
+      "clearinghouseState": {
+        "assetPositions": [
+          {
+            "type": "oneWay",
+            "position": {
+              "coin": "ETH",
+              "szi": "0.75",
+              "entryPx": "100"
+            }
+          }
+        ],
+        "time": 1700000000700
+      }
+    },
+    {
+      "openOrders": [
+        {
+          "coin": "ETH",
+          "side": "B",
+          "limitPx": "100",
+          "sz": "0.2",
+          "oid": 104,
+          "timestamp": 1700000000000
+        }
+      ],
+      "orderStatus": {
+        "0x00000000000000000000000000000001": {
+          "status": "order",
+          "order": {
+            "order": {
+              "coin": "ETH",
+              "side": "B",
+              "limitPx": "100",
+              "sz": "0.5",
+              "oid": 101,
+              "timestamp": 1700000000000,
+              "origSz": "1",
+              "cloid": "0x00000000000000000000000000000001"
+            },
+            "status": "canceled",
+            "statusTimestamp": 1700000000400
+          }
+        },
+        "0x00000000000000000000000000000002": {
+          "status": "order",
+          "order": {
+            "order": {
+              "coin": "ETH",
+              "side": "B",
+              "limitPx": "100",
+              "sz": "0.2",
+              "oid": 102,
+              "timestamp": 1700000000000,
+              "origSz": "0.2",
+              "cloid": "0x00000000000000000000000000000002"
+            },
+            "status": "rejected",
+            "statusTimestamp": 1700000000450
+          }
+        },
+        "0x00000000000000000000000000000003": {
+          "status": "order",
+          "order": {
+            "order": {
+              "coin": "ETH",
+              "side": "B",
+              "limitPx": "100",
+              "sz": "0",
+              "oid": 103,
+              "timestamp": 1700000000000,
+              "origSz": "0.25",
+              "cloid": "0x00000000000000000000000000000003"
+            },
+            "status": "filled",
+            "statusTimestamp": 1700000000550
+          }
+        },
+        "0x00000000000000000000000000000004": {
+          "status": "order",
+          "order": {
+            "order": {
+              "coin": "ETH",
+              "side": "B",
+              "limitPx": "100",
+              "sz": "0.2",
+              "oid": 104,
+              "timestamp": 1700000000000,
+              "origSz": "0.2",
+              "cloid": "0x00000000000000000000000000000004"
+            },
+            "status": "open",
+            "statusTimestamp": 1700000000600
+          }
+        },
+        "0x00000000000000000000000000000005": {
+          "status": "unknownOid"
+        }
+      },
+      "userFillsByTime": [
+        {
+          "coin": "ETH",
+          "px": "100",
+          "sz": "0.4",
+          "side": "B",
+          "time": 1700000000200,
+          "startPosition": "0",
+          "dir": "Open Long",
+          "closedPnl": "0",
+          "hash": "0x0000000000000000000000000000000000000000000000000000000000000001",
+          "oid": 101,
+          "crossed": false,
+          "fee": "0.04",
+          "feeToken": "USDC",
+          "tid": 1
+        },
+        {
+          "coin": "ETH",
+          "px": "100",
+          "sz": "0.1",
+          "side": "B",
+          "time": 1700000000350,
+          "startPosition": "0.4",
+          "dir": "Open Long",
+          "closedPnl": "0",
+          "hash": "0x0000000000000000000000000000000000000000000000000000000000000002",
+          "oid": 101,
+          "crossed": false,
+          "fee": "0.01",
+          "feeToken": "USDC",
+          "tid": 2
+        },
+        {
+          "coin": "ETH",
+          "px": "100",
+          "sz": "0.25",
+          "side": "B",
+          "time": 1700000000550,
+          "startPosition": "0.5",
+          "dir": "Open Long",
+          "closedPnl": "0",
+          "hash": "0x0000000000000000000000000000000000000000000000000000000000000003",
+          "oid": 103,
+          "crossed": false,
+          "fee": "0.025",
+          "feeToken": "USDC",
+          "tid": 3
+        }
+      ],
+      "clearinghouseState": {
+        "assetPositions": [
+          {
+            "type": "oneWay",
+            "position": {
+              "coin": "ETH",
+              "szi": "0.75",
+              "entryPx": "100"
+            }
+          }
+        ],
+        "time": 1700000000700
+      }
+    }
+  ],
+  "mixedHttpResponse": {
+    "status": "ok",
+    "response": {
+      "type": "order",
+      "data": {
+        "statuses": [
+          {
+            "resting": {
+              "oid": 101
+            }
+          },
+          {
+            "filled": {
+              "totalSz": "0.25",
+              "avgPx": "100",
+              "oid": 103
+            }
+          },
+          {
+            "error": "synthetic rejection; not a server error observation"
+          }
+        ]
+      }
+    }
+  },
+  "missingDuringDisconnect": [
+    {
+      "coin": "ETH",
+      "px": "100",
+      "sz": "0.1",
+      "side": "B",
+      "time": 1700000000350,
+      "startPosition": "0.4",
+      "dir": "Open Long",
+      "closedPnl": "0",
+      "hash": "0x0000000000000000000000000000000000000000000000000000000000000002",
+      "oid": 101,
+      "crossed": false,
+      "fee": "0.01",
+      "feeToken": "USDC",
+      "tid": 2
+    },
+    {
+      "coin": "ETH",
+      "px": "100",
+      "sz": "0.25",
+      "side": "B",
+      "time": 1700000000550,
+      "startPosition": "0.5",
+      "dir": "Open Long",
+      "closedPnl": "0",
+      "hash": "0x0000000000000000000000000000000000000000000000000000000000000003",
+      "oid": 103,
+      "crossed": false,
+      "fee": "0.025",
+      "feeToken": "USDC",
+      "tid": 3
+    }
+  ],
+  "startingPosition": "0",
+  "intents": [
+    {
+      "cloid": "0x00000000000000000000000000000001",
+      "coin": "ETH",
+      "size": "1",
+      "limitPx": "100"
+    },
+    {
+      "cloid": "0x00000000000000000000000000000002",
+      "coin": "ETH",
+      "size": "0.2",
+      "limitPx": "100"
+    },
+    {
+      "cloid": "0x00000000000000000000000000000003",
+      "coin": "ETH",
+      "size": "0.25",
+      "limitPx": "100"
+    },
+    {
+      "cloid": "0x00000000000000000000000000000004",
+      "coin": "ETH",
+      "size": "0.2",
+      "limitPx": "100"
+    },
+    {
+      "cloid": "0x00000000000000000000000000000005",
+      "coin": "ETH",
+      "size": "0.1",
+      "limitPx": "100"
+    }
+  ],
+  "transportTimeouts": [
+    "0x00000000000000000000000000000003",
+    "0x00000000000000000000000000000005"
+  ]
+}

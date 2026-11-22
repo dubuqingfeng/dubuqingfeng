@@ -1,0 +1,55 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1200" height="850" viewBox="0 0 1200 850" role="img" aria-labelledby="title desc">
+  <title id="title">Solana Leader、跟随节点与数据观察路径</title>
+  <desc id="desc">最新稳定 Agave v4.4.1 路径：Leader 先执行，再将带 Bank ID 的记录请求非阻塞入队，入队成功后可提交 Bank；PoH 异步生成 Entry，广播端按组件生成 shreds。跟随节点经统一调度器重放。Geyser 5.0.0 与 Yellowstone v17.0.2 加 Solana 4.4.1 的发布依赖对齐，但本篇没有部署测试。共识按 TowerBFT 或 Alpenglow 运行时分支推进。</desc>
+  <defs>
+    <marker id="arrow" markerWidth="9" markerHeight="9" refX="8" refY="4.5" orient="auto"><path d="M0 0L9 4.5L0 9Z" fill="#475569"/></marker>
+    <style>
+      text { font-family: system-ui, 'PingFang SC', sans-serif; fill: #172033; font-size: 17px; }
+      .heading { font-size: 23px; font-weight: 700; }
+      .small { font-size: 15px; fill: #475569; }
+      .box { fill: #fff; stroke: #64748b; stroke-width: 1.5; rx: 9; }
+      .edge { fill: none; stroke: #475569; stroke-width: 2; marker-end: url(#arrow); }
+      .async { stroke-dasharray: 7 5; }
+    </style>
+  </defs>
+  <rect width="1200" height="850" fill="#f8fafc"/>
+  <text x="30" y="37" class="heading">同一签名的三种观察面：负载、执行结果、分叉确认</text>
+  <text x="30" y="64" class="small">最新稳定基线：Agave v4.4.1；记录请求入队与 PoH 生成 Entry 是两个阶段。</text>
+  <rect x="20" y="82" width="1160" height="267" rx="12" fill="#e0f2fe"/>
+  <text x="38" y="112" class="heading">Leader：本地执行与 Entry 广播分支</text>
+  <rect class="box" x="40" y="135" width="228" height="74"/>
+  <text x="55" y="164">TPU → 验签 / 调度 / 锁</text><text x="55" y="190">load_and_execute</text>
+  <rect class="box" x="325" y="135" width="235" height="74"/>
+  <text x="340" y="164">RecordSender.try_send</text><text x="340" y="190">Bank ID / 容量 / 交易 index</text>
+  <rect class="box" x="650" y="135" width="235" height="74"/>
+  <text x="665" y="164">PoH 异步消费 → Entry</text><text x="665" y="190">有界输出；满时背压</text>
+  <rect class="box" x="935" y="135" width="220" height="74"/>
+  <text x="951" y="164">广播：组件 → shreds</text><text x="951" y="190">Turbine / 网络</text>
+  <path class="edge" d="M268 170H325"/><path class="edge async" d="M560 170H650"/><path class="edge" d="M885 170H935"/>
+  <rect class="box" x="325" y="255" width="355" height="68"/>
+  <text x="340" y="283">入队成功 → commit_transactions</text><text x="340" y="308">不等待 PoH 实际生成 Entry</text>
+  <path class="edge" d="M440 209V255"/>
+  <text x="710" y="284" class="small">账户提交与 PoH / 广播可交错</text>
+  <text x="710" y="309" class="small">入队成功 ≠ 持久化或全网确认</text>
+  <rect x="20" y="368" width="1160" height="182" rx="12" fill="#dcfce7"/>
+  <text x="38" y="398" class="heading">跟随节点：接收、恢复、校验与本地重放</text>
+  <rect class="box" x="40" y="428" width="290" height="83"/>
+  <text x="55" y="456">shred 验证 / 修复 / FEC</text><text x="55" y="481">WindowService → Blockstore</text><text x="55" y="501" class="small">缺失数据不能靠排序凭空补全</text>
+  <rect class="box" x="390" y="428" width="310" height="83"/>
+  <text x="406" y="456">ReplayStage → confirm_slot</text><text x="406" y="481">统一调度器 → execute_batch</text><text x="406" y="501" class="small">按账本 index 调度；等待完成及验证</text>
+  <rect class="box" x="760" y="428" width="395" height="83"/>
+  <text x="775" y="456">本地 Bank 提交 → freeze / hash 校验</text><text x="775" y="481">TowerBFT / Alpenglow 按模式推进 root</text><text x="775" y="501" class="small">freeze ≠ finalized；不合法分支可标 dead</text>
+  <path class="edge" d="M330 469H390"/><path class="edge" d="M700 469H760"/>
+  <path class="edge async" d="M1045 209V356H180V428"/>
+  <rect x="20" y="568" width="1160" height="217" rx="12" fill="#fef3c7"/>
+  <text x="38" y="600" class="heading">任一节点的观察出口（依赖该节点启用的服务）</text>
+  <rect class="box" x="40" y="625" width="315" height="125"/>
+  <text x="55" y="654">账户存储前 → Bank 级账户回调</text><text x="55" y="680">状态队列 → Bank 级交易回调</text><text x="55" y="706">slot / Bank 通知 → Geyser</text><text x="55" y="733" class="small">回调触发不保证并发 RPC 已读到新值</text>
+  <rect class="box" x="405" y="625" width="335" height="125"/>
+  <text x="420" y="654">Yellowstone：转换 / 过滤 / 缓冲</text><text x="420" y="680">Subscribe.commitment</text><text x="420" y="706">processed / confirmed / finalized</text><text x="420" y="733" class="small">v17.0.2+solana.4.4.1；Geyser 5.0.0</text>
+  <rect class="box" x="790" y="625" width="365" height="125"/>
+  <text x="805" y="654">RPC：账户 → 选定 Bank 当前状态</text><text x="805" y="680">交易 / 区块 → 历史索引与保留数据</text><text x="805" y="706">按方法支持不同 commitment</text><text x="805" y="733" class="small">minContextSlot 是下界，不是历史快照参数</text>
+  <path class="edge async" d="M355 684H405"/>
+  <text x="30" y="815" class="small">工程关联：签名 + 分叉身份 + slot + 交易 index；账户额外保留 pubkey / write_version / txn_signature。</text>
+  <text x="30" y="839" class="small">两端发布及接口依赖已对齐；没有实际部署测试。block markers 与共识路径受运行时迁移状态控制。</text>
+</svg>

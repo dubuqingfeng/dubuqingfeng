@@ -1,0 +1,131 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1200" height="880" viewBox="0 0 1200 880" role="img" aria-labelledby="title desc">
+  <title id="title">Agave v4.4.1 SVM：batch 处理、账户加载、InvokeContext、CPI 与提交</title>
+  <desc id="desc">Bank 把 sanitized transactions 和 pre-check 结果交给 TransactionBatchProcessor；SVM 先验证 nonce 和 fee payer，再通过 TransactionProcessingCallback 从 AccountsDB 加载账户；执行阶段用 TransactionContext 保存账户、借用计数和 compute meter，InvokeContext::process_message 依次执行指令，CPI 检查权限并同步调用者/被调用者账户；程序缓存提供 Builtin/Loaded 程序，syscalls 注册在 ProgramRuntimeEnvironment；成功后写回 touched 账户，失败只提交 rollback accounts（fee payer/nonce）。</desc>
+  <defs>
+    <marker id="arrow" markerWidth="9" markerHeight="9" refX="8" refY="4.5" orient="auto"><path d="M0 0L9 4.5L0 9Z" fill="#475569"/></marker>
+    <style>
+      text { font-family: system-ui, 'PingFang SC', sans-serif; fill: #172033; font-size: 16px; }
+      .heading { font-size: 22px; font-weight: 700; }
+      .sub { font-size: 14px; fill: #475569; }
+      .small { font-size: 13px; fill: #475569; }
+      .box { fill: #fff; stroke: #64748b; stroke-width: 1.5; rx: 9; }
+      .edge { fill: none; stroke: #475569; stroke-width: 2; marker-end: url(#arrow); }
+      .dash { stroke-dasharray: 7 5; }
+    </style>
+  </defs>
+  <rect width="1200" height="880" fill="#f8fafc"/>
+  <text x="30" y="38" class="heading">SVM 是“交易批处理 + 账户上下文 + 程序运行时”，不直接持有账本</text>
+  <text x="30" y="64" class="sub">基线 Agave v4.4.1。Bank 通过 callback 提供账户；SVM 通过 AccountsDB 读账户，但不负责共识、分叉选择或持久化。</text>
+
+  <rect x="20" y="82" width="1160" height="210" rx="12" fill="#e0f2fe"/>
+  <text x="38" y="112" class="heading">1. 进入 SVM：验证、加载、建立批内账户视图</text>
+  <rect class="box" x="40" y="132" width="235" height="130"/>
+  <text x="56" y="160">Bank 预检查</text>
+  <text x="56" y="184" class="small">sanitize / signature / blockhash</text>
+  <text x="56" y="206" class="small">lock / fee / nonce 等</text>
+  <text x="56" y="228" class="small">check_results</text>
+  <text x="56" y="250" class="small">不是 SVM 的共识判断</text>
+
+  <rect class="box" x="330" y="132" width="285" height="130"/>
+  <text x="346" y="160">TransactionBatchProcessor</text>
+  <text x="346" y="184" class="small">load_and_execute_</text>
+  <text x="346" y="204" class="small">sanitized_transactions</text>
+  <text x="346" y="226" class="small">按批顺序逐笔处理</text>
+  <text x="346" y="248" class="small">批内后一笔能看到前一笔结果</text>
+
+  <rect class="box" x="670" y="132" width="235" height="130"/>
+  <text x="686" y="160">nonce + fee payer</text>
+  <text x="686" y="184" class="small">校验 durable nonce</text>
+  <text x="686" y="206" class="small">扣费、检查余额</text>
+  <text x="686" y="228" class="small">生成 RollbackAccounts</text>
+  <text x="686" y="250" class="small">fee / nonce 失败可 FeesOnly</text>
+
+  <rect class="box" x="960" y="132" width="200" height="130"/>
+  <text x="976" y="160">AccountLoader</text>
+  <text x="976" y="184" class="small">批内账户缓存</text>
+  <text x="976" y="206" class="small">inspect_account</text>
+  <text x="976" y="228" class="small">callback → AccountsDB</text>
+  <text x="976" y="250" class="small">计算 loaded data size</text>
+
+  <path class="edge" d="M275 197H330"/>
+  <path class="edge" d="M615 197H670"/>
+  <path class="edge" d="M905 197H960"/>
+  <path class="edge dash" d="M1060 262V300"/>
+
+  <rect x="20" y="312" width="1160" height="260" rx="12" fill="#dcfce7"/>
+  <text x="38" y="342" class="heading">2. 执行：TransactionContext + InvokeContext + 程序缓存</text>
+  <rect class="box" x="40" y="362" width="280" height="180"/>
+  <text x="56" y="390">TransactionContext</text>
+  <text x="56" y="414" class="small">账户数组 + borrow counters</text>
+  <text x="56" y="436" class="small">instruction stack / trace</text>
+  <text x="56" y="458" class="small">compute meter（CU）</text>
+  <text x="56" y="480" class="small">rent / return data / touched flags</text>
+  <text x="56" y="502" class="small">accounts_resize_delta</text>
+  <text x="56" y="524" class="small">MAX_ACCOUNT_DATA_LEN = 10 MiB</text>
+
+  <rect class="box" x="370" y="362" width="290" height="180"/>
+  <text x="386" y="390">InvokeContext</text>
+  <text x="386" y="414" class="small">process_message：逐条顶层指令</text>
+  <text x="386" y="436" class="small">push → process_executable_chain → pop</text>
+  <text x="386" y="458" class="small">precompile 由 callback 处理</text>
+  <text x="386" y="480" class="small">CPI：prepare_next_cpi_instruction</text>
+  <text x="386" y="502" class="small">权限提升检查 / PDA signer</text>
+  <text x="386" y="524" class="small">reentrancy 与 stack depth 限制</text>
+
+  <rect class="box" x="710" y="362" width="210" height="180"/>
+  <text x="726" y="390">ProgramCache</text>
+  <text x="726" y="414" class="small">Builtin / Loaded</text>
+  <text x="726" y="436" class="small">Unloaded / Closed</text>
+  <text x="726" y="458" class="small">FailedVerification</text>
+  <text x="726" y="480" class="small">DelayVisibility</text>
+  <text x="726" y="502" class="small">fork-aware + usage eviction</text>
+
+  <rect class="box" x="960" y="362" width="200" height="180"/>
+  <text x="976" y="390">SBF / syscalls</text>
+  <text x="976" y="414" class="small">loader builtin → vm::execute</text>
+  <text x="976" y="436" class="small">serialize parameters</text>
+  <text x="976" y="458" class="small">create VM / memory regions</text>
+  <text x="976" y="480" class="small">sol_log / hash / curve</text>
+  <text x="976" y="502" class="small">sol_invoke_signed_c/rust</text>
+  <text x="976" y="524" class="small">CU 由 compute meter 扣减</text>
+
+  <path class="edge" d="M320 452H370"/>
+  <path class="edge" d="M660 452H710"/>
+  <path class="edge" d="M920 452H960"/>
+  <path class="edge dash" d="M490 362V300"/>
+  <text x="500" y="286" class="small">账户已加载</text>
+
+  <rect x="20" y="592" width="1160" height="180" rx="12" fill="#fef3c7"/>
+  <text x="38" y="622" class="heading">3. 结果：后置校验、回滚范围与提交</text>
+  <rect class="box" x="40" y="642" width="250" height="110"/>
+  <text x="56" y="668">post-exec 校验</text>
+  <text x="56" y="692" class="small">rent 状态变化</text>
+  <text x="56" y="714" class="small">lamports 总和平衡</text>
+  <text x="56" y="736" class="small">resize / uninitialized 统计</text>
+
+  <rect class="box" x="320" y="642" width="250" height="110"/>
+  <text x="336" y="668">ProcessedTransaction</text>
+  <text x="336" y="692" class="small">Executed（可能 status=Err）</text>
+  <text x="336" y="714" class="small">FeesOnly（只收费用/推进 nonce）</text>
+  <text x="336" y="736" class="small">NoOp（不改变账户）</text>
+
+  <rect class="box" x="600" y="642" width="250" height="110"/>
+  <text x="616" y="668">成功 vs 失败</text>
+  <text x="616" y="692" class="small">成功：写回 writable + touched</text>
+  <text x="616" y="714" class="small">失败：只提交 fee payer / nonce</text>
+  <text x="616" y="736" class="small">其余账户状态丢弃</text>
+
+  <rect class="box" x="880" y="642" width="280" height="110"/>
+  <text x="896" y="668">Bank::commit_transactions</text>
+  <text x="896" y="692" class="small">collect_accounts_to_store</text>
+  <text x="896" y="714" class="small">AccountsDB 写入 + lt hash</text>
+  <text x="896" y="736" class="small">status cache / program cache</text>
+  <text x="896" y="758" class="small">CommittedTransaction</text>
+
+  <path class="edge" d="M290 697H320"/>
+  <path class="edge" d="M570 697H600"/>
+  <path class="edge" d="M850 697H880"/>
+
+  <text x="30" y="812" class="sub">关键边界：SVM 不决定分叉或最终性；它把“可执行交易”变成“账户增量 + 执行结果”，由 Bank 决定写回、费用、nonce 和账本提交。</text>
+  <text x="30" y="838" class="small">失败交易不是“什么都没发生”：fee payer 扣费、durable nonce 可能推进；CPI/权限/借用/CU 失败只影响指令状态，不回滚这些加载阶段变化。</text>
+</svg>

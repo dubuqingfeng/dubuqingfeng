@@ -1,0 +1,30 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1100" height="750" viewBox="0 0 1100 750" role="img" aria-labelledby="title desc">
+<title id="title">Hyperliquid 客户端签名、订单与重连对账</title>
+<desc id="desc">上层区分本地意图、服务器订单状态和成交。超时进入未知。下层以新连接缓冲、REST订单及成交和仓位查询迭代对账，不能把快照或时间戳当作全局序号。</desc>
+<defs><marker id="arrow" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse"><path d="M0 0L10 5L0 10Z" fill="#52627b"/></marker><style>text{font-family:system-ui,sans-serif;fill:#17253c;font-size:17px}.small{font-size:15px}.title{font-size:24px;font-weight:700}.box{fill:#edf4ff;stroke:#5276a5;stroke-width:2}.terminal{fill:#eaf7ee;stroke:#548168;stroke-width:2}.uncertain{fill:#fff3da;stroke:#ae8437;stroke-width:2}.line{stroke:#52627b;stroke-width:2;fill:none;marker-end:url(#arrow)}</style></defs>
+<rect width="1100" height="750" fill="#fff"/>
+<text x="35" y="42" class="title">一笔意图，三本账：订单 / 成交 / 仓位</text>
+<text x="35" y="72" class="small">蓝色与黄色包含客户端派生状态；绿色为普通限价单终态示例。部分成交不是官方独立状态枚举。</text>
+<rect x="35" y="105" width="220" height="85" rx="10" class="box"/><text x="55" y="138">本地意图 / pending</text><text x="55" y="168" class="small">wire → nonce → 签名</text>
+<path d="M255 145H325" class="line"/>
+<rect x="325" y="105" width="275" height="85" rx="10" class="box"/><text x="345" y="138">逐项 resting / order open</text><text x="345" y="168" class="small">HTTP 200 不等于每一单成功</text>
+<path d="M600 145H685" class="line"/>
+<rect x="685" y="105" width="375" height="85" rx="10" class="box"/><text x="705" y="138">open + fills → 本地部分成交</text><text x="705" y="168" class="small">oid 关联；每笔 fill 独立去重，不能按 oid 去重</text>
+<path d="M145 190V260" class="line"/><text x="160" y="230" class="small">超时 / 断线</text>
+<rect x="35" y="260" width="220" height="85" rx="10" class="uncertain"/><text x="55" y="295">unknown 未知结果</text><text x="55" y="325" class="small">保留意图，先查询再决策</text>
+<path d="M465 190V260" class="line"/><text x="480" y="230" class="small">拒绝 / 查询</text>
+<rect x="325" y="260" width="275" height="85" rx="10" class="terminal"/><text x="345" y="295">rejected / …Rejected</text><text x="345" y="325" class="small">逐项 error 另记原因与输入</text>
+<path d="M870 190V260" class="line"/><text x="885" y="230" class="small">成交 / 撤销</text>
+<rect x="685" y="260" width="375" height="85" rx="10" class="terminal"/><text x="705" y="295">filled / canceled / …Canceled</text><text x="705" y="325" class="small">撤销剩余部分；已成交仓位仍然存在</text>
+<path d="M145 345V400H1055" class="line"/>
+<text x="285" y="389" class="small">unknownOid 或 openOrders 中消失，均不足以判定撤销、成交或从未提交</text>
+<text x="35" y="445" class="title">重连恢复：查询收敛，不假设全局序号或原子快照</text>
+<rect x="35" y="475" width="260" height="90" rx="10" class="box"/><text x="55" y="510">新建 WS，重订阅并缓冲</text><text x="55" y="540" class="small">userFills 的 isSnapshot 也去重</text>
+<path d="M295 520H340" class="line"/>
+<rect x="340" y="475" width="350" height="90" rx="10" class="box"/><text x="360" y="510">REST 快照 + 逐单查询 + 成交回补</text><text x="360" y="540" class="small">openOrders / orderStatus / userFillsByTime</text>
+<path d="M690 520H735" class="line"/>
+<rect x="735" y="475" width="325" height="90" rx="10" class="box"/><text x="755" y="510">核对 clearinghouseState 仓位</text><text x="755" y="540" class="small">按账户 / DEX / coin；不拿 oid 当仓位ID</text>
+<path d="M890 565V615H510V570" class="line"/><text x="535" y="605" class="small">合并缓冲；冲突或仍未知则继续查询，保留不确定性</text>
+<text x="35" y="670">实跑合成例：0.4 + 缺口 0.1 + 缺口 0.25 = 0.75 ETH；撤单后仍有仓位。</text>
+<text x="35" y="705" class="small">证据边界：SDK 源码证明客户端构造；官方规范描述接口；离线回放不证明 HyperCore 内部实现或真实断线行为。</text>
+</svg>

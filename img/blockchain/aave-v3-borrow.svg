@@ -1,0 +1,51 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1280" height="700" viewBox="0 0 1280 700" role="img" aria-labelledby="title desc">
+<title id="title">Aave V3.7 双抵押借款、计息与价格风险</title>
+<desc id="desc">实际本地合约实验：供给两种抵押物，经 Pool 借出一万五千 USD；180 天债务增至 15204.810280，抵押物价格下跌使健康因子低于一，执行一半债务清算。借款校验失败则整个事务回滚。</desc>
+<defs><marker id="arrow" markerWidth="10" markerHeight="10" refX="8" refY="4" orient="auto"><path d="M0 0L8 4L0 8" fill="none" stroke="#52647d" stroke-width="1.5"/></marker></defs>
+<rect width="1280" height="700" rx="20" fill="#f7f9fc"/>
+<g font-family="system-ui, -apple-system, sans-serif" fill="#172c49">
+<text x="40" y="48" font-size="27" font-weight="700">Aave V3.7：借款风险来自份额、索引、价格与有效配置</text>
+<text x="40" y="80" font-size="17" fill="#52647d">本地 chainId 1337 · 固定原始实现 revision 11 · mock 资产与正价 oracle · 非主网部署结论</text>
+<rect x="40" y="112" width="292" height="150" rx="12" fill="#e5efff" stroke="#8dabd7"/>
+<text x="60" y="143" font-size="21" font-weight="650">① 双抵押供给</text>
+<text x="60" y="175" font-size="18">10 COL_A × $2000</text><text x="60" y="204" font-size="18">100 COL_B × $100</text>
+<text x="60" y="238" font-size="17">抵押 $30,000 · 可借 $21,498</text>
+<path d="M333 184H374" stroke="#52647d" stroke-width="2" marker-end="url(#arrow)"/>
+<rect x="384" y="112" width="388" height="150" rx="12" fill="#e8f4ee" stroke="#86af9a"/>
+<text x="404" y="143" font-size="21" font-weight="650">② Pool.borrow：同一 EVM 事务</text>
+<text x="404" y="175" font-size="17">更新索引 → 储备校验 → 铸 scaled 债务</text>
+<text x="404" y="204" font-size="17">更新利率 → aToken 转出 15,000 USD</text>
+<text x="404" y="238" font-size="17">后置 HF / LTV 校验 → 成功发 Borrow</text>
+<path d="M773 184H814" stroke="#52647d" stroke-width="2" marker-end="url(#arrow)"/>
+<rect x="824" y="112" width="416" height="150" rx="12" fill="#fff0e4" stroke="#c9a582"/>
+<text x="844" y="143" font-size="21" font-weight="650">失败分支：全部原子回滚</text>
+<text x="844" y="175" font-size="17">借 22,000：LTV 不足；30,000：HF 不足</text>
+<text x="844" y="204" font-size="17">冻结 / 暂停 / cap / 低 HF 新借款失败</text>
+<text x="844" y="238" font-size="17">status 0 · 无日志 · 余额与储备状态保全</text>
+<path d="M578 263V290H225V307" stroke="#52647d" stroke-width="2" marker-end="url(#arrow)"/>
+<rect x="40" y="320" width="370" height="164" rx="12" fill="#e8f4ee" stroke="#86af9a"/>
+<text x="60" y="352" font-size="21" font-weight="650">③ 推进 180 天：价格不变</text>
+<text x="60" y="385" font-size="18">可变年率 2.75% · scaled 不变</text>
+<text x="60" y="416" font-size="18">债务 = 15,204.810280 USD</text>
+<text x="60" y="449" font-size="18">HF：1.566667 → 1.545564</text>
+<text x="60" y="473" font-size="14" fill="#52647d">读时 normalized index；后续交易才写储备索引</text>
+<path d="M411 401H448" stroke="#52647d" stroke-width="2" marker-end="url(#arrow)"/>
+<rect x="458" y="320" width="370" height="164" rx="12" fill="#fff0e4" stroke="#c9a582"/>
+<text x="478" y="352" font-size="21" font-weight="650">④ 仅改 A 价格：债务不变</text>
+<text x="478" y="385" font-size="18">A=$1000 → HF 1.019414</text>
+<text x="478" y="416" font-size="18">此时可借 0，HF 仍高于 1</text>
+<text x="478" y="449" font-size="18">A=$900 → HF 0.966799</text>
+<text x="478" y="473" font-size="14" fill="#52647d">风险调整抵押 $14,700 / 债务 $15,204.810280</text>
+<path d="M829 401H866" stroke="#52647d" stroke-width="2" marker-end="url(#arrow)"/>
+<rect x="876" y="320" width="364" height="164" rx="12" fill="#e5efff" stroke="#8dabd7"/>
+<text x="896" y="352" font-size="21" font-weight="650">⑤ 实际清算一半债务</text>
+<text x="896" y="385" font-size="18">HF&gt;0.95，所选金额均≥$2000</text>
+<text x="896" y="416" font-size="18">偿还 7,602.405140 USD</text>
+<text x="896" y="449" font-size="18">抵押 bonus 5% · 奖励部分费 10%</text>
+<text x="896" y="473" font-size="14" fill="#52647d">清算后 HF 1.093599；其他 close-factor 分支未跑</text>
+<rect x="40" y="523" width="1200" height="137" rx="12" fill="white" stroke="#b7c6d9"/>
+<text x="60" y="557" font-size="20" font-weight="650">复算要保留取整位置</text>
+<text x="60" y="590" font-size="18">LTV：先 floor(加权 LTV 和 / 总抵押)，再算容量；HF：直接使用未截断的加权清算阈值和。</text>
+<text x="60" y="621" font-size="18">aToken 余额 floor(scaled × index / RAY)；vToken 债务 ceil(scaled × index / RAY)。价格统一为 1e8 USD。</text>
+<text x="60" y="647" font-size="15" fill="#52647d">已执行：双抵押、借款、计息、降价、六次失败、清算。仅源码核对：eMode、供给 cap 失败、100% 清算等。</text>
+</g></svg>

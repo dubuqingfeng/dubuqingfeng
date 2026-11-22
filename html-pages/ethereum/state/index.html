@@ -1,0 +1,1082 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Ethereum State 源码分析 · StateDB / MPT / TrieDB / PathDB / HashDB</title>
+  <meta name="description" content="基于 go-ethereum v1.17.11-unstable（2b7829ea）的以太坊状态源码分析：账户、余额、nonce、存储槽、MPT、StateDB、TrieDB、PathDB、HashDB，以及一次交易如何把它们串起来。">
+  <script src="../../theme.js"></script>
+  <link rel="stylesheet" href="./style.css">
+  <script>document.documentElement.classList.add('js');</script>
+</head>
+<body>
+  <div class="progress" aria-hidden="true"><span id="progressBar"></span></div>
+  <a class="skip-link" href="#main">跳到正文</a>
+
+  <header class="site-header">
+    <a class="brand" href="./index.html">
+      <span class="brand-mark">Ξ</span>
+      <span>Ethereum State</span>
+    </a>
+    <nav class="site-nav" aria-label="章节导航">
+      <a href="#model">心智模型</a>
+      <a href="#account">账户</a>
+      <a href="#mpt">MPT</a>
+      <a href="#statedb">StateDB</a>
+      <a href="#triedb">TrieDB</a>
+      <a href="#pathdb">PathDB</a>
+      <a href="#hashdb">HashDB</a>
+      <a href="#wiring">串起来</a>
+      <a href="#source">源码</a>
+    </nav>
+    <div class="header-actions">
+      <a class="back-link" href="../../index.html">HTML 索引</a>
+      <button class="theme-toggle" type="button" data-theme-toggle aria-label="切换日间/夜间模式">
+        <span data-theme-icon aria-hidden="true">☾</span>
+      </button>
+    </div>
+  </header>
+
+  <main id="main">
+    <section class="hero">
+      <div class="hero-copy reveal">
+        <p class="eyebrow">go-ethereum · v1.17.11-unstable · 2b7829ea</p>
+        <h1>状态不是一张表，<br><span>而是一棵可验证的树。</span></h1>
+        <p class="lede">
+          账户、余额、nonce、存储槽都只是内存里的对象；真正进入区块头的，
+          是从这些对象重新算出来的 <strong>stateRoot</strong>。
+          StateDB 负责“改”，MPT 负责“证明”，TrieDB 负责“存”，
+          PathDB/HashDB 决定“怎么存”。
+        </p>
+        <div class="hero-actions">
+          <a class="button primary" href="#wiring">先看完整链路</a>
+          <button class="button" type="button" data-play-write>播放一次写入</button>
+        </div>
+        <div class="hero-meta">
+          <span>基线：<code>2b7829ea</code></span>
+          <span>代码日期：2026-11-20</span>
+          <span>模式：MPT + PathDB / HashDB</span>
+        </div>
+      </div>
+
+      <div class="hero-visual reveal" aria-label="StateDB、MPT、TrieDB 与后端数据库的分层关系">
+        <svg viewBox="0 0 760 430" role="img" aria-labelledby="heroTitle heroDesc">
+          <title id="heroTitle">以太坊状态的分层结构</title>
+          <desc id="heroDesc">StateDB 保存账户对象和 Journal，MPT 把账户与存储编码为 trie，StateUpdate 聚合变更，TrieDB 分发到 PathDB 或 HashDB，最后落到 Pebble、CodeDB 与历史库。</desc>
+          <defs>
+            <marker id="arrow" markerWidth="9" markerHeight="9" refX="8" refY="4.5" orient="auto">
+              <path d="M0 0L9 4.5L0 9Z" fill="currentColor"/>
+            </marker>
+            <linearGradient id="heroGlow" x1="0" x2="1">
+              <stop offset="0" stop-color="#4f46e5" stop-opacity=".14"/>
+              <stop offset="1" stop-color="#06b6d4" stop-opacity=".03"/>
+            </linearGradient>
+          </defs>
+          <rect x="14" y="16" width="732" height="398" rx="24" fill="url(#heroGlow)"/>
+
+          <g class="svg-node hero-node">
+            <rect x="240" y="34" width="280" height="66" rx="14"/>
+            <text x="380" y="60" text-anchor="middle" class="svg-title">Block Header</text>
+            <text x="380" y="82" text-anchor="middle" class="svg-sub">stateRoot = keccak(RLP(root node))</text>
+          </g>
+
+          <g class="svg-node hero-node">
+            <rect x="64" y="132" width="190" height="72" rx="14"/>
+            <text x="159" y="158" text-anchor="middle" class="svg-title">StateDB</text>
+            <text x="159" y="180" text-anchor="middle" class="svg-sub">stateObjects · journal</text>
+          </g>
+          <g class="svg-node hero-node accent">
+            <rect x="285" y="132" width="190" height="72" rx="14"/>
+            <text x="380" y="158" text-anchor="middle" class="svg-title">StateUpdate</text>
+            <text x="380" y="180" text-anchor="middle" class="svg-sub">accounts · storages · nodes</text>
+          </g>
+          <g class="svg-node hero-node">
+            <rect x="506" y="132" width="190" height="72" rx="14"/>
+            <text x="601" y="158" text-anchor="middle" class="svg-title">MPT / Trie</text>
+            <text x="601" y="180" text-anchor="middle" class="svg-sub">account trie · storage tries</text>
+          </g>
+
+          <g class="svg-node hero-node">
+            <rect x="240" y="238" width="280" height="62" rx="14"/>
+            <text x="380" y="263" text-anchor="middle" class="svg-title">TrieDB</text>
+            <text x="380" y="284" text-anchor="middle" class="svg-sub">NodeReader · StateReader · Update</text>
+          </g>
+
+          <g class="svg-node hero-node">
+            <rect x="64" y="330" width="270" height="66" rx="14"/>
+            <text x="199" y="356" text-anchor="middle" class="svg-title">PathDB</text>
+            <text x="199" y="377" text-anchor="middle" class="svg-sub">diff layers · flat state · history</text>
+          </g>
+          <g class="svg-node hero-node">
+            <rect x="426" y="330" width="270" height="66" rx="14"/>
+            <text x="561" y="356" text-anchor="middle" class="svg-title">HashDB</text>
+            <text x="561" y="377" text-anchor="middle" class="svg-sub">hash → node · refcount GC</text>
+          </g>
+
+          <path id="hp1" class="svg-edge" d="M380 100V132"/>
+          <path id="hp2" class="svg-edge" d="M254 168H285"/>
+          <path id="hp3" class="svg-edge" d="M475 168H506"/>
+          <path id="hp4" class="svg-edge" d="M601 204V238H520"/>
+          <path id="hp5" class="svg-edge" d="M340 300V330"/>
+          <path id="hp6" class="svg-edge" d="M420 300V330"/>
+          <path id="hp7" class="svg-edge" d="M159 204V238H240"/>
+          <path id="hp8" class="svg-edge" d="M380 204V238"/>
+
+          <circle r="4" class="svg-dot"><animateMotion dur="3.4s" repeatCount="indefinite"><mpath href="#hp2"/></animateMotion></circle>
+          <circle r="4" class="svg-dot"><animateMotion dur="3.4s" begin=".7s" repeatCount="indefinite"><mpath href="#hp3"/></animateMotion></circle>
+          <circle r="4" class="svg-dot"><animateMotion dur="3s" begin="1.1s" repeatCount="indefinite"><mpath href="#hp8"/></animateMotion></circle>
+          <circle r="4" class="svg-dot"><animateMotion dur="3s" begin="1.7s" repeatCount="indefinite"><mpath href="#hp5"/></animateMotion></circle>
+          <circle r="4" class="svg-dot"><animateMotion dur="3s" begin="2s" repeatCount="indefinite"><mpath href="#hp6"/></animateMotion></circle>
+
+          <text x="380" y="120" text-anchor="middle" class="svg-note">commit 后回填</text>
+          <text x="270" y="225" text-anchor="middle" class="svg-note">读穿 / 写集</text>
+          <text x="601" y="225" text-anchor="middle" class="svg-note">算根</text>
+        </svg>
+      </div>
+    </section>
+
+    <section id="model" class="section">
+      <div class="section-head reveal">
+        <p class="eyebrow">01 · 心智模型</p>
+        <h2>同一份状态，三种身份</h2>
+        <p class="section-lede">
+          读代码时最容易混乱的地方，是把“账户对象”“trie 节点”“数据库键”当成同一个东西。
+          它们其实是同一份状态的三种表示，生命周期完全不同。
+        </p>
+      </div>
+
+      <div class="card-grid three">
+        <article class="info-card reveal">
+          <span class="card-index">A</span>
+          <h3>内存对象</h3>
+          <p><code>stateObject</code> 持有 <code>data types.StateAccount</code>、storage 缓存和 code。
+          修改先落在这里，EVM 看到的是它。</p>
+        </article>
+        <article class="info-card reveal">
+          <span class="card-index">B</span>
+          <h3>可验证树</h3>
+          <p>账户 trie 的 <code>keccak(addr)</code> 分支，存储 trie 的 <code>keccak(slot)</code> 分支。
+          根哈希进入区块头，任何字段变化都会级联到根。</p>
+        </article>
+        <article class="info-card reveal">
+          <span class="card-index">C</span>
+          <h3>持久化键值</h3>
+          <p>HashDB 用 <code>nodeHash → RLP(node)</code>；PathDB 用
+          <code>(owner, path) → node</code>，另有扁平账户和槽位。</p>
+        </article>
+      </div>
+
+      <div class="quote-card reveal">
+        <p>共识只认 <strong>stateRoot</strong>。数据库里的扁平状态、缓存、快照，都是为了更快地得到或验证这个根，不是新的共识来源。</p>
+      </div>
+
+      <div class="table-wrap reveal">
+        <table class="source-table">
+          <thead><tr><th>层</th><th>核心问题</th><th>关键类型</th><th>是否直接决定共识</th></tr></thead>
+          <tbody>
+            <tr><td>StateDB</td><td>执行期间账户怎么改、怎么回滚</td><td><code>StateDB</code> / <code>stateObject</code> / <code>journal</code></td><td>否，产出的根才决定</td></tr>
+            <tr><td>MPT</td><td>账户和存储如何压缩、哈希、证明</td><td><code>trie.Trie</code> / <code>trie.StateTrie</code></td><td>是，根哈希</td></tr>
+            <tr><td>TrieDB</td><td>节点和扁平状态交给哪个后端</td><td><code>triedb.Database</code> / <code>StateSet</code></td><td>否，存储实现</td></tr>
+            <tr><td>PathDB</td><td>按路径覆盖写，保留最近状态层</td><td><code>pathdb.Database</code> / <code>diffLayer</code> / <code>diskLayer</code></td><td>否，但影响可回滚范围</td></tr>
+            <tr><td>HashDB</td><td>按内容寻址，引用计数回收</td><td><code>hashdb.Database</code> / <code>cachedNode</code></td><td>否，影响归档能力</td></tr>
+          </tbody>
+        </table>
+      </div>
+    </section>
+
+    <section id="account" class="section">
+      <div class="section-head reveal">
+        <p class="eyebrow">02 · 账户</p>
+        <h2>一个账户只有四个共识字段</h2>
+        <p class="section-lede">
+          以太坊没有“EOA 表”和“合约表”两张表。EOA 和合约账户都是
+          <code>StateAccount</code>，区别只在 <code>CodeHash</code> 是否为空，以及 EVM 会不会执行它的代码。
+        </p>
+      </div>
+
+      <div class="split-layout account-layout">
+        <article class="account-card reveal" aria-label="账户字段交互图">
+          <div class="account-head">
+            <div>
+              <p class="mini-label">Account</p>
+              <h3><code>0x0000…00a1</code></h3>
+            </div>
+            <span class="badge" data-account-kind>合约账户</span>
+          </div>
+          <div class="account-fields" role="tablist" aria-label="账户字段">
+            <button type="button" class="account-field active" data-account-field="nonce" role="tab" aria-selected="true">
+              <span class="field-key">Nonce</span>
+              <span class="field-value">7</span>
+            </button>
+            <button type="button" class="account-field" data-account-field="balance" role="tab" aria-selected="false">
+              <span class="field-key">Balance</span>
+              <span class="field-value">10 ETH</span>
+            </button>
+            <button type="button" class="account-field" data-account-field="root" role="tab" aria-selected="false">
+              <span class="field-key">StorageRoot</span>
+              <span class="field-value mono">0x9f…c2</span>
+            </button>
+            <button type="button" class="account-field" data-account-field="code" role="tab" aria-selected="false">
+              <span class="field-key">CodeHash</span>
+              <span class="field-value mono">0x60…fa</span>
+            </button>
+          </div>
+          <div class="account-detail" data-account-detail aria-live="polite">
+            <h4>Nonce：账户自己的计数器</h4>
+            <p>EOA 每发一笔交易加一；合约每创建一个合约加一。它不是交易里的 nonce 字段，但交易 nonce 必须与账户 nonce 对齐。</p>
+            <p class="mini-code">key = keccak256(address)<br>value = RLP(nonce, balance, storageRoot, codeHash)</p>
+          </div>
+        </article>
+
+        <article class="code-card reveal">
+          <div class="code-head"><span>core/types/state_account.go</span><span class="tag">StateAccount</span></div>
+<pre><code>type StateAccount struct {
+    Nonce    uint64
+    Balance  *uint256.Int
+    Root     common.Hash // merkle root of the storage trie
+    CodeHash []byte
+}</code></pre>
+          <p class="code-note">
+            字段顺序就是 RLP 顺序。地址本身不在账户体里，地址是 trie 的 key。
+            <code>EmptyRootHash</code> 表示空存储，<code>EmptyCodeHash</code> 表示没有代码。
+          </p>
+          <div class="formula-list">
+            <div><span>EOA</span><code>CodeHash = keccak256(nil)</code></div>
+            <div><span>合约</span><code>CodeHash ≠ keccak256(nil)</code></div>
+            <div><span>空账户</span><code>nonce = 0 ∧ balance = 0 ∧ codeHash = empty</code></div>
+          </div>
+        </article>
+      </div>
+
+      <div class="card-grid three" style="margin-top: 18px;">
+        <article class="info-card reveal">
+          <h3>原生余额 ≠ 代币余额</h3>
+          <p><code>StateAccount.Balance</code> 是 ETH，单位 wei。ERC-20 的
+          <code>balanceOf</code> 是合约存储里的一个槽，读它要执行合约代码。</p>
+        </article>
+        <article class="info-card reveal">
+          <h3>Code 不在账户体里</h3>
+          <p>账户只存 <code>codeHash</code>；字节码按哈希存在 CodeDB。这样同一份代码可以被多个账户引用，也避免 trie 节点过大。</p>
+        </article>
+        <article class="info-card reveal">
+          <h3>Nonce 也会改根</h3>
+          <p>Nonce 是账户 RLP 的第一项。即使余额和存储都不变，仅 nonce 变化也会让账户 trie 的叶子变化，最终改变 stateRoot。</p>
+        </article>
+      </div>
+
+      <div class="callout reveal">
+        <strong>“合约账户”不是一种独立的数据结构。</strong>
+        当一笔交易 CALL 到某个地址时，EVM 读取该账户的 <code>CodeHash</code>；如果有代码，就加载并执行。
+        <code>DELEGATECALL</code> 执行的是目标代码，但读写的是调用方账户的存储。
+      </div>
+    </section>
+
+    <section id="storage" class="section">
+      <div class="section-head reveal">
+        <p class="eyebrow">03 · 余额、nonce 与存储槽</p>
+        <h2>写一笔状态，要穿过四层缓存</h2>
+        <p class="section-lede">
+          <code>stateObject</code> 不是简单地“改一个 map”。它把当前交易、当前区块、已提交值分开，
+          这样 EVM 的 revert、SSTORE 的 gas 规则和区块末尾的统一提交才能同时成立。
+        </p>
+      </div>
+
+      <div class="storage-grid reveal" aria-label="stateObject 的四层存储缓存">
+        <div class="storage-layer">
+          <span class="layer-tag">dirtyStorage</span>
+          <strong>当前交易写</strong>
+          <p>EVM 刚写入的值。revert 时随 journal 回滚。</p>
+        </div>
+        <div class="storage-layer">
+          <span class="layer-tag">pendingStorage</span>
+          <strong>交易结束待提交</strong>
+          <p><code>Finalise</code> 把 dirty 挪进来，等待区块末写入 storage trie。</p>
+        </div>
+        <div class="storage-layer">
+          <span class="layer-tag">originStorage</span>
+          <strong>区块内已读原值</strong>
+          <p>第一次 SLOAD 的缓存；也是 SSTORE gas 和回滚判断的基准。</p>
+        </div>
+        <div class="storage-layer">
+          <span class="layer-tag">uncommittedStorage</span>
+          <strong>自上次 commit 的脏槽</strong>
+          <p>记录该槽的原始值，区块末统一生成 storage diff。</p>
+        </div>
+      </div>
+
+      <div class="split-layout">
+        <article class="code-card reveal">
+          <div class="code-head"><span>core/state/state_object.go · GetCommittedState</span><span class="tag">读</span></div>
+<pre><code>if value, pending := s.pendingStorage[key]; pending {
+    return value
+}
+if value, cached := s.originStorage[key]; cached {
+    return value
+}
+// 账户在本区块被销毁过：不要回读旧数据库
+if _, destructed := s.db.stateObjectsDestruct[s.address]; destructed {
+    s.originStorage[key] = common.Hash{}
+    return common.Hash{}
+}
+value, err := s.db.reader.Storage(s.address, key)</code></pre>
+          <p class="code-note">读取顺序：pending → origin 缓存 → 扁平状态 / trie。销毁过的账户直接返回空槽。</p>
+        </article>
+
+        <article class="code-card reveal">
+          <div class="code-head"><span>core/state/state_object.go · SetState</span><span class="tag">写</span></div>
+<pre><code>prev, origin := s.getState(key)
+if prev == value {
+    return prev
+}
+s.db.journal.storageChange(s.address, key, prev, origin)
+s.setState(key, value, origin)</code></pre>
+          <p class="code-note">
+            写入前必须拿到 <code>prev</code> 和 <code>origin</code>：前者用于 revert，
+            后者用于判断“是否真的偏离了原值”。写回原值会撤销 dirty 标记。
+          </p>
+        </article>
+      </div>
+
+      <div class="split-layout" style="margin-top: 18px;">
+        <article class="info-card reveal">
+          <h3>存储槽的键和值</h3>
+          <p>EVM 看到的是 32 字节 key、32 字节 value。进入 MPT 前：
+          key 变成 <code>keccak256(key)</code>，value 去掉前导零后做 RLP。值为零等同于删除该槽。</p>
+          <p class="mini-code">trie key   = keccak256(slot)<br>trie value = RLP(trimLeftZeroes(value))</p>
+        </article>
+        <article class="info-card reveal">
+          <h3>Solidity 的 mapping 在哪</h3>
+          <p>对于声明在 slot 0 的 <code>mapping(address =&gt; uint256) balances</code>，</p>
+          <p class="mini-code">slot = keccak256(abi.encode(holder, uint256(0)))</p>
+          <p>所以 <code>balanceOf(holder)</code> 读的是合约存储 trie 的一个普通叶子，和 ETH 余额完全无关。</p>
+        </article>
+      </div>
+
+      <div class="callout reveal">
+        <strong>SSTORE 不是“直接写 trie”。</strong> 它先写 <code>dirtyStorage</code> 并记 journal；
+        交易结束由 <code>Finalise</code> 汇总到 <code>pendingStorage</code>；
+        区块结束 <code>IntermediateRoot</code> 才把 pending 写进 storage trie，重算 storageRoot。
+      </div>
+    </section>
+
+    <section id="mpt" class="section">
+      <div class="section-head reveal">
+        <p class="eyebrow">04 · MPT</p>
+        <h2>Merkle Patricia Trie：把 64 位十六进制 key 压成一条路径</h2>
+        <p class="section-lede">
+          账户 trie 和每个合约的存储 trie 都是 MPT。MPT 的每个节点要么是 16 路分支，
+          要么是压缩后的短节点；节点 RLP 编码后取 keccak256，父节点存子节点哈希。
+        </p>
+      </div>
+
+      <div class="mpt-transforms reveal" aria-label="从地址到 trie 路径的转换">
+        <div class="transform-step"><span>1</span><b>address</b><code>0x0000…00a1</code></div>
+        <div class="transform-arrow">→</div>
+        <div class="transform-step"><span>2</span><b>keccak256</b><code>32 bytes</code></div>
+        <div class="transform-arrow">→</div>
+        <div class="transform-step"><span>3</span><b>nibbles</b><code>64 × [0..f]</code></div>
+        <div class="transform-arrow">→</div>
+        <div class="transform-step"><span>4</span><b>path</b><code>branch / short</code></div>
+      </div>
+
+      <div class="card-grid three">
+        <article class="info-card reveal">
+          <h3>Branch（fullNode）</h3>
+          <p>17 个槽：前 16 个对应下一个 nibble，第 17 个存放“路径在这里结束”的值。
+          账户和存储的 key 都是定长，所以第 17 槽通常为空。</p>
+        </article>
+        <article class="info-card reveal">
+          <h3>Short（shortNode）</h3>
+          <p>压缩一段没有分叉的路径。带 terminator 时是叶子，不带时是扩展节点。
+          编码时使用 compact encoding。</p>
+        </article>
+        <article class="info-card reveal">
+          <h3>Embedded（&lt; 32 bytes）</h3>
+          <p>RLP 小于 32 字节的节点不单独存哈希，直接嵌入父节点。只有大节点才在数据库里按哈希寻址。</p>
+        </article>
+      </div>
+
+      <div class="mpt-explorer reveal" data-mpt-explorer>
+        <div class="explorer-head">
+          <div>
+            <p class="mini-label">交互演示 · 压缩后的 MPT</p>
+            <h3>查找一个 nibble key</h3>
+          </div>
+          <div class="explorer-actions">
+            <label class="select-label" for="mptKeySelect">key</label>
+            <select id="mptKeySelect" data-mpt-key></select>
+            <button class="button small primary" type="button" data-mpt-lookup>逐跳查找</button>
+          </div>
+        </div>
+        <div class="mpt-canvas-wrap">
+          <svg class="mpt-canvas" data-mpt-svg viewBox="0 0 900 420" role="img" aria-label="MPT 演示树"></svg>
+        </div>
+        <p class="mpt-caption" data-mpt-caption aria-live="polite">选择 key，然后点击“逐跳查找”。</p>
+        <div class="mpt-legend">
+          <span><i class="legend-branch"></i>branch</span>
+          <span><i class="legend-short"></i>extension / leaf</span>
+          <span><i class="legend-edge"></i>nibble edge</span>
+        </div>
+        <p class="small">演示用短 key，省略哈希值；真实节点路径是 64 个 nibble，根哈希为 <code>keccak256(RLP(root node))</code>。</p>
+      </div>
+
+      <div class="split-layout">
+        <article class="code-card reveal">
+          <div class="code-head"><span>trie/secure_trie.go · 账户与存储</span><span class="tag">StateTrie</span></div>
+<pre><code>func (t *StateTrie) GetAccount(address common.Address) (*types.StateAccount, error) {
+    res, err := t.trie.Get(crypto.Keccak256(address.Bytes()))
+    // ...
+    ret := new(types.StateAccount)
+    err = rlp.DecodeBytes(res, ret)
+}
+
+func (t *StateTrie) UpdateStorage(_ common.Address, key, value []byte) error {
+    hk := crypto.Keccak256(key)
+    v, _ := rlp.EncodeToBytes(value)
+    return t.trie.Update(hk, v)
+}</code></pre>
+          <p class="code-note">StateTrie 是“带 key 哈希的 Trie”。账户 key 和存储 key 都会先做 keccak256。</p>
+        </article>
+
+        <article class="info-card reveal">
+          <h3>为什么账户 trie 和存储 trie 是两棵树</h3>
+          <p>账户叶子里的 <code>Root</code> 是存储 trie 根。账户 trie 只负责“地址 → 账户元数据”，
+          存储 trie 负责“槽 → 值”。合约可以有大量存储，不必把槽塞进账户叶子。</p>
+          <p class="mini-code">accountTrie[keccak(addr)] = RLP(account)<br>storageTrie[keccak(slot)] = RLP(value)</p>
+          <p>更新一个槽：storage trie 根变 → 账户叶子的 Root 变 → 账户 trie 根变 → 区块头 stateRoot 变。</p>
+        </article>
+      </div>
+
+      <div class="table-wrap reveal">
+        <table class="source-table">
+          <thead><tr><th>编码</th><th>用途</th><th>注意</th></tr></thead>
+          <tbody>
+            <tr><td>KEYBYTES</td><td>对外 API 的原始 key</td><td>账户是 20 字节地址，槽是 32 字节</td></tr>
+            <tr><td>HEX</td><td>内存中的 nibble 路径</td><td>末尾 <code>0x10</code> 表示 value 终止</td></tr>
+            <tr><td>COMPACT</td><td>落盘节点的路径编码</td><td>首字节包含 terminator / odd 标志</td></tr>
+            <tr><td>RLP</td><td>节点序列化</td><td>节点哈希 = keccak256(RLP(node))</td></tr>
+          </tbody>
+        </table>
+      </div>
+    </section>
+
+    <section id="statedb" class="section">
+      <div class="section-head reveal">
+        <p class="eyebrow">05 · StateDB</p>
+        <h2>执行期的写缓存 + 可回滚日志</h2>
+        <p class="section-lede">
+          StateDB 不是“数据库”，而是某一状态根上的执行视图。它缓存账户对象，
+          用 journal 支持调用帧回滚，最后把变更打包成 <code>StateUpdate</code>。
+        </p>
+      </div>
+
+      <div class="split-layout">
+        <article class="info-card reveal">
+          <h3>StateDB 里真正重要的字段</h3>
+          <ul class="clean-list">
+            <li><code>stateObjects</code>：活跃账户对象，按地址缓存。</li>
+            <li><code>stateObjectsDestruct</code>：本区块内销毁过的账户，阻止回读旧存储。</li>
+            <li><code>mutations</code>：本区块内账户级变更摘要，区块末据此提交。</li>
+            <li><code>journal</code>：每次改动的逆操作，支持 Snapshot / Revert。</li>
+            <li><code>reader</code>：绑定 stateRoot 的读取器，扁平状态优先、trie 兜底。</li>
+            <li><code>dbErr</code>：第一个数据库错误，最终由 Commit 返回。</li>
+          </ul>
+        </article>
+
+        <article class="code-card reveal">
+          <div class="code-head"><span>core/state/statedb.go · getStateObject</span><span class="tag">读账户</span></div>
+<pre><code>if obj := s.stateObjects[addr]; obj != nil {
+    return obj
+}
+if _, ok := s.stateObjectsDestruct[addr]; ok {
+    return nil
+}
+acct, err := s.reader.Account(addr)
+if err != nil {
+    s.setError(...)
+    return nil
+}
+if acct == nil {
+    return nil
+}
+obj := newObject(s, addr, acct)
+s.setStateObject(obj)
+return obj</code></pre>
+          <p class="code-note">活跃对象优先；销毁过的地址直接视为不存在；否则通过 Reader 读扁平状态或 trie。</p>
+        </article>
+      </div>
+
+      <div class="write-player reveal" data-player="write">
+        <div class="player-toolbar">
+          <button class="button small" type="button" data-step-prev>上一步</button>
+          <button class="button small primary" type="button" data-step-play>播放</button>
+          <button class="button small" type="button" data-step-next>下一步</button>
+          <span class="step-counter" data-step-counter>1 / 8</span>
+        </div>
+        <div class="flow-stage">
+          <div class="flow-node" data-node="evm"><b>EVM</b><small>SSTORE</small></div>
+          <div class="flow-arrow">→</div>
+          <div class="flow-node" data-node="object"><b>stateObject</b><small>dirtyStorage</small></div>
+          <div class="flow-arrow">→</div>
+          <div class="flow-node" data-node="journal"><b>journal</b><small>记录 prev / origin</small></div>
+          <div class="flow-arrow">→</div>
+          <div class="flow-node" data-node="finalise"><b>Finalise</b><small>pool → pending</small></div>
+          <div class="flow-arrow">→</div>
+          <div class="flow-node" data-node="storage"><b>storage trie</b><small>UpdateStorage</small></div>
+          <div class="flow-arrow">→</div>
+          <div class="flow-node" data-node="account"><b>account trie</b><small>UpdateAccount</small></div>
+          <div class="flow-arrow">→</div>
+          <div class="flow-node" data-node="update"><b>StateUpdate</b><small>accounts + nodes</small></div>
+          <div class="flow-arrow">→</div>
+          <div class="flow-node" data-node="db"><b>TrieDB</b><small>PathDB / HashDB</small></div>
+        </div>
+        <p class="player-caption" data-step-caption></p>
+        <ol class="step-list" data-step-list>
+          <li>EVM 执行 SSTORE，调用 StateDB.SetState。</li>
+          <li>stateObject 比较当前值和原值，写入 dirtyStorage，并由 journal 记录逆操作。</li>
+          <li>交易结束，Finalise 把 dirtyStorage 汇总到 pendingStorage，并维护 uncommittedStorage。</li>
+          <li>区块结束，IntermediateRoot 并发更新各账户的 storage trie，重算 storageRoot。</li>
+          <li>账户 trie 写入新的 StateAccount，得到新的 stateRoot。</li>
+          <li>commit 收集 AccountUpdate、storage diff、code 和 trie node，生成 StateUpdate。</li>
+          <li>MPTDatabase.Commit 写 CodeDB、更新 snapshot，再调用 triedb.Update。</li>
+          <li>PathDB 新增 diff layer；HashDB 把节点放入 dirties，等待引用计数和 Commit/Cap。</li>
+        </ol>
+      </div>
+
+      <div class="table-wrap reveal">
+        <table class="source-table">
+          <thead><tr><th>阶段</th><th>做什么</th><th>不做什么</th></tr></thead>
+          <tbody>
+            <tr><td><code>Finalise</code></td><td>处理自毁/空账户、汇总 dirty storage、清 journal</td><td>不写 trie、不算根</td></tr>
+            <tr><td><code>IntermediateRoot</code></td><td>更新 storage trie 和 account trie，返回当前根</td><td>不落盘、不生成 StateUpdate</td></tr>
+            <tr><td><code>commit</code></td><td>收集节点和状态 diff，构造 <code>StateUpdate</code></td><td>不写数据库</td></tr>
+            <tr><td><code>commitAndFlush</code></td><td>调用 <code>Database.Commit</code>，再刷新 reader</td><td>不负责区块头写入</td></tr>
+          </tbody>
+        </table>
+      </div>
+
+      <div class="split-layout" style="margin-top: 18px;">
+        <article class="code-card reveal">
+          <div class="code-head"><span>core/state/statedb.go · Finalise</span><span class="tag">交易边界</span></div>
+<pre><code>if obj.selfDestructed || (rules.IsEIP158 &amp;&amp; obj.empty()) {
+    delete(s.stateObjects, obj.address)
+    s.markDelete(addr)
+    if _, ok := s.stateObjectsDestruct[obj.address]; !ok {
+        s.stateObjectsDestruct[obj.address] = obj
+    }
+} else {
+    obj.finalise()
+    s.markUpdate(addr)
+}</code></pre>
+          <p class="code-note">自毁和 EIP-161 空账户在此刻被标记删除；普通账户把 dirty storage 汇总到 pending。</p>
+        </article>
+
+        <article class="code-card reveal">
+          <div class="code-head"><span>core/state/journal.go · Snapshot</span><span class="tag">回滚</span></div>
+<pre><code>func (j *journal) snapshot() int {
+    id := j.nextRevisionId
+    j.nextRevisionId++
+    j.validRevisions = append(j.validRevisions, revision{id, j.length()})
+    return id
+}
+
+func (j *journal) revertToSnapshot(revid int, s *StateDB) {
+    // 找到 revision，反向重放 journal
+}</code></pre>
+          <p class="code-note">CALL 失败时，EVM 回滚到调用前快照；journal 保存 balance、nonce、code、storage 等逆操作。</p>
+        </article>
+      </div>
+    </section>
+
+    <section id="triedb" class="section">
+      <div class="section-head reveal">
+        <p class="eyebrow">06 · TrieDB</p>
+        <h2>把“树”与“怎么存树”解耦</h2>
+        <p class="section-lede">
+          trie 只关心节点、路径和哈希；TrieDB 决定节点写到哪里、保留多少层、是否维护扁平状态和历史。
+          这就是 PathDB 与 HashDB 能共享同一套 MPT 代码的原因。
+        </p>
+      </div>
+
+      <div class="split-layout">
+        <article class="code-card reveal">
+          <div class="code-head"><span>triedb/database.go · Database</span><span class="tag">门面</span></div>
+<pre><code>type Database struct {
+    disk      ethdb.Database
+    config    *Config
+    preimages *preimageStore
+    backend   backend // hashdb 或 pathdb
+}
+
+func (db *Database) Update(
+    root, parent common.Hash,
+    block uint64,
+    nodes *trienode.MergedNodeSet,
+    states *StateSet,
+) error {
+    switch b := db.backend.(type) {
+    case *hashdb.Database:
+        return b.Update(root, parent, block, nodes)
+    case *pathdb.Database:
+        return b.Update(root, parent, block, nodes, states.internal())
+    }
+}</code></pre>
+          <p class="code-note">同一次状态提交同时带 <code>nodes</code>（trie 节点）和 <code>states</code>（扁平账户/槽位）。HashDB 只用前者。</p>
+        </article>
+
+        <article class="info-card reveal">
+          <h3>两个 Reader 接口</h3>
+          <p><code>NodeReader.Node(owner, path, hash)</code> 给 trie 用：
+          按“哪个 trie、哪条路径、期望哈希”取节点。</p>
+          <p><code>StateReader.Account(hash)</code> / <code>Storage(acctHash, slotHash)</code> 给扁平日志用：
+          直接按地址哈希和槽哈希取值，不经过 trie 路径。</p>
+          <p class="mini-code">NodeReader  → pathdb.reader / hashdb.reader<br>StateReader → pathdb.reader（hashdb 未实现）</p>
+          <p>HashDB 模式没有扁平状态，StateDB 的读取最终回落到 MPT；可选 snapshot tree 才会提供 flat 快路径。</p>
+        </article>
+      </div>
+
+      <div class="flow-strip reveal" aria-label="StateUpdate 到 TrieDB 的数据流">
+        <div class="strip-node"><b>StateUpdate</b><small>OriginRoot · Root</small></div>
+        <div class="strip-arrow">→</div>
+        <div class="strip-node"><b>StateSet</b><small>Accounts · Storages · Origins</small></div>
+        <div class="strip-arrow">→</div>
+        <div class="strip-node"><b>MergedNodeSet</b><small>owner → path → node</small></div>
+        <div class="strip-arrow">→</div>
+        <div class="strip-node accent"><b>TrieDB.Update</b><small>root, parent, block</small></div>
+        <div class="strip-arrow">→</div>
+        <div class="strip-node"><b>backend</b><small>PathDB / HashDB</small></div>
+      </div>
+
+      <div class="callout reveal">
+        <strong>节点集和状态集不是一回事。</strong>
+        <code>MergedNodeSet</code> 是“树节点怎么变”，用于重建/验证 trie；
+        <code>StateSet</code> 是“账户和槽位现在是什么”，用于扁平读取、快照和状态历史。
+        PathDB 两者都存，HashDB 只存节点。
+      </div>
+    </section>
+
+    <section id="pathdb" class="section">
+      <div class="section-head reveal">
+        <p class="eyebrow">07 · PathDB</p>
+        <h2>在内存里叠 128 层 diff，再把最底层压进磁盘</h2>
+        <p class="section-lede">
+          PathDB 用 <code>(owner, path)</code> 定位节点，而不是节点哈希。每个有状态变化的区块新增一个 diff layer，
+          当层数超过 128 时，最底层被 flatten 到 disk layer。
+        </p>
+      </div>
+
+      <div class="path-stack reveal" aria-label="PathDB 的层结构">
+        <div class="stack-side">
+          <div class="stack-label">内存</div>
+          <div class="stack-label">磁盘</div>
+        </div>
+        <div class="stack-main">
+          <div class="layer-box diff"><span>HEAD</span><b>diff layer</b><small>最新账户/槽位/节点</small></div>
+          <div class="layer-box diff"><span>HEAD-1</span><b>diff layer</b><small>父层差异，按 root 链接</small></div>
+          <div class="layer-box diff faded"><span>…</span><b>…</b><small>最多 128 层</small></div>
+          <div class="layer-box disk"><span>disk</span><b>diskLayer</b><small>buffer · frozen · clean cache</small></div>
+          <div class="layer-box file"><span>Pebble</span><b>持久化</b><small>flat state · A/O nodes · history</small></div>
+        </div>
+      </div>
+
+      <div class="split-layout" style="margin-top: 20px;">
+        <article class="code-card reveal">
+          <div class="code-head"><span>triedb/pathdb/database.go · Update</span><span class="tag">写入</span></div>
+<pre><code>nodesWithOrigins := newNodeSetWithOrigin(newMergedNodeSet(nodes), origins)
+if err := db.tree.add(root, parentRoot, block, nodesWithOrigins, states); err != nil {
+    return err
+}
+// Keep 128 diff layers in the memory, persistent layer is 129th.
+return db.tree.cap(root, maxDiffLayers)</code></pre>
+          <p class="code-note">每次提交只挂一层，并不立即写盘；超过 128 层才触发底部持久化。</p>
+        </article>
+
+        <article class="code-card reveal">
+          <div class="code-head"><span>triedb/pathdb/reader.go · StateReader</span><span class="tag">读取</span></div>
+<pre><code>func (db *Database) StateReader(root common.Hash) (database.StateReader, error) {
+    layer := db.tree.get(root)
+    if layer == nil {
+        return nil, fmt.Errorf("%w: %#x", database.ErrStateUnavailable, root)
+    }
+    return &amp;reader{db: db, state: root, layer: layer}, nil
+}</code></pre>
+          <p class="code-note">读取从目标 root 对应的层开始，逐层向父层找；找不到才落到 disk。</p>
+        </article>
+      </div>
+
+      <div class="table-wrap reveal">
+        <table class="source-table">
+          <thead><tr><th>数据</th><th>PathDB 键</th><th>值</th></tr></thead>
+          <tbody>
+            <tr><td>账户树节点</td><td><code>"A" + hexPath</code></td><td>RLP(node)</td></tr>
+            <tr><td>存储树节点</td><td><code>"O" + acctHash + hexPath</code></td><td>RLP(node)</td></tr>
+            <tr><td>扁平账户</td><td><code>"a" + acctHash</code></td><td>slim RLP(account)</td></tr>
+            <tr><td>扁平存储槽</td><td><code>"o" + acctHash + slotHash</code></td><td>trim 后的 RLP(value)</td></tr>
+            <tr><td>状态根 → ID</td><td><code>"L" + stateRoot</code></td><td>stateID(uint64)</td></tr>
+            <tr><td>代码</td><td><code>"c" + codeHash</code></td><td>contract bytecode</td></tr>
+          </tbody>
+        </table>
+      </div>
+
+      <div class="card-grid three" style="margin-top: 18px;">
+        <article class="info-card reveal">
+          <h3>为什么能省空间</h3>
+          <p>按路径覆盖写，同一个节点路径只保留最新版本；不需要像 HashDB 那样为每个历史版本保留节点，直到引用计数归零。</p>
+        </article>
+        <article class="info-card reveal">
+          <h3>为什么还需要 trie</h3>
+          <p>扁平状态可能不完整（快照还在生成），也可能被错误修改。MPT 是最终校验器：扁平读失败或未覆盖时回落到 trie。</p>
+        </article>
+        <article class="info-card reveal">
+          <h3>历史与回滚</h3>
+          <p>底部 diff 持久化时写入 state history（反向 diff）。深 reorg 时按 history 反向恢复；可配置保留长度，默认只保留最近一段。</p>
+        </article>
+      </div>
+
+      <div class="split-layout" style="margin-top: 18px;">
+        <article class="code-card reveal">
+          <div class="code-head"><span>triedb/pathdb/difflayer.go</span><span class="tag">读穿透</span></div>
+<pre><code>if blob, found := dl.states.account(hash); found {
+    return blob, nil
+}
+// Account is unknown to this layer, resolve from parent
+return dl.parent.account(hash, depth+1)</code></pre>
+          <p class="code-note">账户、槽位、节点都遵循同一套“本层命中 → 父层递归 → diskLayer”的查找。</p>
+        </article>
+        <article class="code-card reveal">
+          <div class="code-head"><span>triedb/pathdb/disklayer.go · commit</span><span class="tag">落盘</span></div>
+<pre><code>flush, err := dl.write(bottom) // history + root→id
+dl.stale = true
+combined := dl.buffer.commitWithBloom(
+    bottom.nodes.nodeSet,
+    bottom.states.stateSet,
+    ...
+)
+if combined.full() || force || flush {
+    dl.frozen = combined
+    dl.frozen.flush(...) // 后台批量写盘
+}</code></pre>
+          <p class="code-note">历史先写，再合并 buffer；buffer 满或历史触发 flush 时，冻结并异步写入 Pebble，避免阻塞区块执行。</p>
+        </article>
+      </div>
+    </section>
+
+    <section id="hashdb" class="section">
+      <div class="section-head reveal">
+        <p class="eyebrow">08 · HashDB</p>
+        <h2>内容寻址、引用计数、显式 GC</h2>
+        <p class="section-lede">
+          HashDB 把每个 trie 节点按 <code>keccak256(RLP(node))</code> 存。相同子树天然去重；
+          代价是必须追踪父子引用，并在合适的时机 Commit / Cap 把节点刷盘。
+        </p>
+      </div>
+
+      <div class="split-layout">
+        <article class="code-card reveal">
+          <div class="code-head"><span>triedb/hashdb/database.go · 结构</span><span class="tag">cachedNode</span></div>
+<pre><code>type Database struct {
+    diskdb  ethdb.Database
+    cleans  *fastcache.Cache
+    dirties map[common.Hash]*cachedNode
+    oldest  common.Hash
+    newest  common.Hash
+}
+
+type cachedNode struct {
+    node      []byte
+    parents   uint32
+    external  map[common.Hash]struct{}
+    flushPrev common.Hash
+    flushNext common.Hash
+}</code></pre>
+          <p class="code-note">dirties 是“当前仍被引用的脏节点”；flush-list 按插入顺序串联，用于 Cap 时从旧到新刷盘。</p>
+        </article>
+
+        <article class="info-card reveal">
+          <h3>一次区块提交发生什么</h3>
+          <ol class="clean-list ordered">
+            <li><code>Update</code> 按 owner 顺序插入节点；先存储 trie，后账户 trie。</li>
+            <li>账户叶子里的 storageRoot 通过 <code>Reference</code> 挂在账户节点上。</li>
+            <li>区块头 stateRoot 通过 <code>Reference(root, zero)</code> 增加一个外部引用。</li>
+            <li>旧区块 root 通过 <code>Dereference</code> 减少引用；无引用节点级联删除。</li>
+            <li>内存超限或达到保留窗口时，<code>Cap</code> / <code>Commit</code> 把节点写入磁盘。</li>
+          </ol>
+        </article>
+      </div>
+
+      <div class="split-layout" style="margin-top: 18px;">
+        <article class="code-card reveal">
+          <div class="code-head"><span>core/blockchain.go · 非 archive 路径</span><span class="tag">GC</span></div>
+<pre><code>bc.triedb.Reference(root, common.Hash{})
+bc.triegc.Push(root, -int64(block.NumberU64()))
+
+// 超过保留窗口后，选一个旧 root 落盘并释放引用
+if nodes &gt; limit {
+    bc.triedb.Cap(limit - ethdb.IdealBatchSize)
+}
+if chosen := current - state.TriesInMemory; chosen &gt; 0 {
+    bc.triedb.Commit(...)
+}</code></pre>
+          <p class="code-note">Full 节点只保留最近约 128 个状态根对应的节点；更旧的节点被 GC。Archive 节点则对每个 root 都 Commit。</p>
+        </article>
+
+        <article class="info-card reveal">
+          <h3>HashDB 的取舍</h3>
+          <p><strong>优点</strong>：节点按内容寻址，天然去重；任意历史状态只要节点还在就能读；实现简单，便于归档。</p>
+          <p><strong>代价</strong>：没有扁平账户/槽位，读账户要遍历 trie；需要引用计数和显式 GC；随机写多，状态增长快。</p>
+          <p><strong>边界</strong>：HashDB 的 <code>StateReader</code> 返回“not implemented”，所以 flat 快路径只能来自独立的 snapshot tree。</p>
+        </article>
+      </div>
+
+      <div class="compare-grid reveal">
+        <article class="compare-card">
+          <h3>PathDB</h3>
+          <ul class="clean-list">
+            <li>键：<code>(owner, path)</code></li>
+            <li>128 层 diff + disk buffer</li>
+            <li>节点 + 扁平状态一起提交</li>
+            <li>历史 state 反向 diff</li>
+            <li>path-based（新节点常用）</li>
+          </ul>
+        </article>
+        <article class="compare-card">
+          <h3>HashDB</h3>
+          <ul class="clean-list">
+            <li>键：<code>nodeHash</code></li>
+            <li>dirties + 引用计数 GC</li>
+            <li>只存节点，不存 flat state</li>
+            <li>Archive 保留全部历史节点</li>
+            <li>legacy scheme</li>
+          </ul>
+        </article>
+      </div>
+    </section>
+
+    <section id="lifecycle" class="section">
+      <div class="section-head reveal">
+        <p class="eyebrow">09 · 一次交易</p>
+        <h2>把余额、nonce、存储槽串成一条提交链</h2>
+        <p class="section-lede">
+          切换场景，看看同一笔“转账”在状态层到底改了哪些字段。注意：日志和收据不属于状态，
+          但它们会影响收据根和 bloom。
+        </p>
+      </div>
+
+      <div class="scenario-tabs reveal" role="tablist" aria-label="交易场景">
+        <button type="button" class="scenario-tab active" data-scenario="eth" role="tab" aria-selected="true">原生 ETH 转账</button>
+        <button type="button" class="scenario-tab" data-scenario="erc20" role="tab" aria-selected="false">ERC-20 transfer</button>
+        <button type="button" class="scenario-tab" data-scenario="deploy" role="tab" aria-selected="false">部署合约</button>
+      </div>
+
+      <div class="scenario-panel reveal" data-scenario-panel>
+        <div class="scenario-summary">
+          <h3 data-scenario-title>EOA A → EOA B，转账 1 ETH</h3>
+          <p data-scenario-desc>只有账户元数据变化，没有合约存储变化。stateRoot 仍然会因为 nonce 和 balance 改变。</p>
+        </div>
+        <div class="table-wrap">
+          <table class="source-table scenario-table">
+            <thead><tr><th>对象</th><th>字段 / 槽位</th><th>变化</th><th>落到哪里</th></tr></thead>
+            <tbody data-scenario-rows></tbody>
+          </table>
+        </div>
+        <p class="scenario-note" data-scenario-note></p>
+      </div>
+
+      <div class="timeline reveal">
+        <div class="timeline-step"><span class="dot"></span><h3>交易执行</h3><p>EVM 读写 StateDB；失败的调用帧由 journal 回滚，但手续费和 nonce 保留。</p></div>
+        <div class="timeline-step"><span class="dot"></span><h3>Finalise</h3><p>每笔交易结束：空账户清理、自毁处理、dirty → pending；journal 清空。</p></div>
+        <div class="timeline-step"><span class="dot"></span><h3>IntermediateRoot</h3><p>区块组装时统一更新 storage tries 和 account trie，得到 header.Root。</p></div>
+        <div class="timeline-step"><span class="dot"></span><h3>Commit</h3><p>生成 StateUpdate，写 CodeDB，更新 snapshot，交给 TrieDB。</p></div>
+        <div class="timeline-step"><span class="dot"></span><h3>TrieDB</h3><p>PathDB 挂 diff layer；HashDB 进 dirties，等待 Cap/Commit 与 GC。</p></div>
+      </div>
+
+      <div class="callout reveal">
+        <strong>区块头里的 stateRoot 是“执行完所有交易后的根”，不是每笔交易的根。</strong>
+        Byzantium 之后，收据里不再保存每笔交易的中间状态根；
+        <code>Finalise</code> 在交易边界执行，<code>IntermediateRoot</code> 在区块组装/提交时执行。
+      </div>
+    </section>
+
+    <section id="wiring" class="section">
+      <div class="section-head reveal">
+        <p class="eyebrow">10 · 串联</p>
+        <h2>读一条链，写一条链</h2>
+        <p class="section-lede">
+          把前面的模块接起来后，读和写其实是两条方向相反的调用链。
+          读路径从 StateDB 往下穿透；写路径从 EVM 往上收敛成 StateUpdate，再交给 TrieDB。
+        </p>
+      </div>
+
+      <div class="wiring-grid">
+        <article class="chain-card reveal">
+          <div class="chain-head"><span class="chain-badge read">READ</span><h3>读：账户/槽位从哪里来</h3></div>
+          <ol class="chain-list">
+            <li><code>StateDB.GetBalance(addr)</code></li>
+            <li><code>getStateObject(addr)</code> → 活跃对象或 Reader</li>
+            <li><code>Reader.Account(addr)</code></li>
+            <li><code>multiStateReader</code>：flat 优先</li>
+            <li><code>flatReader</code> → PathDB flat / snapshot</li>
+            <li>未命中 → <code>mptTrieReader</code> → <code>StateTrie.GetAccount</code></li>
+            <li><code>trie.Trie.Get</code> → 逐 nibble resolve</li>
+            <li><code>NodeReader.Node(owner, path, hash)</code></li>
+            <li>PathDB diff/disk 或 HashDB 节点缓存</li>
+          </ol>
+          <p class="chain-note">trie 是兜底和最终校验；flat state 只是加速层，可能未覆盖或过期。</p>
+        </article>
+
+        <article class="chain-card reveal">
+          <div class="chain-head"><span class="chain-badge write">WRITE</span><h3>写：一次 SSTORE 如何落库</h3></div>
+          <ol class="chain-list">
+            <li>EVM <code>SSTORE</code> → <code>StateDB.SetState</code></li>
+            <li><code>stateObject.SetState</code> → journal + dirtyStorage</li>
+            <li>交易结束 <code>Finalise</code> → pendingStorage</li>
+            <li>区块结束 <code>IntermediateRoot</code></li>
+            <li><code>updateTrie</code> → <code>StateTrie.UpdateStorage</code></li>
+            <li><code>Trie.Commit</code> → storage root + NodeSet</li>
+            <li><code>UpdateAccount</code> → account trie + stateRoot</li>
+            <li><code>StateDB.commit</code> → <code>StateUpdate</code></li>
+            <li><code>MPTDatabase.Commit</code> → CodeDB + snapshot + <code>triedb.Update</code></li>
+            <li>PathDB diff layer / HashDB dirties</li>
+          </ol>
+          <p class="chain-note">最终只有 <code>header.Root</code> 进入共识；其余都是本地存储与加速结构。</p>
+        </article>
+      </div>
+
+      <div class="table-wrap reveal" style="margin-top: 20px;">
+        <table class="source-table">
+          <thead><tr><th>调用点</th><th>被调用者</th><th>为什么需要这一层</th></tr></thead>
+          <tbody>
+            <tr><td><code>StateDB</code></td><td><code>Reader</code></td><td>把“账户对象缓存”和“持久状态读取”解耦，支持 flat 优先、trie 兜底。</td></tr>
+            <tr><td><code>StateDB.commit</code></td><td><code>Database.Commit(StateUpdate)</code></td><td>把执行结果变成可持久化的状态集与节点集，避免 StateDB 直接依赖后端。</td></tr>
+            <tr><td><code>MPTDatabase.Commit</code></td><td><code>triedb.Update</code></td><td>统一 hash/path 两种 scheme 的入口，同时携带 nodes 与 states。</td></tr>
+            <tr><td><code>triedb.Database</code></td><td><code>pathdb</code> / <code>hashdb</code></td><td>不同落盘策略：分层覆盖写 vs 内容寻址 + 引用计数。</td></tr>
+            <tr><td><code>trie.Trie</code></td><td><code>NodeReader</code></td><td>trie 不需要知道节点在内存 diff、buffer 还是磁盘，只管按路径取。</td></tr>
+          </tbody>
+        </table>
+      </div>
+
+      <div class="quote-card reveal">
+        <p>
+          一句话串起来：<strong>EVM 改 StateDB → StateDB 改 stateObject → IntermediateRoot 改两棵 trie →
+          StateUpdate 收集 diff → TrieDB 选择后端 → 区块头只拿走 root。</strong>
+        </p>
+      </div>
+    </section>
+
+    <section id="pitfalls" class="section">
+      <div class="section-head reveal">
+        <p class="eyebrow">11 · 常见误区</p>
+        <h2>读源码时最容易踩的坑</h2>
+      </div>
+
+      <div class="card-grid two">
+        <article class="info-card reveal"><h3>“stateRoot 包含代码”</h3><p>不包含代码字节，只包含 <code>codeHash</code>。代码按哈希存在 CodeDB；哈希进账户，所以代码仍被根间接承诺。</p></article>
+        <article class="info-card reveal"><h3>“nonce 是交易字段”</h3><p>账户 nonce 是状态字段；交易 nonce 是签名消息的一部分。交易 nonce 必须等于账户 nonce，执行后账户 nonce 加一。</p></article>
+        <article class="info-card reveal"><h3>“存储 key 直接进 trie”</h3><p>EVM 的 32 字节 slot 会先 keccak256 再进 MPT。Solidity mapping 又会在合约层先算一次哈希，所以最终 key 是哈希的哈希。</p></article>
+        <article class="info-card reveal"><h3>“写入 0 会保留一个零值”</h3><p>值为 0 等价于删除槽。MPT 中不存在的叶子和值为 0 的叶子在状态上不可区分。</p></article>
+        <article class="info-card reveal"><h3>“flat state 可以单独信任”</h3><p>扁平状态是加速/快照结构，可能未生成完或被损坏。PathDB 的 Reader 仍把 MPT 作为兜底；<code>multiStateReader</code> 最后才是 trie。</p></article>
+        <article class="info-card reveal"><h3>“PathDB 等于 archive”</h3><p>PathDB 默认只保留 128 层 diff 和有限 state history；archive 需要额外配置和完整历史。能否读旧状态取决于 history 保留范围。</p></article>
+        <article class="info-card reveal"><h3>“HashDB 的节点可以随便删”</h3><p>节点按引用计数存活。少一次 <code>Reference</code> 或多一次 <code>Dereference</code> 都可能导致节点被提前回收，读到 MissingNode。</p></article>
+        <article class="info-card reveal"><h3>“Commit 会立刻写磁盘”</h3><p>StateDB.Commit 不等于落盘：PathDB 的区块写入走 <code>Update</code> 挂 diff layer；HashDB 的 <code>Commit</code> 才递归写节点。PathDB 还要等 cap 把底层 diff 压进 diskLayer，再由 buffer 异步 flush。</p></article>
+      </div>
+    </section>
+
+    <section id="changes" class="section">
+      <div class="section-head reveal">
+        <p class="eyebrow">12 · 变更雷达</p>
+        <h2>这份最新代码相比旧版，值得注意的变化</h2>
+        <p class="section-lede">
+          基线是 2026-11-20 的 master。以下不是历史回顾，而是读当前代码时会直接影响理解的结构性变化。
+        </p>
+      </div>
+
+      <div class="change-list reveal">
+        <div class="change-item">
+          <span class="change-mark">01</span>
+          <div><h3>StateUpdate 成为一等公民</h3><p>StateDB 不再直接把 trie 节点塞给数据库，而是产出 <code>StateUpdate</code>：账户、存储、代码、节点、原始值一起描述一次状态迁移。提交与存储彻底解耦。</p></div>
+        </div>
+        <div class="change-item">
+          <span class="change-mark">02</span>
+          <div><h3>Reader 抽象 + 扁平优先</h3><p><code>core/state/reader.go</code> 新增 <code>StateReader</code> / <code>ContractCodeReader</code>，<code>multiStateReader</code> 按优先级尝试 flat 和 MPT；还有 64 桶的并发读缓存与命中统计。</p></div>
+        </div>
+        <div class="change-item">
+          <span class="change-mark">03</span>
+          <div><h3>PathDB 的 buffer / bloom / 异步写</h3><p>底部 diff 合并进 buffer，使用 bloom 过滤和分层索引降低查找成本；历史先写、buffer 冻结、后台刷盘。读路径对 stale layer 有回退。</p></div>
+        </div>
+        <div class="change-item">
+          <span class="change-mark">04</span>
+          <div><h3>PBT（EIP-8297）实验路径</h3><p><code>core/state/database_pbt.go</code> 与 <code>trie/pbt</code> 引入分区二叉 Trie：一棵树同时持有账户、存储和代码，<code>OpenStorageTrie</code> 返回自身。它是独立命名空间，不是默认 MPT 路径。</p></div>
+        </div>
+        <div class="change-item">
+          <span class="change-mark">05</span>
+          <div><h3>Amsterdam / EIP-8246 / EIP-7928</h3><p><code>Finalise</code> 分叉出 <code>finaliseAmsterdam</code>：非零余额的自毁账户按 EIP-8246 清空 nonce/code/storage 并保留余额，零余额仍删除；同时把 balance/nonce/code/storage 变更汇总进区块级访问列表。</p></div>
+        </div>
+        <div class="change-item">
+          <span class="change-mark">06</span>
+          <div><h3>并发提交与 CodeDB 拆分</h3><p>账户 trie 与多个 storage trie 并发 commit；代码从 StateDB 的提交路径中拆到 <code>CodeDB</code>，按 codeHash 批量写并维护全局缓存。</p></div>
+        </div>
+      </div>
+
+      <div class="callout warn reveal">
+        <strong>注意版本边界：</strong>master 处于 unstable，PBT、Amsterdam 相关逻辑和数据库格式都可能继续变化。
+        做生产分析时，先固定 commit，再把“共识状态格式”和“本地存储实现”分开看。
+      </div>
+    </section>
+
+    <section id="source" class="section">
+      <div class="section-head reveal">
+        <p class="eyebrow">13 · 源码地图</p>
+        <h2>按一条状态变更的顺序读</h2>
+        <p class="section-lede">链接固定到提交 <code>2b7829ea6aed9a95a3fd793cca46731202c6c310</code>。</p>
+      </div>
+
+      <div class="table-wrap reveal">
+        <table class="source-table">
+          <thead><tr><th>主题</th><th>文件 / 入口</th><th>看什么</th></tr></thead>
+          <tbody>
+            <tr><td>账户结构</td><td><a href="https://github.com/ethereum/go-ethereum/blob/2b7829ea6aed9a95a3fd793cca46731202c6c310/core/types/state_account.go#L31" target="_blank" rel="noreferrer">StateAccount</a></td><td>nonce、balance、storageRoot、codeHash 的 RLP 布局</td></tr>
+            <tr><td>StateDB 读取</td><td><a href="https://github.com/ethereum/go-ethereum/blob/2b7829ea6aed9a95a3fd793cca46731202c6c310/core/state/statedb.go#L601" target="_blank" rel="noreferrer">getStateObject</a></td><td>活跃对象、销毁集合、Reader 回落</td></tr>
+            <tr><td>存储缓存</td><td><a href="https://github.com/ethereum/go-ethereum/blob/2b7829ea6aed9a95a3fd793cca46731202c6c310/core/state/state_object.go#L184" target="_blank" rel="noreferrer">GetCommittedState</a></td><td>pending / origin / 销毁账户 / Reader</td></tr>
+            <tr><td>写入与回滚</td><td><a href="https://github.com/ethereum/go-ethereum/blob/2b7829ea6aed9a95a3fd793cca46731202c6c310/core/state/journal.go#L188" target="_blank" rel="noreferrer">journal</a></td><td>snapshot、revert、每账户 mutation 计数</td></tr>
+            <tr><td>交易边界</td><td><a href="https://github.com/ethereum/go-ethereum/blob/2b7829ea6aed9a95a3fd793cca46731202c6c310/core/state/statedb.go#L775" target="_blank" rel="noreferrer">Finalise</a></td><td>自毁、EIP-161、dirty → pending</td></tr>
+            <tr><td>算根</td><td><a href="https://github.com/ethereum/go-ethereum/blob/2b7829ea6aed9a95a3fd793cca46731202c6c310/core/state/statedb.go#L925" target="_blank" rel="noreferrer">IntermediateRoot</a></td><td>并发更新 storage tries、账户 trie、witness</td></tr>
+            <tr><td>生成状态迁移</td><td><a href="https://github.com/ethereum/go-ethereum/blob/2b7829ea6aed9a95a3fd793cca46731202c6c310/core/state/statedb.go#L1288" target="_blank" rel="noreferrer">commit</a></td><td>AccountUpdate、NodeSet、StateUpdate</td></tr>
+            <tr><td>状态迁移结构</td><td><a href="https://github.com/ethereum/go-ethereum/blob/2b7829ea6aed9a95a3fd793cca46731202c6c310/core/state/stateupdate.go#L82" target="_blank" rel="noreferrer">StateUpdate</a></td><td>Accounts / Storages / Codes / Nodes / Origins</td></tr>
+            <tr><td>状态落盘</td><td><a href="https://github.com/ethereum/go-ethereum/blob/2b7829ea6aed9a95a3fd793cca46731202c6c310/core/state/database_mpt.go#L143" target="_blank" rel="noreferrer">MPTDatabase.Commit</a></td><td>CodeDB、snapshot、triedb.Update</td></tr>
+            <tr><td>Reader 组合</td><td><a href="https://github.com/ethereum/go-ethereum/blob/2b7829ea6aed9a95a3fd793cca46731202c6c310/core/state/reader.go#L287" target="_blank" rel="noreferrer">multiStateReader</a></td><td>flat 优先、MPT 兜底、缓存桶</td></tr>
+            <tr><td>MPT 账户/存储</td><td><a href="https://github.com/ethereum/go-ethereum/blob/2b7829ea6aed9a95a3fd793cca46731202c6c310/trie/secure_trie.go#L111" target="_blank" rel="noreferrer">StateTrie</a></td><td>keccak key、RLP value、storage root</td></tr>
+            <tr><td>Trie 提交</td><td><a href="https://github.com/ethereum/go-ethereum/blob/2b7829ea6aed9a95a3fd793cca46731202c6c310/trie/trie.go#L816" target="_blank" rel="noreferrer">Trie.Commit</a></td><td>dirty node → NodeSet、embedded 节点</td></tr>
+            <tr><td>节点哈希</td><td><a href="https://github.com/ethereum/go-ethereum/blob/2b7829ea6aed9a95a3fd793cca46731202c6c310/trie/committer.go#L133" target="_blank" rel="noreferrer">committer.store</a></td><td>节点 hash、删除节点、叶子收集</td></tr>
+            <tr><td>TrieDB 门面</td><td><a href="https://github.com/ethereum/go-ethereum/blob/2b7829ea6aed9a95a3fd793cca46731202c6c310/triedb/database.go#L153" target="_blank" rel="noreferrer">Database.Update</a></td><td>hash/path 分发、preimage</td></tr>
+            <tr><td>PathDB 层</td><td><a href="https://github.com/ethereum/go-ethereum/blob/2b7829ea6aed9a95a3fd793cca46731202c6c310/triedb/pathdb/database.go#L324" target="_blank" rel="noreferrer">pathdb.Update</a></td><td>diff layer、128 层 cap</td></tr>
+            <tr><td>PathDB 落盘</td><td><a href="https://github.com/ethereum/go-ethereum/blob/2b7829ea6aed9a95a3fd793cca46731202c6c310/triedb/pathdb/disklayer.go#L476" target="_blank" rel="noreferrer">diskLayer.commit</a></td><td>history、buffer、freeze、async flush</td></tr>
+            <tr><td>HashDB 写入</td><td><a href="https://github.com/ethereum/go-ethereum/blob/2b7829ea6aed9a95a3fd793cca46731202c6c310/triedb/hashdb/database.go#L537" target="_blank" rel="noreferrer">hashdb.Update</a></td><td>dirties、storage root reference</td></tr>
+            <tr><td>HashDB GC</td><td><a href="https://github.com/ethereum/go-ethereum/blob/2b7829ea6aed9a95a3fd793cca46731202c6c310/triedb/hashdb/database.go#L253" target="_blank" rel="noreferrer">Dereference</a></td><td>引用计数、flush-list、级联删除</td></tr>
+            <tr><td>区块提交</td><td><a href="https://github.com/ethereum/go-ethereum/blob/2b7829ea6aed9a95a3fd793cca46731202c6c310/core/blockchain.go#L1733" target="_blank" rel="noreferrer">writeBlockWithState</a></td><td>Commit、Reference、Cap、trie GC</td></tr>
+          </tbody>
+        </table>
+      </div>
+    </section>
+
+    <section class="section final-note">
+      <div class="quote-card reveal">
+        <p>
+          StateDB 负责“这笔交易想改什么”，MPT 负责“改完之后根是什么”，TrieDB 负责“根和节点放在哪里”。
+          把这三件事分开，以太坊状态代码就不再是一团 map。
+        </p>
+      </div>
+      <p class="small reveal">
+        版本基线：go-ethereum <code>v1.17.11-unstable</code> / <code>2b7829ea</code>（2026-11-20）。
+        本文以 MPT + PathDB/HashDB 为主；PBT（EIP-8297）目前是独立实验路径。
+      </p>
+    </section>
+  </main>
+
+  <footer class="site-footer">
+    <span>Ethereum State · go-ethereum 2b7829ea</span>
+    <a href="../../index.html">返回 HTML 索引</a>
+  </footer>
+
+  <script src="./app.js"></script>
+</body>
+</html>

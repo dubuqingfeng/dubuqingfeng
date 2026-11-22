@@ -1,0 +1,844 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Solana AccountsDB 源码分析 · Agave v4.4.1</title>
+  <meta name="description" content="用动画和源码路径理解 Solana AccountsDB：账户字段如何落到 AppendVec、写缓存、root 落盘、索引、clean、tombstone、snapshot 与 AccountsLtHash。">
+  <script src="../../theme.js"></script>
+  <link rel="stylesheet" href="./style.css">
+  <script>document.documentElement.classList.add('js');</script>
+</head>
+<body>
+  <div class="progress" aria-hidden="true"><span id="progressBar"></span></div>
+
+  <a class="skip-link" href="#main">跳到正文</a>
+
+  <header class="site-header">
+    <a class="brand" href="./index.html">
+      <span class="brand-mark">◎</span>
+      <span>Solana AccountsDB</span>
+    </a>
+    <nav class="site-nav" aria-label="章节导航">
+      <a href="#model">心智模型</a>
+      <a href="#account">账户</a>
+      <a href="#layout">布局</a>
+      <a href="#write">写路径</a>
+      <a href="#read">读路径</a>
+      <a href="#rpc-index">RPC 索引</a>
+      <a href="#lifecycle">生命周期</a>
+      <a href="#ecosystem">周边组件</a>
+      <a href="#snapshot">快照</a>
+      <a href="#source">源码</a>
+    </nav>
+    <div class="header-actions">
+      <a class="back-link" href="../bank/index.html">Bank 源码</a>
+      <a class="back-link" href="../../index.html#accountsdb">HTML 索引</a>
+      <button class="theme-toggle" type="button" data-theme-toggle aria-label="切换日间/夜间模式">
+        <span data-theme-icon aria-hidden="true">☾</span>
+      </button>
+    </div>
+  </header>
+
+  <main id="main">
+    <section class="hero">
+      <div class="hero-copy reveal">
+        <p class="eyebrow">Agave v4.4.1 · Source Walkthrough</p>
+        <h1>一笔交易写入后，<br><span>账户到底去了哪里？</span></h1>
+        <p class="lede">
+          AccountsDB 不是一棵每次交易都更新的全局 Merkle 树。它更像一套
+          <strong>按 pubkey 索引、按 slot 保存版本</strong>的日志系统：
+          最新状态先住进写缓存，只有 root 才追加到文件，索引负责回答“去哪儿找”。
+        </p>
+        <div class="hero-actions">
+          <a class="button primary" href="#write">从写路径开始</a>
+          <button class="button" type="button" data-play-write>播放 6 步动画</button>
+        </div>
+        <div class="hero-meta">
+          <span>基线：<code>5bb30402</code></span>
+          <span>重点：写缓存 → root 落盘 → 索引 → clean</span>
+        </div>
+      </div>
+
+      <div class="hero-visual reveal" aria-label="AccountsDB 写入流程示意图">
+        <svg viewBox="0 0 760 360" role="img" aria-labelledby="heroTitle heroDesc">
+          <title id="heroTitle">AccountsDB 写缓存、追加文件与索引</title>
+          <desc id="heroDesc">Bank 提交先写 SlotCache，root 后 flush 到 AppendVec，AccountsIndex 记录 pubkey 到文件和偏移的映射。</desc>
+          <defs>
+            <marker id="arrow" markerWidth="9" markerHeight="9" refX="8" refY="4.5" orient="auto">
+              <path d="M0 0L9 4.5L0 9Z" fill="currentColor"/>
+            </marker>
+            <linearGradient id="glow" x1="0" x2="1">
+              <stop offset="0" stop-color="#2563eb" stop-opacity=".12"/>
+              <stop offset="1" stop-color="#2563eb" stop-opacity=".02"/>
+            </linearGradient>
+          </defs>
+
+          <rect x="16" y="20" width="728" height="320" rx="22" fill="url(#glow)"/>
+
+          <g class="svg-node">
+            <rect x="44" y="72" width="160" height="82" rx="14"/>
+            <text x="124" y="106" text-anchor="middle" class="svg-title">Bank</text>
+            <text x="124" y="130" text-anchor="middle" class="svg-sub">commit_transactions</text>
+          </g>
+
+          <g class="svg-node">
+            <rect x="284" y="72" width="180" height="82" rx="14"/>
+            <text x="374" y="106" text-anchor="middle" class="svg-title">SlotCache</text>
+            <text x="374" y="130" text-anchor="middle" class="svg-sub">未 root 的最新值</text>
+          </g>
+
+          <g class="svg-node">
+            <rect x="548" y="72" width="168" height="82" rx="14"/>
+            <text x="632" y="106" text-anchor="middle" class="svg-title">AppendVec</text>
+            <text x="632" y="130" text-anchor="middle" class="svg-sub">&lt;slot&gt;.&lt;id&gt;</text>
+          </g>
+
+          <g class="svg-node">
+            <rect x="284" y="226" width="180" height="82" rx="14"/>
+            <text x="374" y="260" text-anchor="middle" class="svg-title">AccountsIndex</text>
+            <text x="374" y="284" text-anchor="middle" class="svg-sub">pubkey → slot_list</text>
+          </g>
+
+          <g class="svg-node">
+            <rect x="548" y="226" width="168" height="82" rx="14"/>
+            <text x="632" y="260" text-anchor="middle" class="svg-title">root / clean</text>
+            <text x="632" y="284" text-anchor="middle" class="svg-sub">回收与快照边界</text>
+          </g>
+
+          <path id="p1" class="svg-edge" d="M204 113H284"/>
+          <path id="p2" class="svg-edge" d="M464 113H548"/>
+          <path id="p3" class="svg-edge" d="M374 154V226"/>
+          <path id="p4" class="svg-edge" d="M464 267H548"/>
+
+          <circle r="4.5" class="svg-dot"><animateMotion dur="3.2s" repeatCount="indefinite"><mpath href="#p1"/></animateMotion></circle>
+          <circle r="4.5" class="svg-dot"><animateMotion dur="3.2s" begin="1s" repeatCount="indefinite"><mpath href="#p2"/></animateMotion></circle>
+          <circle r="4.5" class="svg-dot"><animateMotion dur="2.6s" begin=".4s" repeatCount="indefinite"><mpath href="#p3"/></animateMotion></circle>
+          <circle r="4.5" class="svg-dot"><animateMotion dur="2.6s" begin="1.4s" repeatCount="indefinite"><mpath href="#p4"/></animateMotion></circle>
+
+          <text x="238" y="58" text-anchor="middle" class="svg-note">先写内存</text>
+          <text x="506" y="58" text-anchor="middle" class="svg-note">root 后 flush</text>
+          <text x="374" y="205" text-anchor="middle" class="svg-note">索引是派生数据</text>
+        </svg>
+      </div>
+    </section>
+
+    <section id="model" class="section">
+      <div class="section-head reveal">
+        <p class="eyebrow">01 · 心智模型</p>
+        <h2>先记住一句话</h2>
+        <p class="section-lede">
+          读 AccountsDB 时，不要问“最新文件是哪个”，要问：
+          <strong>这个 Bank 的 ancestors 能看到哪个 slot 的哪个版本？</strong>
+        </p>
+      </div>
+
+      <div class="quote-card reveal">
+        <p>按 pubkey 索引、按 slot 保存版本、以追加文件为事实来源、以可重建索引回答位置。</p>
+      </div>
+
+      <div class="card-grid three">
+        <article class="info-card reveal">
+          <span class="card-index">A</span>
+          <h3>事实来源</h3>
+          <p>AppendVec 只追加，不原地改。账户版本以完整字节写入，旧版本不会在写入时被覆盖。</p>
+        </article>
+        <article class="info-card reveal">
+          <span class="card-index">B</span>
+          <h3>派生索引</h3>
+          <p>AccountsIndex 记录 <code>pubkey → [(slot, file, offset)]</code>。它可以重建，不是账户文件本身。</p>
+        </article>
+        <article class="info-card reveal">
+          <span class="card-index">C</span>
+          <h3>生命周期</h3>
+          <p>root 决定哪些版本可以保留、清理、收缩和进入快照。未 root 的状态只在写缓存里。</p>
+        </article>
+      </div>
+
+      <div class="callout reveal">
+        <strong>v4.4.1 的读路径是 cache-first。</strong>
+        主索引不再保存 <code>Cached</code> 条目；读账户先查写缓存，未命中才查索引和文件。
+      </div>
+    </section>
+
+    <section id="account" class="section">
+      <div class="section-head reveal">
+        <p class="eyebrow">02 · 账户与 AccountsDB</p>
+        <h2>pubkey 是键，AccountSharedData 是值</h2>
+        <p class="section-lede">
+          AccountsDB 没有一张“账户表”。它把账户拆成两半：<strong>pubkey 做键</strong>，
+          <strong>账户值做内容</strong>，分别放进写缓存、索引和 AppendVec。
+          这两半在哪里拆开、又在哪里拼回去，就是它与账户的结合方式。
+        </p>
+      </div>
+
+      <div class="quote-card reveal">
+        <p><strong><code>AccountSharedData</code> 里没有 pubkey。</strong>身份在键上，数据在值里；AccountsDB 负责让两者在每个平面上一一对应。</p>
+      </div>
+
+      <div class="table-wrap reveal">
+        <table class="source-table">
+          <thead>
+            <tr><th>组成</th><th>由谁提供</th><th>在 AccountsDB 里长什么样</th></tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td>身份 · pubkey</td>
+              <td>交易、调用方、程序派生地址</td>
+              <td>缓存键、索引键、文件里的 <code>StoredMeta.pubkey</code>；不写进账户值</td>
+            </tr>
+            <tr>
+              <td>值 · AccountSharedData</td>
+              <td>SVM 执行结果</td>
+              <td>缓存里作为值；落盘时摊平成 <code>AccountMeta</code> + <code>data</code></td>
+            </tr>
+            <tr>
+              <td>版本 · slot</td>
+              <td>Bank 的 slot 与 ancestors</td>
+              <td>缓存里的 slot、索引的 <code>slot_list</code>、文件名 <code>&lt;slot&gt;.&lt;id&gt;</code></td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+
+      <div class="split-layout" style="margin-top: 20px;">
+        <article class="code-card reveal">
+          <div class="code-head"><span>AccountSharedData</span><span class="tag">执行层</span></div>
+<pre><code>pub struct AccountSharedData {
+    lamports: u64,
+    data: Arc&lt;Vec&lt;u8&gt;&gt;,   // clone 只加引用计数
+    owner: Pubkey,
+    executable: bool,
+    rent_epoch: Epoch,
+}</code></pre>
+          <p class="code-note">
+            只有 5 个字段，没有身份字段。独占版本是 <code>Account</code>（<code>data: Vec&lt;u8&gt;</code>）；
+            Bank 提交的写集是 <code>(pubkey, AccountSharedData)</code>，身份由元组的前半截提供。
+          </p>
+        </article>
+
+        <article class="info-card reveal">
+          <h3>为什么把键和值拆开</h3>
+          <p>
+            同一个账户值可以被多个读者共享，而 pubkey 只是查找入口。拆开之后，
+            AccountsDB 可以原地追加整块值、在索引里只存 8 字节位置，缓存里则把键和值重新绑在一起。
+          </p>
+          <p style="margin-top: 12px;">
+            代价是：任何一层都必须自己带上键。缓存用 <code>CachedAccount { pubkey, account }</code>，
+            文件用 <code>StoredMeta.pubkey</code>，索引用 <code>AccountMapEntry</code> 的 key。
+          </p>
+        </article>
+      </div>
+
+      <h3 class="sub-head reveal">同一个账户的四种形态</h3>
+      <div class="acct-tabs reveal" data-acct-tabs>
+        <div class="acct-tabbar" role="tablist" aria-label="账户在 AccountsDB 中的形态">
+          <button class="acct-tab active" type="button" role="tab" aria-selected="true" data-acct-view="exec">执行层</button>
+          <button class="acct-tab" type="button" role="tab" aria-selected="false" data-acct-view="cache">写缓存</button>
+          <button class="acct-tab" type="button" role="tab" aria-selected="false" data-acct-view="file">落盘</button>
+          <button class="acct-tab" type="button" role="tab" aria-selected="false" data-acct-view="load">读回</button>
+        </div>
+
+        <div class="acct-panel" role="tabpanel" data-acct-panel="exec">
+          <h3>AccountSharedData：执行层看到的值</h3>
+          <p class="acct-tagline">Bank 执行交易后产生的新账户值；pubkey 在它外面。</p>
+<pre><code>let writes: Vec&lt;(Pubkey, AccountSharedData)&gt; =
+    collect_accounts_to_store(&amp;results);
+
+// AccountSharedData 回答“有什么”，不回答“是谁”
+lamports, data, owner, executable, rent_epoch</code></pre>
+          <p>
+            <code>data</code> 是 <code>Arc&lt;Vec&lt;u8&gt;&gt;</code>，克隆账户值不会复制账户数据；
+            只有真正落盘或读回时才需要碰字节。
+          </p>
+        </div>
+
+        <div class="acct-panel" role="tabpanel" data-acct-panel="cache" hidden>
+          <h3>CachedAccount：键和值第一次被绑在一起</h3>
+          <p class="acct-tagline">存在 per-slot SlotCache 里；未 root，主索引完全不知道。</p>
+<pre><code>pub struct CachedAccount {
+    pub account: AccountSharedData,
+    pubkey: Pubkey,     // 身份被显式补上
+}
+
+SlotCache: DashMap&lt;Pubkey, Arc&lt;CachedAccount&gt;&gt;</code></pre>
+          <p>
+            <code>AccountsCache::store(slot, pubkey, account)</code> 把这对键值写进该 slot 的
+            DashMap；同一 slot 重复写直接覆盖，只有 pubkey 首次进入该 slot 时才更新缓存内部索引。
+          </p>
+        </div>
+
+        <div class="acct-panel" role="tabpanel" data-acct-panel="file" hidden>
+          <h3>StoredMeta + AccountMeta：值被摊平成字节</h3>
+          <p class="acct-tagline">flush 时按账户整体追加；pubkey 写进 StoredMeta，是重建索引的唯一线索。</p>
+<pre><code>StoredMeta    48 B  { write_version_obsolete: 0, data_len, pubkey }
+AccountMeta   56 B  { lamports, rent_epoch, owner, executable }
+hash          32 B  全零占位（ObsoleteAccountHash）
+data           N B  账户数据
+
+stored_size = u64_align(136 + data_len)</code></pre>
+          <p>
+            账户值的 4 个定长字段进入 <code>AccountMeta</code>，<code>data</code> 作为变长段跟在 136 B 元数据之后；
+            <code>pubkey</code> 被复制进 <code>StoredMeta</code>。写入时 <code>account.pubkey()</code> 来自
+            <code>StorableAccounts</code>，也就是元组的前半截。
+          </p>
+        </div>
+
+        <div class="acct-panel" role="tabpanel" data-acct-panel="load" hidden>
+          <h3>StoredAccountInfo：借用文件内存的只读视图</h3>
+          <p class="acct-tagline">读路径最后一步才把字节重新解释成账户值。</p>
+<pre><code>pub struct StoredAccountInfo&lt;'storage&gt; {
+    pubkey: &amp;'storage Pubkey,
+    lamports: u64,
+    owner: &amp;'storage Pubkey,
+    data: &amp;'storage [u8],
+    executable: bool,
+    rent_epoch: Epoch,
+}</code></pre>
+          <p>
+            索引只给 <code>store_id + offset</code>，文件给字节；
+            <code>take_account()</code> 时才调用 <code>create_account_shared_data</code>，
+            把 <code>data</code> 拷成 <code>Arc&lt;Vec&lt;u8&gt;&gt;</code> 变回 <code>AccountSharedData</code>。
+          </p>
+        </div>
+      </div>
+
+      <h3 class="sub-head reveal">Account 的每个字段去哪儿了</h3>
+      <div class="table-wrap reveal">
+        <table class="source-table">
+          <thead>
+            <tr><th>AccountSharedData 字段</th><th>大小</th><th>写入哪里</th><th>读回时</th></tr>
+          </thead>
+          <tbody>
+            <tr><td>lamports</td><td>8 B</td><td><code>AccountMeta.lamports</code></td><td>原值</td></tr>
+            <tr><td>rent_epoch</td><td>8 B</td><td><code>AccountMeta.rent_epoch</code></td><td>原值；不参与 lt hash</td></tr>
+            <tr><td>owner</td><td>32 B</td><td><code>AccountMeta.owner</code></td><td>原值</td></tr>
+            <tr><td>executable</td><td>1 B + 7 B 填充</td><td><code>AccountMeta.executable</code></td><td>原值</td></tr>
+            <tr><td>data</td><td>data_len</td><td>紧跟 136 B 固定元数据之后</td><td>拷贝进 <code>Arc&lt;Vec&lt;u8&gt;&gt;</code></td></tr>
+            <tr><td>（pubkey）</td><td>32 B</td><td><code>StoredMeta.pubkey</code>，不是账户字段</td><td>由索引或调用方给出</td></tr>
+          </tbody>
+        </table>
+      </div>
+
+      <div class="callout reveal">
+        <strong>零 lamport 账户落盘时会被压成占位值：</strong>
+        <code>account_default_if_zero_lamport</code> 让归零账户用 <code>DEFAULT_ACCOUNT_SHARED_DATA</code>
+        （lamports=0、data 为空、owner 默认）写入，pubkey 仍然保留。所以“删除”在文件里依然是一条记录，
+        它正是后续 tombstone 的字节来源。
+      </div>
+
+      <div class="card-grid two" style="margin-top: 20px;">
+        <article class="info-card reveal">
+          <h3>整体替换，没有字段级 diff</h3>
+          <p>
+            账户值以整体为单位写入：<code>lamports</code>、<code>owner</code>、<code>data</code>
+            任意一个变了，AppendVec 里就是一条完整的新记录，不会只改一个字段。
+          </p>
+        </article>
+        <article class="info-card reveal">
+          <h3>哈希只看账户值的一部分</h3>
+          <p>
+            <code>lt_hash_account</code> 只取 <code>lamports || data || executable || owner || pubkey</code>；
+            <code>rent_epoch</code> 留在磁盘布局里，但不进入 bank hash。
+          </p>
+        </article>
+      </div>
+    </section>
+
+    <section id="layout" class="section">
+      <div class="section-head reveal">
+        <p class="eyebrow">03 · 磁盘布局</p>
+        <h2>一条账户版本长什么样</h2>
+        <p class="section-lede">
+          <code>AccountInfo</code> 只有 8 字节，负责“去哪儿找”；真正的账户内容在 AppendVec 里。
+        </p>
+      </div>
+
+      <div class="split-layout">
+        <article class="code-card reveal">
+          <div class="code-head"><span>account_info.rs</span><span class="tag">v4.4.1</span></div>
+<pre><code>pub struct AccountInfo {
+    store_id: u32,
+    account_offset_and_flags: PackedOffsetAndFlags,
+}
+
+// 31-bit 逻辑 offset + 1-bit zero-lamport
+const _: () = assert!(size_of::&lt;AccountInfo&gt;() == 8);</code></pre>
+          <p class="code-note">没有 <code>Cached</code> 变体。未 flush 的账户由写缓存负责。</p>
+        </article>
+
+        <article class="byte-card reveal">
+          <div class="byte-row">
+            <span class="byte-name">StoredMeta</span>
+            <span class="byte-size">48 B</span>
+            <span class="byte-desc">write_version_obsolete / data_len / pubkey</span>
+          </div>
+          <div class="byte-row">
+            <span class="byte-name">AccountMeta</span>
+            <span class="byte-size">56 B</span>
+            <span class="byte-desc">lamports / rent_epoch / owner / executable</span>
+          </div>
+          <div class="byte-row highlight">
+            <span class="byte-name">ObsoleteAccountHash</span>
+            <span class="byte-size">32 B</span>
+            <span class="byte-desc">全零占位；不再保存有效账户哈希</span>
+          </div>
+          <div class="byte-row">
+            <span class="byte-name">data</span>
+            <span class="byte-size">N B</span>
+            <span class="byte-desc">账户数据</span>
+          </div>
+          <div class="byte-row">
+            <span class="byte-name">padding</span>
+            <span class="byte-size">0–7 B</span>
+            <span class="byte-desc">对齐到下一个 8 字节边界</span>
+          </div>
+          <div class="byte-total">固定元数据 136 B · 文件上限 16 GiB · 文件名 <code>&lt;slot&gt;.&lt;id&gt;</code></div>
+        </article>
+      </div>
+
+      <div class="mini-math reveal">
+        <div>
+          <span class="math-label">165 B Token 账户</span>
+          <strong>136 + 165 = 301</strong>
+          <span>对齐后约 <b>304 B / 版本</b></span>
+        </div>
+        <p>每次写都复制完整 data；旧版本要等 root + clean + shrink 才真正回收。</p>
+      </div>
+    </section>
+
+    <section id="write" class="section">
+      <div class="section-head reveal">
+        <p class="eyebrow">04 · 写路径</p>
+        <h2>缓存 → root → 追加文件</h2>
+        <p class="section-lede">
+          点击播放，按顺序看一笔账户写入如何从 Bank 进入缓存，再在 root 后落到文件。
+        </p>
+      </div>
+
+      <div class="player reveal" data-player="write">
+        <div class="player-toolbar">
+          <button type="button" class="button small" data-step-prev>上一步</button>
+          <button type="button" class="button small primary" data-step-play>播放</button>
+          <button type="button" class="button small" data-step-next>下一步</button>
+          <span class="step-counter" data-step-counter>1 / 6</span>
+        </div>
+
+        <div class="player-stage">
+          <div class="flow-row">
+            <div class="flow-node" data-node="bank"><b>Bank</b><small>commit</small></div>
+            <div class="flow-arrow">→</div>
+            <div class="flow-node" data-node="cache"><b>SlotCache</b><small>未 root</small></div>
+            <div class="flow-arrow">→</div>
+            <div class="flow-node" data-node="flush"><b>flush</b><small>root only</small></div>
+            <div class="flow-arrow">→</div>
+            <div class="flow-node" data-node="file"><b>AppendVec</b><small>只追加</small></div>
+          </div>
+          <div class="flow-row lower">
+            <div class="flow-node" data-node="index"><b>AccountsIndex</b><small>slot_list</small></div>
+            <div class="flow-node" data-node="clean"><b>clean</b><small>obsolete / tombstone</small></div>
+          </div>
+          <div class="player-caption" data-step-caption></div>
+        </div>
+
+        <ol class="step-list" data-step-list>
+          <li>Bank 提交写集，<code>Accounts::store_accounts</code> 进入 SVM 账户写入。</li>
+          <li><code>write_accounts_to_cache</code> 反向去重；零 lamport 且无旧值时直接跳过。</li>
+          <li>账户进入 per-slot <code>SlotCache</code>；主索引此时完全不知道这条写入。</li>
+          <li>slot 成为 root，<code>flush_accounts_cache</code> 只处理 rooted slots。</li>
+          <li><code>store_accounts_for_flush</code>：写文件 → 插入存储 → 更新索引 → 处理 reclaims。</li>
+          <li>移除缓存；后续 clean 删除旧版本，shrink 才物理回收字节。</li>
+        </ol>
+      </div>
+
+      <div class="callout reveal">
+        <strong>不变量：</strong>文件先写完，索引再切过去，缓存最后移除。读者在旧缓存上失败时，可以回到索引重试。
+      </div>
+    </section>
+
+    <section id="read" class="section">
+      <div class="section-head reveal">
+        <p class="eyebrow">05 · 读路径</p>
+        <h2>cache-first + ancestors</h2>
+        <p class="section-lede">
+          切换 Bank，看看同一个 pubkey 在不同祖先链上会读到哪个版本。
+        </p>
+      </div>
+
+      <div class="fork-demo reveal">
+        <div class="fork-controls">
+          <button type="button" class="button small" data-bank="100">Bank @ 100</button>
+          <button type="button" class="button small primary" data-bank="102">Bank @ 102</button>
+        </div>
+
+        <div class="fork-grid">
+          <div class="fork-panel">
+            <h3>写缓存</h3>
+            <div class="version-row cache-row" data-cache-row="102">
+              <span class="slot">102</span>
+              <span class="loc">SlotCache</span>
+              <span class="state">未 flush</span>
+            </div>
+            <p class="fork-note">Bank 102 先命中这里；Bank 100 看不到 102。</p>
+          </div>
+
+          <div class="fork-panel">
+            <h3>主索引 slot_list</h3>
+            <div class="version-row" data-index-row="100">
+              <span class="slot">100</span>
+              <span class="loc">file 100.1</span>
+              <span class="state">root</span>
+            </div>
+            <div class="version-row" data-index-row="101">
+              <span class="slot">101</span>
+              <span class="loc">file 101.2</span>
+              <span class="state">root</span>
+            </div>
+            <p class="fork-note">索引按 ancestors 选可见版本，而不是“取最大 slot”。</p>
+          </div>
+        </div>
+
+        <div class="fork-result" data-fork-result>
+          当前 Bank 102：先命中缓存 slot 102；如果缓存没有，再在索引里选祖先链上最高的可见 root。
+        </div>
+      </div>
+
+      <div class="read-steps reveal">
+        <div class="read-step"><b>1</b><span>写缓存 <code>load_latest</code></span></div>
+        <div class="read-step"><b>2</b><span>read-only cache（P + slot）</span></div>
+        <div class="read-step"><b>3</b><span>索引 <code>latest_slot</code></span></div>
+        <div class="read-step"><b>4</b><span>AppendVec 按 offset 读</span></div>
+        <div class="read-step"><b>5</b><span>竞争失败则从索引重试</span></div>
+      </div>
+    </section>
+
+    <section id="rpc-index" class="section">
+      <div class="section-head reveal">
+        <p class="eyebrow">06 · RPC 与扫描</p>
+        <h2>getProgramAccounts 不是“读账户表”</h2>
+        <p class="section-lede">
+          它是一条<strong>服务端扫描路径</strong>：先看 ProgramId 二级索引是否可用，再用
+          <code>ScanTracker</code> 把相关 root 钉住，最后在缓存和主索引上做过滤。
+        </p>
+      </div>
+
+      <div class="scan-flow reveal">
+        <div class="scan-step">
+          <span class="scan-number">1</span>
+          <b>filters 校验</b>
+          <small>最多 4 个；memcmp ≤ 128 B</small>
+        </div>
+        <div class="scan-arrow">→</div>
+        <div class="scan-step">
+          <span class="scan-number">2</span>
+          <b>ProgramId 索引？</b>
+          <small>启用则走 index_scan_accounts</small>
+        </div>
+        <div class="scan-arrow">→</div>
+        <div class="scan-step">
+          <span class="scan-number">3</span>
+          <b>ScanTracker</b>
+          <small>注册扫描，阻止相关 root 被 clean</small>
+        </div>
+        <div class="scan-arrow">→</div>
+        <div class="scan-step">
+          <span class="scan-number">4</span>
+          <b>扫描 + 过滤</b>
+          <small>缓存与索引合并，再 owner/filter</small>
+        </div>
+      </div>
+
+      <div class="split-layout" style="margin-top: 20px;">
+        <article class="info-card reveal">
+          <h3>二级索引是可选加速</h3>
+          <p>
+            启用 <code>AccountIndex::ProgramId</code> 时，RPC 只遍历该 program 的索引 key；
+            没启用则回退到全量 <code>scan_accounts</code>。索引启用但 key 被 include/exclude 排除时，
+            直接返回 <code>KeyExcludedFromSecondaryIndex</code>。
+          </p>
+        </article>
+        <article class="info-card reveal">
+          <h3>ScanTracker 保护扫描</h3>
+          <p>
+            扫描开始会登记 bank_id 和 max root；clean 看到正在进行的 scan 会压低
+            <code>max_clean_root</code>，避免扫描过程中把还需要读的 root 删掉。
+            Bank 被移除时扫描返回 <code>SlotRemoved</code>。
+          </p>
+        </article>
+      </div>
+
+      <div class="callout reveal">
+        <strong>两个容易混淆的点：</strong>
+        索引路径有 <code>scan_results_limit_bytes</code> 的结果字节上限（若配置），全量扫描路径没有同样的上限；
+        扫描会合并写缓存，因此未 flush 的账户也可能被看到。
+      </div>
+
+      <p class="small reveal" style="margin-top: 16px;">
+        源码入口：
+        <a href="https://github.com/anza-xyz/agave/blob/5bb304027fe1a166b02cb26dc8c161593f416fca/rpc/src/rpc.rs#L2296" target="_blank" rel="noreferrer">get_filtered_program_accounts</a> ·
+        <a href="https://github.com/anza-xyz/agave/blob/5bb304027fe1a166b02cb26dc8c161593f416fca/accounts-db/src/accounts_db.rs#L2491" target="_blank" rel="noreferrer">scan_accounts</a> ·
+        <a href="https://github.com/anza-xyz/agave/blob/5bb304027fe1a166b02cb26dc8c161593f416fca/accounts-db/src/accounts_db.rs#L2585" target="_blank" rel="noreferrer">index_scan_accounts</a>。
+        详细接口路径见
+        <a href="/docs/Wiki/blockchain/solana/rpc-account-queries" target="_blank" rel="noreferrer">getAccountInfo 与 getProgramAccounts 源码分析</a>。
+      </p>
+    </section>
+
+    <section id="lifecycle" class="section">
+      <div class="section-head reveal">
+        <p class="eyebrow">07 · 生命周期</p>
+        <h2>root 之后，旧版本怎么消失</h2>
+        <p class="section-lede">
+          clean 负责“逻辑回收”，shrink 负责“物理回收”；零 lamport 的删除还要跨过快照边界。
+        </p>
+      </div>
+
+      <div class="timeline reveal">
+        <div class="timeline-step">
+          <span class="dot"></span>
+          <h3>root</h3>
+          <p>slot 进入 rooted 路径，flush 与 clean 才有意义。</p>
+        </div>
+        <div class="timeline-step">
+          <span class="dot"></span>
+          <h3>clean</h3>
+          <p>用 <code>max_cleaned_root</code> 收敛版本；每个 pubkey 至多保留最新 root 版本。</p>
+        </div>
+        <div class="timeline-step">
+          <span class="dot"></span>
+          <h3>tombstone / obsolete</h3>
+          <p>零 lamport 保留 tombstone；旧字节标记 obsolete，重建时忽略。</p>
+        </div>
+        <div class="timeline-step">
+          <span class="dot"></span>
+          <h3>shrink</h3>
+          <p>重写存活账户并携带 tombstone；旧文件才真正释放。</p>
+        </div>
+        <div class="timeline-step">
+          <span class="dot"></span>
+          <h3>snapshot</h3>
+          <p>full snapshot 推进后，才允许清掉只含 tombstone 的存储。</p>
+        </div>
+      </div>
+
+      <div class="split-layout">
+        <article class="info-card reveal">
+          <h3>clean ≠ shrink</h3>
+          <p>clean 更新索引、alive 计数和死字节记账；文件中间不会挖洞。shrink 才把存活账户写到更小的新文件。</p>
+        </article>
+        <article class="info-card reveal">
+          <h3>零 lamport 不是立刻消失</h3>
+          <p>如果账户在 full snapshot 之后归零，提前删掉字节会让增量快照丢失“归零”事实。tombstone 就是为这个边界保留的。</p>
+        </article>
+      </div>
+    </section>
+
+    <section id="ecosystem" class="section">
+      <div class="section-head reveal">
+        <p class="eyebrow">08 · 周边组件</p>
+        <h2>AccountsDB 不是一座孤岛</h2>
+        <p class="section-lede">
+          按“谁写它、谁读它、谁维护它、谁验证它”来分，周边大致是六圈。
+        </p>
+      </div>
+
+      <div class="eco-diagram reveal" aria-label="AccountsDB 周边组件关系图">
+        <div class="eco-row">
+          <div class="eco-box"><b>SVM / TransactionBatchProcessor</b><small>产出账户增量</small></div>
+          <span class="eco-arrow">→</span>
+          <div class="eco-box"><b>Bank / BankForks</b><small>执行状态视图、ancestors、root</small></div>
+          <span class="eco-arrow">→</span>
+          <div class="eco-box"><b>Accounts</b><small>运行时门面</small></div>
+        </div>
+        <div class="eco-row">
+          <div class="eco-box core"><b>AccountsDB</b><small>cache · index · storage · hash</small></div>
+        </div>
+        <div class="eco-row">
+          <div class="eco-box"><b>AccountsBackgroundService</b><small>flush / clean / shrink</small></div>
+          <div class="eco-box"><b>SnapshotController</b><small>快照请求与打包</small></div>
+          <div class="eco-box"><b>RPC / Geyser</b><small>读取与通知</small></div>
+        </div>
+      </div>
+
+      <div class="card-grid three" style="margin-top: 18px;">
+        <article class="info-card reveal">
+          <h3>写入侧</h3>
+          <p><code>Bank</code>、<code>BankForks</code>、<code>Ancestors</code>、<code>SVM</code>、<code>Accounts</code>、<code>account_saver</code>、账户锁。</p>
+        </article>
+        <article class="info-card reveal">
+          <h3>内部核心</h3>
+          <p><code>SlotCache</code>、<code>AccountsIndex</code>、<code>BucketMapHolder</code>、<code>AccountStorage</code>、<code>AppendVec</code>、<code>ReadOnlyAccountsCache</code>、二级索引。</p>
+        </article>
+        <article class="info-card reveal">
+          <h3>生命周期</h3>
+          <p><code>AccountsBackgroundService</code>、<code>SnapshotController</code>、<code>SnapshotMinimizer</code>、<code>SnapshotPackagerService</code>。</p>
+        </article>
+        <article class="info-card reveal">
+          <h3>快照与启动</h3>
+          <p><code>SnapshotConfig</code>、<code>StoragesList</code>、<code>ObsoleteAccounts</code>、<code>StartupHints</code>、<code>SnapshotStorageRebuilder</code>、<code>serde_snapshot</code>。</p>
+        </article>
+        <article class="info-card reveal">
+          <h3>读取与通知</h3>
+          <p><code>getAccountInfo</code>、<code>getProgramAccounts</code>、<code>account_resolver</code>、Geyser 插件、<code>ProgramLoader</code>。</p>
+        </article>
+        <article class="info-card reveal">
+          <h3>验证与工具</h3>
+          <p><code>AccountsLtHash</code>、<code>Bank::verify_snapshot_bank</code>、<code>ledger-tool</code>、<code>store-tool</code>、<code>accounts-hash-cache-tool</code>、<code>accounts-bench</code>。</p>
+        </article>
+      </div>
+
+      <div class="callout reveal">
+        <strong>边界：</strong>root 由 <code>BankForks</code>/Replay 推进，不是 AccountsDB 决定；Geyser 通知由
+        <code>AccountsUpdateNotifier</code> 转发；SVM 也不直接拥有 AccountsDB，而是通过
+        <code>TransactionProcessingCallback</code> 向 Bank 要账户。
+      </div>
+
+      <p class="small reveal" style="margin-top: 16px;">
+        想继续沿执行侧读，见
+        <a href="../bank/index.html">Solana Bank 源码分析</a>。
+      </p>
+    </section>
+
+    <section id="snapshot" class="section">
+      <div class="section-head reveal">
+        <p class="eyebrow">09 · 快照与哈希</p>
+        <h2>快照不再复制文件，哈希也不再建 Merkle 树</h2>
+        <p class="section-lede">
+          v4.4.1 的 fastboot 3.x 用 storages list 描述账户文件；全量状态哈希改为增量维护的 AccountsLtHash。
+        </p>
+      </div>
+
+      <div class="card-grid two">
+        <article class="feature-card reveal">
+          <span class="feature-kicker">snapshot</span>
+          <h3>storages list</h3>
+          <p>快照目录写 <code>(slot, id)</code> 列表和 obsolete accounts 文件；账户文件留在 run 目录。启动时按列表裁剪、重建、扫描生成索引。</p>
+          <div class="mini-list">
+            <span>flush storages</span>
+            <span>write storages list</span>
+            <span>write obsolete accounts</span>
+            <span>mark loadable</span>
+          </div>
+        </article>
+
+        <article class="feature-card reveal">
+          <span class="feature-kicker">hash</span>
+          <h3>AccountsLtHash</h3>
+          <p>1024 × <code>u16</code> 的格哈希，支持 <code>mix_in</code> / <code>mix_out</code>。账户更新异步计算“旧值减、新值加”，freeze 等待完成。</p>
+          <div class="lattice" aria-hidden="true">
+            <span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span>
+            <span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span>
+          </div>
+          <p class="small">bank hash 混入 2 KiB lt hash；快照哈希是 checksum。</p>
+        </article>
+      </div>
+    </section>
+
+    <section id="source" class="section">
+      <div class="section-head reveal">
+        <p class="eyebrow">10 · 源码地图</p>
+        <h2>沿调用链读，不要从文件名猜</h2>
+        <p class="section-lede">所有链接固定到 Agave v4.4.1 提交 <code>5bb30402</code>。</p>
+      </div>
+
+      <div class="table-wrap reveal">
+        <table class="source-table">
+          <thead>
+            <tr><th>主题</th><th>入口</th><th>看什么</th></tr>
+          </thead>
+          <tbody>
+            <tr><td>写入</td><td><a href="https://github.com/anza-xyz/agave/blob/5bb304027fe1a166b02cb26dc8c161593f416fca/svm/src/account_loader.rs#L187" target="_blank" rel="noreferrer">svm/account_loader.rs</a></td><td>批内账户缓存、callback、rollback</td></tr>
+            <tr><td>写缓存</td><td><a href="https://github.com/anza-xyz/agave/blob/5bb304027fe1a166b02cb26dc8c161593f416fca/accounts-db/src/accounts_db.rs#L4584" target="_blank" rel="noreferrer">write_accounts_to_cache</a></td><td>反向去重、零 lamport 跳过</td></tr>
+            <tr><td>flush</td><td><a href="https://github.com/anza-xyz/agave/blob/5bb304027fe1a166b02cb26dc8c161593f416fca/accounts-db/src/accounts_db.rs#L3715" target="_blank" rel="noreferrer">do_flush_slot_cache</a></td><td>选择 pubkey、写文件、移除缓存</td></tr>
+            <tr><td>落盘</td><td><a href="https://github.com/anza-xyz/agave/blob/5bb304027fe1a166b02cb26dc8c161593f416fca/accounts-db/src/accounts_db.rs#L4481" target="_blank" rel="noreferrer">store_accounts_for_flush</a></td><td>写文件 → 插存储 → 更新索引 → reclaims</td></tr>
+            <tr><td>账户值</td><td><a href="https://github.com/anza-xyz/agave/blob/5bb304027fe1a166b02cb26dc8c161593f416fca/accounts-db/src/accounts_cache.rs#L168" target="_blank" rel="noreferrer">CachedAccount</a></td><td>缓存里把 pubkey 与账户值绑在一起</td></tr>
+            <tr><td>账户落盘</td><td><a href="https://github.com/anza-xyz/agave/blob/5bb304027fe1a166b02cb26dc8c161593f416fca/accounts-db/src/append_vec.rs#L945" target="_blank" rel="noreferrer">append_accounts</a></td><td>AccountSharedData → StoredMeta + AccountMeta + data</td></tr>
+            <tr><td>账户读回</td><td><a href="https://github.com/anza-xyz/agave/blob/5bb304027fe1a166b02cb26dc8c161593f416fca/accounts-db/src/append_vec.rs#L593" target="_blank" rel="noreferrer">get_account_shared_data</a></td><td>按 offset 重建 AccountSharedData</td></tr>
+            <tr><td>账户视图</td><td><a href="https://github.com/anza-xyz/agave/blob/5bb304027fe1a166b02cb26dc8c161593f416fca/accounts-db/src/account_storage/stored_account_info.rs#L10" target="_blank" rel="noreferrer">StoredAccountInfo</a></td><td>借用文件内存的零拷贝账户视图</td></tr>
+            <tr><td>零 lamport</td><td><a href="https://github.com/anza-xyz/agave/blob/5bb304027fe1a166b02cb26dc8c161593f416fca/accounts-db/src/storable_accounts.rs#L133" target="_blank" rel="noreferrer">account_default_if_zero_lamport</a></td><td>归零账户用占位值落盘，保留 pubkey</td></tr>
+            <tr><td>账户构造</td><td><a href="https://github.com/anza-xyz/agave/blob/5bb304027fe1a166b02cb26dc8c161593f416fca/accounts-db/src/utils.rs#L156" target="_blank" rel="noreferrer">create_account_shared_data</a></td><td>data 拷贝进 Arc，构造读回值</td></tr>
+            <tr><td>索引</td><td><a href="https://github.com/anza-xyz/agave/blob/5bb304027fe1a166b02cb26dc8c161593f416fca/accounts-db/src/accounts_index/account_map_entry.rs#L21" target="_blank" rel="noreferrer">AccountMapEntry</a></td><td>slot_list + meta，没有 ref_count</td></tr>
+            <tr><td>读</td><td><a href="https://github.com/anza-xyz/agave/blob/5bb304027fe1a166b02cb26dc8c161593f416fca/accounts-db/src/accounts_db.rs#L3006" target="_blank" rel="noreferrer">do_load</a></td><td>缓存优先、索引兜底、失败重试</td></tr>
+            <tr><td>clean</td><td><a href="https://github.com/anza-xyz/agave/blob/5bb304027fe1a166b02cb26dc8c161593f416fca/accounts-db/src/accounts_db.rs#L1511" target="_blank" rel="noreferrer">clean_accounts</a></td><td>max_cleaned_root、tombstone、obsolete</td></tr>
+            <tr><td>快照</td><td><a href="https://github.com/anza-xyz/agave/blob/5bb304027fe1a166b02cb26dc8c161593f416fca/runtime/src/snapshot_utils.rs#L488" target="_blank" rel="noreferrer">serialize_snapshot</a></td><td>storages list、obsolete accounts</td></tr>
+            <tr><td>哈希</td><td><a href="https://github.com/anza-xyz/agave/blob/5bb304027fe1a166b02cb26dc8c161593f416fca/accounts-db/src/accounts_db.rs#L3429" target="_blank" rel="noreferrer">lt_hash_account</a></td><td>1024 × u16、mix_in / mix_out</td></tr>
+          </tbody>
+        </table>
+      </div>
+    </section>
+
+    <section id="failure" class="section">
+      <div class="section-head reveal">
+        <p class="eyebrow">11 · 失败与边界</p>
+        <h2>理解“什么时候不能相信它”</h2>
+      </div>
+
+      <div class="card-grid three">
+        <article class="info-card reveal">
+          <h3>崩溃丢缓存</h3>
+          <p>未 flush 的写缓存只在内存。崩溃后可以丢失并从账本重放；索引本来就可以扫描文件重建。</p>
+        </article>
+        <article class="info-card reveal">
+          <h3>读到旧位置</h3>
+          <p>flush、shrink、clean、purge 都可能让 <code>store_id/offset</code> 失效。读者必须能从索引重试。</p>
+        </article>
+        <article class="info-card reveal">
+          <h3>零 lamport 跨快照</h3>
+          <p>full snapshot 之后的归零不能提前彻底删除，否则增量快照恢复时旧余额会“复活”。</p>
+        </article>
+        <article class="info-card reveal">
+          <h3>clean 后仍有占用</h3>
+          <p>clean 只更新逻辑记账；不 shrink 的话，死字节仍占着 AppendVec。</p>
+        </article>
+        <article class="info-card reveal">
+          <h3>快照哈希不匹配</h3>
+          <p>启动时用扫描得到的 lt hash 校验快照；不匹配不能把状态当作可信。</p>
+        </article>
+        <article class="info-card reveal">
+          <h3>版本差异</h3>
+          <p>v2.2.7 的索引含 <code>Cached</code> 条目和 <code>ref_count</code>，全量哈希是 Merkle；v4.4.1 已重构，不能混用行号。</p>
+        </article>
+      </div>
+    </section>
+
+    <section id="takeaways" class="section">
+      <div class="section-head reveal">
+        <p class="eyebrow">12 · 工程取舍</p>
+        <h2>为什么这样设计</h2>
+      </div>
+
+      <div class="table-wrap reveal">
+        <table class="source-table">
+          <thead><tr><th>选择</th><th>收益</th><th>代价</th></tr></thead>
+          <tbody>
+            <tr><td>未 root 只写缓存</td><td>写入快；主索引小；未 root 分叉不污染索引</td><td>读必须先查缓存；崩溃丢缓存</td></tr>
+            <tr><td>按 slot 追加</td><td>旧版本天然支持分叉和快照</td><td>写放大：每次复制完整 data + 136 B 元数据</td></tr>
+            <tr><td>clean 用 max_cleaned_root</td><td>索引收敛，旧版本可回收</td><td>tombstone/obsolete 的生命周期复杂</td></tr>
+            <tr><td>增量 LtHash</td><td>不排序、不建树、不周期全量扫描</td><td>每次更新要知道旧值；freeze 等待异步任务</td></tr>
+            <tr><td>storages list 快照</td><td>不复制、不硬链接；启动按列表裁剪</td><td>快照与账户目录生命周期耦合</td></tr>
+          </tbody>
+        </table>
+      </div>
+    </section>
+
+    <section class="section final-note">
+      <div class="quote-card reveal">
+        <p>AccountsDB 的核心不是“把账户写进一个文件”，而是<strong>在正确的 root 边界上，保留正确的版本，并让读路径能安全地重试。</strong></p>
+      </div>
+      <p class="small reveal">
+        版本基线：Agave v4.4.1 / <code>5bb30402</code>。更完整的文字版见
+        <a href="/docs/Wiki/blockchain/solana/accounts-db" target="_blank" rel="noreferrer">Solana AccountsDB 文章</a>；
+        想看账户之上交易怎么并行执行，见
+        <a href="../../blockchain/parallel-execution/index.html">并行执行的主流原理</a>。
+        写作结构参考
+        <a href="https://lukadev.site/p/solana-data-stream" target="_blank" rel="noreferrer">Solana 数据路径：Shred Stream、gRPC 与 RPC</a>。
+      </p>
+    </section>
+  </main>
+
+  <footer class="site-footer">
+    <span>Solana AccountsDB · Agave v4.4.1</span>
+    <a href="../../index.html#accountsdb">返回 HTML 索引</a>
+  </footer>
+  <script src="./app.js"></script>
+</body>
+</html>

@@ -1,0 +1,37 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1060" height="510" viewBox="0 0 1060 510" role="img" aria-labelledby="title desc">
+<title id="title">交易可被接纳 ≠ 能进入候选 payload</title><desc id="desc">实跑：先到 nonce 1 的交易，在补 0 后由同一 best iterator 按 0→1 返回。；RPC/P2P、完整 payload 任务、blob 与取消仅源码核查，未实跑。</desc>
+<defs><marker id="arrow" markerWidth="8" markerHeight="8" refX="7" refY="4" orient="auto"><path d="M0 0 L8 4 L0 8Z" fill="#64748b"/></marker></defs>
+<rect width="1060" height="510" fill="#f8fafc"/>
+<text x="32" y="36" font-family="sans-serif" font-size="22" fill="#0f172a">交易可被接纳 ≠ 能进入候选 payload</text>
+<path d="M250 110 L330 110" stroke="#64748b" stroke-width="2" marker-end="url(#arrow)"/>
+<path d="M615 110 L700 110" stroke="#64748b" stroke-width="2" marker-end="url(#arrow)"/>
+<path d="M860 150 L515 275" stroke="#64748b" stroke-width="2" marker-end="url(#arrow)"/>
+<text x="692.5" y="204.5" font-family="sans-serif" font-size="13" fill="#334155">选择 Pending 候选</text>
+<path d="M280 315 L380 315" stroke="#64748b" stroke-width="2" marker-end="url(#arrow)"/>
+<text x="335.0" y="307.0" font-family="sans-serif" font-size="13" fill="#334155">构块请求</text>
+<path d="M650 315 L750 315" stroke="#64748b" stroke-width="2" marker-end="url(#arrow)"/>
+<text x="705.0" y="307.0" font-family="sans-serif" font-size="13" fill="#334155">尝试结果</text>
+<rect x="30" y="75" width="220" height="75" rx="9" fill="#e0f2fe" stroke="#0284c7"/>
+<text x="140.0" y="102" text-anchor="middle" font-family="sans-serif" font-size="15" fill="#0f172a">RPC Local / P2P External</text>
+<text x="140.0" y="125" text-anchor="middle" font-family="sans-serif" font-size="15" fill="#0f172a">解码 · 恢复 · 入口限制</text>
+<rect x="330" y="75" width="285" height="75" rx="9" fill="#e0f2fe" stroke="#0284c7"/>
+<text x="472.5" y="102" text-anchor="middle" font-family="sans-serif" font-size="15" fill="#0f172a">EthTransactionValidator</text>
+<text x="472.5" y="125" text-anchor="middle" font-family="sans-serif" font-size="15" fill="#0f172a">类型/费用/nonce/余额/sidecar</text>
+<rect x="700" y="75" width="320" height="75" rx="9" fill="#e0f2fe" stroke="#0284c7"/>
+<text x="860.0" y="102" text-anchor="middle" font-family="sans-serif" font-size="15" fill="#0f172a">真实 TxPool</text>
+<text x="860.0" y="125" text-anchor="middle" font-family="sans-serif" font-size="15" fill="#0f172a">Queued / BaseFee / Blob / Pending</text>
+<rect x="30" y="275" width="250" height="85" rx="9" fill="#e0f2fe" stroke="#0284c7"/>
+<text x="155.0" y="302" text-anchor="middle" font-family="sans-serif" font-size="15" fill="#0f172a">CL FCU + attributes</text>
+<text x="155.0" y="325" text-anchor="middle" font-family="sans-serif" font-size="15" fill="#0f172a">Payload ID / BasicPayloadJob</text>
+<text x="155.0" y="348" text-anchor="middle" font-family="sans-serif" font-size="15" fill="#0f172a">parent 对应状态</text>
+<rect x="380" y="275" width="270" height="85" rx="9" fill="#e0f2fe" stroke="#0284c7"/>
+<text x="515.0" y="302" text-anchor="middle" font-family="sans-serif" font-size="15" fill="#0f172a">BestTransactions + EVM</text>
+<text x="515.0" y="325" text-anchor="middle" font-family="sans-serif" font-size="15" fill="#0f172a">nonce 依赖 · 容量 · 执行</text>
+<text x="515.0" y="348" text-anchor="middle" font-family="sans-serif" font-size="15" fill="#0f172a">尝试累计 tip 收益</text>
+<rect x="750" y="275" width="270" height="85" rx="9" fill="#e0f2fe" stroke="#0284c7"/>
+<text x="885.0" y="302" text-anchor="middle" font-family="sans-serif" font-size="15" fill="#0f172a">Better / Aborted / Cancelled</text>
+<text x="885.0" y="325" text-anchor="middle" font-family="sans-serif" font-size="15" fill="#0f172a">getPayload 解析候选</text>
+<text x="885.0" y="348" text-anchor="middle" font-family="sans-serif" font-size="15" fill="#0f172a">候选不会自动 canonical</text>
+<text x="32" y="435" font-family="sans-serif" font-size="15" fill="#334155">实跑：先到 nonce 1 的交易，在补 0 后由同一 best iterator 按 0→1 返回。</text>
+<text x="32" y="461" font-family="sans-serif" font-size="15" fill="#334155">RPC/P2P、完整 payload 任务、blob 与取消仅源码核查，未实跑。</text>
+</svg>

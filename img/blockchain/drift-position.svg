@@ -1,0 +1,18 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1080 650" role="img" aria-labelledby="title desc">
+<title id="title">Drift订单、仓位和风险路径</title><desc id="desc">用户保存订单后，链外DLOB和keeper寻找候选，程序选择maker或AMM成交并验证风险。资金费和预言机改变权益，清算后可能另有坏账处置。虚线表示链外阶段，不是成交承诺。</desc>
+<defs><marker id="a" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="8" markerHeight="8" orient="auto-start-reverse"><path d="M0 0L10 5L0 10z" fill="#46556e"/></marker></defs>
+<rect width="1080" height="650" fill="#f6f8fc"/>
+<g font-family="system-ui,sans-serif" fill="#172b4d"><text x="32" y="38" font-size="24" font-weight="700">Drift v2.161.0：订单意图 → 成交记账 → 风险处置</text><text x="32" y="65" font-size="15">固定源码 / 原始 Rust 函数测试；没有验证器、主网部署或交易级回滚证明</text></g>
+<g stroke="#9aabc4" fill="#fff" stroke-width="2"><rect x="30" y="110" width="230" height="115" rx="10"/><rect x="315" y="110" width="240" height="115" rx="10" stroke-dasharray="8 5"/><rect x="615" y="100" width="200" height="72" rx="10"/><rect x="615" y="195" width="200" height="72" rx="10"/><rect x="865" y="110" width="185" height="150" rx="10"/>
+<rect x="30" y="340" width="260" height="112" rx="10"/><rect x="350" y="340" width="280" height="112" rx="10"/><rect x="710" y="340" width="340" height="112" rx="10"/><rect x="710" y="510" width="340" height="100" rx="10"/></g>
+<g font-family="system-ui,sans-serif" fill="#172b4d" font-size="17"><text x="46" y="141" font-weight="700">用户 / delegate：place</text><text x="46" y="171">User.orders / open exposure</text><text x="46" y="199">检查下单风险；未产生仓位</text>
+<text x="331" y="141" font-weight="700">链外 DLOB / JIT / keeper</text><text x="331" y="171">账户视图、拍卖价与候选</text><text x="331" y="199">候选可能过时；提交 fill</text>
+<text x="632" y="130" font-weight="700">maker match</text><text x="632" y="154">limit / auction / 数量</text><text x="632" y="225" font-weight="700">AMM / AMM JIT</text><text x="632" y="249">reserve / peg / spread</text>
+<text x="879" y="140" font-weight="700">程序实际成交</text><text x="879" y="171">base / entry / quote</text><text x="879" y="199">fee / order filled</text><text x="879" y="227">后置风险 / 价格带</text>
+<text x="46" y="371" font-weight="700">市场 funding 累计更新</text><text x="46" y="401">TWAP / 时间 / 预算 / oracle</text><text x="46" y="430">个人按累计差结算 quote</text>
+<text x="367" y="371" font-weight="700">风险计算：权益与要求</text><text x="367" y="401">oracle + 未结funding + 挂单</text><text x="367" y="430">IM / Fill / MM；cross / isolated</text>
+<text x="728" y="371" font-weight="700">keeper：清算</text><text x="728" y="401">撤单 → 转仓 / 费用 → 接仓人风险</text><text x="728" y="430">用户 base=0 仍可能 quote&lt;0</text>
+<text x="728" y="541" font-weight="700">独立坏账处置（本篇只读源码）</text><text x="728" y="572">限额保险 → fee pool → 社会化损失</text><text x="728" y="597" font-size="15">LP资产与保险储备各有账本；都不是订单状态</text></g>
+<g fill="none" stroke="#46556e" stroke-width="2" marker-end="url(#a)"><path d="M260 162H312"/><path d="M555 162L611 136"/><path d="M555 180L611 230"/><path d="M815 136H861"/><path d="M815 230H861"/><path d="M957 260V296H490V336"/><path d="M290 393H346"/><path d="M630 393H706"/><path d="M880 452V506"/></g>
+<g font-family="system-ui,sans-serif" fill="#536580" font-size="15"><text x="640" y="317">成功可能零成交；Err须由运行时放弃提交</text><text x="35" y="523">实测：maker、混合成交、保证金不足、价格带撤单、清算</text><text x="35" y="550">funding只结显式累计差；20 quote抵押是风险演算假设</text><text x="35" y="577">原函数 Err 不会自动恢复普通内存</text></g>
+</svg>

@@ -1,0 +1,71 @@
+/* Bank-specific additions; the shared layout and theme live in
+   ../accountsdb/style.css. */
+
+.one-line-title {
+  font-size: clamp(1.2rem, 2.4vw, 2rem);
+  white-space: nowrap;
+}
+
+@media (max-width: 640px) {
+  .one-line-title { white-space: normal; }
+}
+
+.bank-flow {
+  display: flex;
+  align-items: stretch;
+  gap: 8px;
+  flex-wrap: wrap;
+  padding: 18px;
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  background: var(--surface);
+  box-shadow: var(--shadow);
+}
+.bank-flow .flow-node { flex: 1 1 150px; }
+.bank-flow .flow-arrow { display: grid; place-items: center; }
+
+.lifecycle-player {
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  background: var(--surface);
+  box-shadow: var(--shadow);
+  overflow: hidden;
+}
+.lifecycle-stage {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  flex-wrap: wrap;
+  padding: 20px;
+}
+.lifecycle-node {
+  flex: 1 1 140px;
+  min-width: 120px;
+  padding: 13px 14px;
+  border: 1px solid var(--border);
+  border-radius: 12px;
+  background: var(--surface-2);
+  text-align: center;
+  transition: border-color 0.2s, box-shadow 0.2s, transform 0.2s, background 0.2s;
+}
+.lifecycle-node b { display: block; font-size: 0.88rem; }
+.lifecycle-node small { display: block; color: var(--muted); font-size: 0.74rem; }
+.lifecycle-node.active {
+  border-color: var(--accent);
+  background: var(--accent-soft);
+  box-shadow: 0 0 0 4px color-mix(in srgb, var(--accent) 12%, transparent);
+  transform: translateY(-2px);
+}
+.lifecycle-arrow { color: var(--muted); font-weight: 800; }
+.lifecycle-caption {
+  margin: 0;
+  padding: 0 20px 18px;
+  color: var(--muted);
+  font-size: 0.86rem;
+}
+
+@media (max-width: 640px) {
+  .lifecycle-stage { flex-direction: column; align-items: stretch; }
+  .lifecycle-arrow { transform: rotate(90deg); text-align: center; }
+  .bank-flow .flow-arrow { display: none; }
+}
