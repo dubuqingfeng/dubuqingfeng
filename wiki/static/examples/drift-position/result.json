@@ -1,0 +1,160 @@
+{
+  "tests": [
+    "controller::orders::tests::fulfill_order_with_maker_order::long_taker_order_fulfilled_start_of_auction",
+    "controller::orders::tests::fulfill_order::fulfill_with_amm_and_maker",
+    "controller::orders::tests::fulfill_order::maker_insufficient_collateral",
+    "controller::orders::tests::fill_order::maker_order_canceled_for_breaching_oracle_price_band",
+    "controller::liquidation::tests::liquidate_perp::successful_liquidation_long_perp"
+  ],
+  "observations": [
+    {
+      "stage": "match",
+      "base": 1000000000,
+      "quote": -100050000,
+      "entry": -100000000,
+      "breakEven": -100050000,
+      "fee": 50000,
+      "makerBase": -1000000000,
+      "makerQuote": 100030000,
+      "rebate": 30000,
+      "marketFee": 20000
+    },
+    {
+      "stage": "funding",
+      "quote": -100060000,
+      "entry": -100000000,
+      "breakEven": -100060000,
+      "lastFunding": 10000000,
+      "cumulativePayment": -10000,
+      "netUnsettledFundingPnl": 10000
+    },
+    {
+      "stage": "funding-repeat",
+      "quote": -100060000
+    },
+    {
+      "stage": "risk",
+      "price": 100000000,
+      "kind": "Initial",
+      "requirement": 10000000,
+      "pnl": -60000,
+      "liability": 100000000,
+      "value": 100000000
+    },
+    {
+      "stage": "risk",
+      "price": 100000000,
+      "kind": "Fill",
+      "requirement": 7500000,
+      "pnl": -60000,
+      "liability": 100000000,
+      "value": 100000000
+    },
+    {
+      "stage": "risk",
+      "price": 100000000,
+      "kind": "Maintenance",
+      "requirement": 5000000,
+      "pnl": -60000,
+      "liability": 100000000,
+      "value": 100000000
+    },
+    {
+      "stage": "risk",
+      "price": 90000000,
+      "kind": "Initial",
+      "requirement": 9000000,
+      "pnl": -10060000,
+      "liability": 90000000,
+      "value": 90000000
+    },
+    {
+      "stage": "risk",
+      "price": 90000000,
+      "kind": "Fill",
+      "requirement": 6750000,
+      "pnl": -10060000,
+      "liability": 90000000,
+      "value": 90000000
+    },
+    {
+      "stage": "risk",
+      "price": 90000000,
+      "kind": "Maintenance",
+      "requirement": 4500000,
+      "pnl": -10060000,
+      "liability": 90000000,
+      "value": 90000000
+    },
+    {
+      "stage": "risk",
+      "price": 84000000,
+      "kind": "Initial",
+      "requirement": 8400000,
+      "pnl": -16060000,
+      "liability": 84000000,
+      "value": 84000000
+    },
+    {
+      "stage": "risk",
+      "price": 84000000,
+      "kind": "Fill",
+      "requirement": 6300000,
+      "pnl": -16060000,
+      "liability": 84000000,
+      "value": 84000000
+    },
+    {
+      "stage": "risk",
+      "price": 84000000,
+      "kind": "Maintenance",
+      "requirement": 4200000,
+      "pnl": -16060000,
+      "liability": 84000000,
+      "value": 84000000
+    },
+    {
+      "stage": "hybrid",
+      "base": 1000000000,
+      "quote": -100306387,
+      "entry": -100256258,
+      "fee": 50129,
+      "makerBase": -500000000,
+      "ammBase": 500000000,
+      "rebate": 15001,
+      "fillerReward": 5012
+    },
+    {
+      "stage": "failure-before",
+      "takerBase": 0,
+      "takerQuote": 0,
+      "makerBase": 0,
+      "makerQuote": 0
+    },
+    {
+      "stage": "failure-after",
+      "error": "InsufficientCollateral",
+      "takerBase": 1000000000,
+      "takerQuote": -95047500,
+      "makerBase": -1000000000,
+      "makerQuote": 95028500,
+      "takerUnchanged": false,
+      "makerUnchanged": false
+    },
+    {
+      "stage": "oracle-band",
+      "fillBase": 0,
+      "makerOrderAvailable": true,
+      "makerBase": 0
+    },
+    {
+      "stage": "liquidation",
+      "userBase": 0,
+      "userQuote": -51000000,
+      "openOrders": 0,
+      "liquidatorBase": 1000000000,
+      "liquidatorQuote": -99000000,
+      "insuranceFee": 0
+    }
+  ]
+}

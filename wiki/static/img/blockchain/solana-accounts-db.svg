@@ -1,0 +1,104 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1200" height="860" viewBox="0 0 1200 860" role="img" aria-labelledby="title desc">
+  <title id="title">Solana AccountsDB v4.4.1：写缓存、根落盘、派生索引、墓碑与格哈希</title>
+  <desc id="desc">以 Agave v4.4.1 为基线：Bank 提交先写 per-slot 写缓存，只有 root 才 flush 到 AppendVec；读路径先查缓存再查索引；索引只有 slot 列表，没有 ref_count；clean 用 max_cleaned_root、tombstone 和 obsolete accounts 回收零 lamport 与旧版本；快照写 storages list 而不是逐存储硬链接；bank hash 混入增量维护的 AccountsLtHash。</desc>
+  <defs>
+    <marker id="arrow" markerWidth="9" markerHeight="9" refX="8" refY="4.5" orient="auto"><path d="M0 0L9 4.5L0 9Z" fill="#475569"/></marker>
+    <style>
+      text { font-family: system-ui, 'PingFang SC', sans-serif; fill: #172033; font-size: 16px; }
+      .heading { font-size: 22px; font-weight: 700; }
+      .sub { font-size: 14px; fill: #475569; }
+      .small { font-size: 13px; fill: #475569; }
+      .box { fill: #fff; stroke: #64748b; stroke-width: 1.5; rx: 9; }
+      .edge { fill: none; stroke: #475569; stroke-width: 2; marker-end: url(#arrow); }
+      .dash { stroke-dasharray: 7 5; }
+    </style>
+  </defs>
+  <rect width="1200" height="860" fill="#f8fafc"/>
+  <text x="30" y="38" class="heading">v4.4.1：写缓存不进主索引，只有 root 落盘；读缓存优先</text>
+  <text x="30" y="64" class="sub">基线 Agave v4.4.1（提交 5bb30402）。P = pubkey，S = slot；箭头表示依赖或数据流，不表示跨机器统一时序。</text>
+
+  <rect x="20" y="82" width="1160" height="230" rx="12" fill="#e0f2fe"/>
+  <text x="38" y="112" class="heading">写入：Bank → per-slot 写缓存 → root 后 flush</text>
+  <rect class="box" x="40" y="132" width="255" height="150"/>
+  <text x="56" y="160">Bank 执行与提交</text>
+  <text x="56" y="187" class="small">commit_transactions</text>
+  <text x="56" y="209" class="small">collect_accounts_to_store</text>
+  <text x="56" y="231" class="small">Accounts::store_accounts</text>
+  <text x="56" y="253" class="small">Geyser 通知（带 bank_id）</text>
+  <text x="56" y="273" class="small">未 root 状态可丢失并重放</text>
+
+  <rect class="box" x="355" y="132" width="330" height="150"/>
+  <text x="371" y="160">写缓存 AccountsCache（内存）</text>
+  <text x="371" y="187" class="small">每 slot 一个 SlotCache</text>
+  <text x="371" y="209" class="small">P → 最新 AccountSharedData</text>
+  <text x="371" y="231" class="small">反向去重，同批只留最后值</text>
+  <text x="371" y="253" class="small">零 lamport 且无旧版本时直接跳过</text>
+  <text x="371" y="273" class="small">主索引此时完全不知道这条写入</text>
+
+  <rect class="box" x="745" y="132" width="415" height="150"/>
+  <text x="761" y="160">AppendVec（持久，root 后）</text>
+  <text x="761" y="187" class="small">accounts/&lt;slot&gt;.&lt;id&gt;，只追加</text>
+  <text x="761" y="209" class="small">136 B 元数据 + data，8 B 对齐</text>
+  <text x="761" y="231" class="small">AccountInfo = store_id + 逻辑 offset</text>
+  <text x="761" y="253" class="small">不再保存有效账户哈希（占位 32 B 为零）</text>
+  <text x="761" y="273" class="small">tombstone / obsolete 记账随存储保存</text>
+
+  <path class="edge" d="M295 207H355"/>
+  <path class="edge" d="M685 207H745"/>
+  <text x="700" y="198" class="small">flush root</text>
+
+  <rect x="20" y="332" width="1160" height="220" rx="12" fill="#fef3c7"/>
+  <text x="38" y="362" class="heading">读与索引：先缓存，再索引；索引只有 slot 列表</text>
+  <rect class="box" x="40" y="382" width="610" height="150"/>
+  <text x="56" y="410">AccountsIndex（派生，可重建）</text>
+  <text x="56" y="437" class="small">8192 个 bin：pubkey 前缀 → InMemAccountsIndex</text>
+  <text x="56" y="459" class="small">P → slot_list [(S1, file/off), (S2, file/off), …]</text>
+  <text x="56" y="481" class="small">没有 ref_count；旧版本在 flush/clean 时回收</text>
+  <text x="56" y="503" class="small">默认 InMemOnly；可选 Threshold 磁盘索引 + write-through</text>
+  <text x="56" y="525" class="small">启动时扫描 storages 重建索引和 lt hash</text>
+
+  <rect class="box" x="710" y="382" width="450" height="150"/>
+  <text x="726" y="410">读：load(ancestors, P)</text>
+  <text x="726" y="437" class="small">1. AccountsCache::load_latest：祖先优先，再未 flush root</text>
+  <text x="726" y="459" class="small">2. 未命中 → read-only cache（P + slot 必须匹配）</text>
+  <text x="726" y="481" class="small">3. 仍未命中 → 索引找可见版本 → 按 store_id/offset 读文件</text>
+  <text x="726" y="503" class="small">4. 与 flush/shrink/clean/purge 竞争失败时从索引重试</text>
+  <text x="726" y="525" class="small">零 lamport 账户对外按不存在处理</text>
+
+  <path class="edge" d="M650 457H710"/>
+  <path class="edge dash" d="M895 382V282"/>
+  <text x="905" y="330" class="small">索引指向文件</text>
+
+  <rect x="20" y="572" width="1160" height="215" rx="12" fill="#dcfce7"/>
+  <text x="38" y="602" class="heading">生命周期：root 决定落盘、回收、快照与哈希</text>
+  <rect class="box" x="40" y="622" width="250" height="140"/>
+  <text x="56" y="648">root / clean</text>
+  <text x="56" y="672" class="small">add_root 只标记缓存 + max_root</text>
+  <text x="56" y="694" class="small">clean 用 max_cleaned_root 收敛版本</text>
+  <text x="56" y="716" class="small">零 lamport 变 tombstone</text>
+  <text x="56" y="738" class="small">旧版本标 obsolete，供快照重建忽略</text>
+
+  <rect class="box" x="320" y="622" width="250" height="140"/>
+  <text x="336" y="648">shrink / ancient</text>
+  <text x="336" y="672" class="small">重写存活账户，携带 tombstone</text>
+  <text x="336" y="694" class="small">ancient 只处理 ≤ max_cleaned_root 的 slot</text>
+  <text x="336" y="716" class="small">保证老 slot 中每个 P 只有一条索引</text>
+  <text x="336" y="738" class="small">合并文件，降低元数据与文件数</text>
+
+  <rect class="box" x="600" y="622" width="250" height="140"/>
+  <text x="616" y="648">snapshot</text>
+  <text x="616" y="672" class="small">fastboot 3.x 写 storages list</text>
+  <text x="616" y="694" class="small">不逐存储硬链接；账户文件留在 run 目录</text>
+  <text x="616" y="716" class="small">另有 obsolete accounts 文件</text>
+  <text x="616" y="738" class="small">归档快照仍携带账户文件</text>
+
+  <rect class="box" x="880" y="622" width="280" height="140"/>
+  <text x="896" y="648">AccountsLtHash</text>
+  <text x="896" y="672" class="small">1024 × u16 的格哈希，可加可减</text>
+  <text x="896" y="694" class="small">账户更新异步 mix_out 旧值 / mix_in 新值</text>
+  <text x="896" y="716" class="small">freeze 等待 pending，bank hash 混入 2 KiB</text>
+  <text x="896" y="738" class="small">快照哈希 = lt hash checksum</text>
+
+  <text x="30" y="818" class="sub">关键不变量：写缓存只服务未 root 状态；flush 先写文件、再插存储、再更新索引、最后移除缓存；失败读从索引重试。</text>
+  <text x="30" y="840" class="small">与 v2.2.7 的核心差异：读改 cache-first、索引去掉 ref_count、Merkle/epoch 哈希改为 LtHash、快照从硬链接改为 storages list。</text>
+</svg>

@@ -1,0 +1,1318 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>并行执行的主流原理 · 从 Sealevel 到 Block-STM</title>
+  <meta name="description" content="用源码和可交互模拟理解区块链并行执行：静态声明、乐观并发、Block-STM、BAL、Monad、Sei、Solana、Sui、MegaETH、Hyperliquid。">
+  <script src="../../theme.js"></script>
+  <link rel="stylesheet" href="./style.css">
+  <script>document.documentElement.classList.add('js');</script>
+</head>
+<body>
+  <div class="progress" aria-hidden="true"><span id="progressBar"></span></div>
+  <a class="skip-link" href="#main">跳到正文</a>
+
+  <header class="site-header">
+    <a class="brand" href="./index.html">
+      <span class="brand-mark">⫶</span>
+      <span>Parallel Execution</span>
+    </a>
+    <nav class="site-nav" aria-label="章节导航">
+      <a href="#model">心智模型</a>
+      <a href="#deps">依赖</a>
+      <a href="#optimistic">乐观执行</a>
+      <a href="#bal">BAL</a>
+      <a href="#blockstm">Block-STM</a>
+      <a href="#sei">Sei</a>
+      <a href="#monad">Monad</a>
+      <a href="#solana">Solana</a>
+      <a href="#sui">Sui</a>
+      <a href="#megaeth">MegaETH</a>
+      <a href="#hyperliquid">Hyperliquid</a>
+      <a href="#matrix">对比</a>
+      <a href="#source">源码</a>
+    </nav>
+    <div class="header-actions">
+      <a class="back-link" href="../../index.html#parallel-execution">HTML 索引</a>
+      <button class="theme-toggle" type="button" data-theme-toggle aria-label="切换日间/夜间模式">
+        <span data-theme-icon aria-hidden="true">☾</span>
+      </button>
+    </div>
+  </header>
+
+  <main id="main">
+    <section class="hero">
+      <div class="hero-copy reveal">
+        <p class="eyebrow">Parallel Execution · Source Walkthrough</p>
+        <h1>区块里的交易，<br><span>凭什么能同时跑？</span></h1>
+        <p class="lede">
+          并行执行不是「多开几个线程」。它要回答三件事：
+          <strong>哪些交易没有依赖</strong>、<strong>冲突了怎么收场</strong>、
+          <strong>凭什么保证结果和串行一模一样</strong>。
+          不同链的差别，本质上是对这三个问题的不同取舍。
+        </p>
+        <div class="hero-actions">
+          <a class="button primary" href="#optimistic">看冲突模拟器</a>
+          <a class="button" href="#matrix">直接看对比矩阵</a>
+        </div>
+        <div class="hero-meta">
+          <span>覆盖：BAL · Block-STM · Solana · Sui · Monad · Sei · MegaETH · Hyperliquid</span>
+        </div>
+      </div>
+
+      <div class="hero-visual reveal" aria-label="交易与状态键的读写依赖图">
+        <svg viewBox="0 0 760 400" role="img" aria-labelledby="heroTitle heroDesc">
+          <title id="heroTitle">交易与状态键之间的读写依赖</title>
+          <desc id="heroDesc">四笔交易分别读写账户 A、B、C。T1 与 T3 都写 A，T2 与 T4 都写 C，因此这两对必须按顺序执行。</desc>
+          <defs>
+            <marker id="arrowW" markerWidth="9" markerHeight="9" refX="8" refY="4.5" orient="auto">
+              <path d="M0 0L9 4.5L0 9Z" fill="#b91c1c"/>
+            </marker>
+            <marker id="arrowR" markerWidth="9" markerHeight="9" refX="8" refY="4.5" orient="auto">
+              <path d="M0 0L9 4.5L0 9Z" fill="#0891b2"/>
+            </marker>
+          </defs>
+
+          <text x="120" y="30" text-anchor="middle" class="svg-note">区块内交易（顺序固定）</text>
+          <text x="620" y="30" text-anchor="middle" class="svg-note">被访问的状态键</text>
+
+          <g class="svg-node tx">
+            <rect x="40" y="52" width="160" height="54" rx="12"/>
+            <text x="120" y="78" text-anchor="middle" class="svg-title">T1 转账</text>
+            <text x="120" y="96" text-anchor="middle" class="svg-sub">A → B · 100</text>
+          </g>
+          <g class="svg-node tx">
+            <rect x="40" y="132" width="160" height="54" rx="12"/>
+            <text x="120" y="158" text-anchor="middle" class="svg-title">T2 转账</text>
+            <text x="120" y="176" text-anchor="middle" class="svg-sub">C → D · 50</text>
+          </g>
+          <g class="svg-node tx">
+            <rect x="40" y="212" width="160" height="54" rx="12"/>
+            <text x="120" y="238" text-anchor="middle" class="svg-title">T3 swap</text>
+            <text x="120" y="256" text-anchor="middle" class="svg-sub">读写 A、B</text>
+          </g>
+          <g class="svg-node tx">
+            <rect x="40" y="292" width="160" height="54" rx="12"/>
+            <text x="120" y="318" text-anchor="middle" class="svg-title">T4 转账</text>
+            <text x="120" y="336" text-anchor="middle" class="svg-sub">B → C · 20</text>
+          </g>
+
+          <g class="svg-node">
+            <rect x="540" y="72" width="160" height="54" rx="12"/>
+            <text x="620" y="98" text-anchor="middle" class="svg-title">A</text>
+            <text x="620" y="116" text-anchor="middle" class="svg-sub">T1、T3 都写</text>
+          </g>
+          <g class="svg-node">
+            <rect x="540" y="172" width="160" height="54" rx="12"/>
+            <text x="620" y="198" text-anchor="middle" class="svg-title">B</text>
+            <text x="620" y="216" text-anchor="middle" class="svg-sub">T1、T3、T4 触碰</text>
+          </g>
+          <g class="svg-node">
+            <rect x="540" y="272" width="160" height="54" rx="12"/>
+            <text x="620" y="298" text-anchor="middle" class="svg-title">C</text>
+            <text x="620" y="316" text-anchor="middle" class="svg-sub">T2、T4 都写</text>
+          </g>
+
+          <path id="e-t1a" class="svg-edge rw" d="M200 79C330 79 410 99 540 99" marker-end="url(#arrowW)"/>
+          <path id="e-t1b" class="svg-edge ro" d="M200 96C340 120 400 199 540 199" marker-end="url(#arrowR)"/>
+          <path id="e-t2c" class="svg-edge rw" d="M200 159C330 159 410 299 540 299" marker-end="url(#arrowW)"/>
+          <path id="e-t3a" class="svg-edge rw" d="M200 239C330 239 380 119 540 119" marker-end="url(#arrowW)"/>
+          <path id="e-t3b" class="svg-edge ro" d="M200 256C320 280 400 219 540 219" marker-end="url(#arrowR)"/>
+          <path id="e-t4b" class="svg-edge rw" d="M200 319C330 319 420 239 540 239" marker-end="url(#arrowW)"/>
+          <path id="e-t4c" class="svg-edge rw" d="M200 336C340 350 420 319 540 319" marker-end="url(#arrowW)"/>
+
+          <circle r="4" fill="#0891b2"><animateMotion dur="3.4s" repeatCount="indefinite"><mpath href="#e-t1b"/></animateMotion></circle>
+          <circle r="4" fill="#b91c1c"><animateMotion dur="3s" repeatCount="indefinite"><mpath href="#e-t1a"/></animateMotion></circle>
+          <circle r="4" fill="#b91c1c"><animateMotion dur="3.4s" begin="1s" repeatCount="indefinite"><mpath href="#e-t3a"/></animateMotion></circle>
+          <circle r="4" fill="#b91c1c"><animateMotion dur="3.2s" begin=".5s" repeatCount="indefinite"><mpath href="#e-t4c"/></animateMotion></circle>
+
+          <text x="380" y="382" text-anchor="middle" class="svg-note">写边在同一个键上相遇 → 这两笔交易必须按区块顺序串行</text>
+        </svg>
+      </div>
+    </section>
+
+    <section id="model" class="section">
+      <div class="section-head reveal">
+        <p class="eyebrow">01 · 心智模型</p>
+        <h2>并行是手段，等价顺序状态机才是目标</h2>
+        <p class="section-lede">
+          任何并行执行方案，都要在「不改变状态转换结果」的前提下，把顺序状态机改写成并发程序。
+          区别只在于三件事的答案：依赖怎么发现、冲突怎么处理、正确性怎么证明。
+        </p>
+      </div>
+
+      <div class="card-grid three">
+        <article class="info-card reveal">
+          <span class="card-index">A</span>
+          <h3>哪些交易能并行</h3>
+          <p>
+            读集和写集不相交的交易可以同时执行；写同一个键的交易必须排队。
+            依赖是在<strong>执行前声明</strong>，还是<strong>执行后检测</strong>，决定了整套架构。
+          </p>
+        </article>
+        <article class="info-card reveal">
+          <span class="card-index">B</span>
+          <h3>冲突了怎么办</h3>
+          <p>
+            加锁等待、回滚重放、或者直接串行执行。乐观方案把冲突推迟到校验阶段，
+            用「重放」换吞吐；悲观方案在执行前就把冲突交易挡在门外。
+          </p>
+        </article>
+        <article class="info-card reveal">
+          <span class="card-index">C</span>
+          <h3>怎么证明没算错</h3>
+          <p>
+            最终状态必须等于按区块顺序串行执行的结果。提交顺序、版本号、gas 计费都要可复现；
+            否则并行度越高，错得越快。
+          </p>
+        </article>
+      </div>
+
+      <div class="quote-card reveal">
+        <p>并行执行的正确性约束是：<strong>最终状态 ≡ 按区块顺序串行执行的结果</strong>。所有算法都在为这个等式买单。</p>
+      </div>
+
+      <div class="table-wrap reveal">
+        <table class="source-table">
+          <thead>
+            <tr><th>范式</th><th>代表</th><th>依赖从哪来</th><th>冲突怎么处理</th><th>主要代价</th></tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td>静态声明（悲观）</td>
+              <td>Solana、Sui owned object</td>
+              <td>交易自带账户 / 对象声明</td>
+              <td>加锁 + 调度；冲突交易等待或失败</td>
+              <td>声明粒度粗，热点账户天然串行</td>
+            </tr>
+            <tr>
+              <td>乐观检测</td>
+              <td>Block-STM、Sei、Monad</td>
+              <td>执行时记录读写集与版本</td>
+              <td>读集校验失败就重放</td>
+              <td>重放放大、多版本内存</td>
+            </tr>
+            <tr>
+              <td>区块级声明</td>
+              <td>BAL（EIP-7928）</td>
+              <td>区块执行后生成，随区块传播</td>
+              <td>不改变首次执行；并行 IO / 校验</td>
+              <td>区块体积、验证与预取开销</td>
+            </tr>
+            <tr>
+              <td>流水线与专用架构</td>
+              <td>Solana TPU、Monad、MegaETH、Hyperliquid</td>
+              <td>按层拆分（共识 / 执行 / 存储）</td>
+              <td>核心状态机顺序执行，外围并行</td>
+              <td>通用性弱，依赖工程与硬件</td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+
+      <div class="callout reveal">
+        <strong>先分清「执行并行」和「验证并行」。</strong>
+        并行执行要发现交易之间的依赖；并行验证只需要重放已知结果。
+        BAL 属于后者——它让「第二遍」可以并行，而第一遍仍然要顺序执行来产生它。
+      </div>
+    </section>
+
+    <section id="deps" class="section">
+      <div class="section-head reveal">
+        <p class="eyebrow">02 · 依赖判定</p>
+        <h2>并行的边界，是读写集的交集</h2>
+        <p class="section-lede">
+          两笔交易冲突，当且仅当一笔写了的键，被另一笔读过或写过。
+          难点不在判断冲突，而在于：<strong>执行之前，你根本不知道会碰哪些键</strong>。
+        </p>
+      </div>
+
+      <div class="split-layout">
+        <article class="code-card reveal">
+          <div class="code-head"><span>冲突的三种形态</span><span class="tag">教学模型</span></div>
+<pre><code>// 三笔交易对同一个键 K 的操作
+T1:  write K = 1     // WAW：两个写，谁最后生效？
+T2:  read  K         // RAW：读到的是谁写的值？
+T3:  read  K; write  // WAR：读完之后又被改
+
+// 并行执行只关心一件事实：
+// 「我读到的值，在提交前有没有被更低序号的交易改掉」</code></pre>
+          <p class="code-note">
+            实际实现里通常不需要区分 WAW / RAW / WAR，只维护「读到的版本」并在提交前校验。
+          </p>
+        </article>
+
+        <article class="info-card reveal">
+          <h3>粒度决定并行度</h3>
+          <p>
+            粒度越粗，冲突越容易被误判；粒度越细，元数据和校验成本越高。
+            账户级（Solana）天然把同一账户的所有交易串行化；
+            存储槽级（EVM 系）能把同一合约的不同槽拆开。
+          </p>
+          <div class="mini-list">
+            <span>交易级</span><span>账户级</span><span>对象级</span><span>存储槽级</span>
+          </div>
+        </article>
+      </div>
+
+      <div class="table-wrap reveal" style="margin-top: 20px;">
+        <table class="source-table">
+          <thead>
+            <tr><th>粒度</th><th>典型系统</th><th>一个并行单元</th><th>误判冲突的典型场景</th></tr>
+          </thead>
+          <tbody>
+            <tr><td>账户</td><td>Solana</td><td>一笔交易锁定的所有账户</td><td>同一 AMM 池、同一 mint 的所有交易互斥</td></tr>
+            <tr><td>对象</td><td>Sui</td><td>一笔交易输入的 owned object 集合</td><td>共享对象（shared object）必须走共识</td></tr>
+            <tr><td>存储槽</td><td>EVM 系并行方案、Block-STM</td><td>一个 <code>(address, slot)</code> 的读或写</td><td>同一槽被大量交易读写（如 ERC-20 总供应量）</td></tr>
+            <tr><td>交易</td><td>纯转账 / 无状态批处理</td><td>整笔交易</td><td>任何共享状态都会退化为串行</td></tr>
+          </tbody>
+        </table>
+      </div>
+
+      <h3 class="sub-head reveal">依赖在什么时候变得可知</h3>
+      <div class="card-grid three">
+        <article class="feature-card reveal">
+          <span class="card-index">1</span>
+          <h3>执行前声明</h3>
+          <p>
+            Solana 的账户列表、Sui 的输入对象都属于这一类。调度器可以在执行前加锁、分组、并行，
+            代价是声明必须准确且粒度固定。
+          </p>
+        </article>
+        <article class="feature-card reveal">
+          <span class="card-index">2</span>
+          <h3>执行后检测</h3>
+          <p>
+            EVM 交易执行前不知道会读哪些槽。Block-STM、Sei 让交易先跑，
+            记录读写集，再校验版本；冲突就重放。
+          </p>
+        </article>
+        <article class="feature-card reveal">
+          <span class="card-index">3</span>
+          <h3>区块级声明</h3>
+          <p>
+            BAL 由区块执行产生并随区块传播。它不帮助第一遍执行，
+            但让验证、状态根计算、磁盘预取可以并行。
+          </p>
+        </article>
+      </div>
+
+      <div class="callout warn reveal">
+        <strong>EVM 的根本矛盾：</strong>gas 计费依赖状态访问（cold/warm、账户是否存在），
+        而访问集只有执行后才知道。于是「先声明再并行」在 EVM 上不成立，
+        「先乐观执行再校验」或「区块级事后声明」才是可行路径。
+      </div>
+    </section>
+
+    <section id="optimistic" class="section">
+      <div class="section-head reveal">
+        <p class="eyebrow">03 · 乐观执行</p>
+        <h2>先跑，再验，错了重跑</h2>
+        <p class="section-lede">
+          把「按顺序执行」换成「先并行猜测，再按顺序校验」。
+          下面这个模拟器用 6 笔交易演示：哪些能一起跑、哪些会被打回、最终如何收敛到串行结果。
+        </p>
+      </div>
+
+      <div class="sim reveal" data-sim>
+        <div class="sim-toolbar">
+          <button class="button small primary" type="button" data-sim-next>下一轮</button>
+          <button class="button small" type="button" data-sim-play>自动播放</button>
+          <button class="button small" type="button" data-sim-reset>重置</button>
+          <span class="sim-round" data-sim-round>第 0 轮</span>
+        </div>
+
+        <div class="sim-stage">
+          <div class="sim-accounts" data-sim-accounts aria-label="账户状态"></div>
+          <div class="sim-txs" data-sim-txs aria-label="交易"></div>
+          <div class="sim-log" data-sim-log aria-live="polite"></div>
+          <div class="sim-foot">
+            <span class="verdict" data-sim-verdict>串行基线：A=805 · B=670 · C=770 · D=55</span>
+            <span>提交顺序始终等于区块顺序；重放次数就是并行付出的代价。</span>
+          </div>
+        </div>
+      </div>
+
+      <div class="mini-math reveal">
+        <div>
+          <span>收敛上界</span>
+          <strong>≤ N 轮</strong>
+          <span>N 笔交易，每轮至少提交一笔</span>
+        </div>
+        <p>
+          重放一定由「更低序号的交易写了它读过的键」触发。每轮按序校验时，
+          至少有一笔交易能把读集对上并提交，所以最多 N 轮收敛。
+        </p>
+      </div>
+
+      <h3 class="sub-head reveal">通用算法（教学伪代码）</h3>
+      <div class="split-layout">
+        <article class="code-card reveal">
+          <div class="code-head"><span>optimistic.rs</span><span class="tag">伪代码</span></div>
+<pre><code>loop {
+    // 1. 并行执行所有未提交交易
+    parallel for tx in pending {
+        view  = snapshot();
+        out   = execute(tx, view);
+        reads = view.read_versions(tx.inputs);
+    }
+
+    // 2. 按区块顺序校验并提交
+    for tx in pending (block order) {
+        if reads.version_changed(committed) {
+            tx.state = Redo;          // 重放
+        } else {
+            committed.apply(out[tx]); // 提交
+        }
+    }
+
+    if pending.is_empty() { break; }
+}</code></pre>
+          <p class="code-note">提交顺序永远等于区块顺序；并行只改变「谁先算」，不改变「谁先算数」。</p>
+        </article>
+
+        <article class="info-card reveal">
+          <h3>三个必须守住的细节</h3>
+          <p><strong>1. 读的是快照，不是最新值。</strong>同轮并行执行时，每笔交易看到的是本轮开始时的状态；否则结果依赖调度顺序，不可复现。</p>
+          <p><strong>2. 校验看版本，不看内容。</strong>同一个值被写两次仍然是冲突——否则你无法判断中间是否发生过「写回旧值」。</p>
+          <p><strong>3. 重放要读最新状态。</strong>重放不是把同一笔交易再算一遍，而是拿新的已提交状态重新执行。</p>
+        </article>
+      </div>
+
+      <div class="callout reveal">
+        <strong>代价不对称：</strong>一次冲突会让一笔交易重算，还可能连锁触发后续交易重放。
+        所以「冲突率」比「并行线程数」更能决定实际吞吐——这也是为什么所有方案都在优化热点访问。
+      </div>
+    </section>
+
+    <section id="bal" class="section">
+      <div class="section-head reveal">
+        <p class="eyebrow">04 · BAL · EIP-7928</p>
+        <h2>把访问集写进区块，让「第二遍」并行</h2>
+        <p class="section-lede">
+          Block-level Access Lists 强制区块携带完整的读写位置。它的定位不是让第一遍执行并行，
+          而是让磁盘预取、交易校验、状态根计算和免执行状态更新并行。
+        </p>
+      </div>
+
+      <div class="split-layout">
+        <article class="info-card reveal">
+          <h3>它长什么样</h3>
+          <p>
+            区块头新增 <code>block_access_list_hash</code>；BAL 本体通过 Engine API 的
+            <code>ExecutionPayloadV4.blockAccessList</code> 传输，不放进区块体。
+          </p>
+          <p>
+            结构按 <code>address → field → block_access_index → change</code> 组织：
+            <code>AccountChanges = [address, storage_changes, storage_reads, balance_changes, nonce_changes, code_changes]</code>。
+          </p>
+          <p>
+            <code>block_access_index</code>：0 表示执行前系统合约，1..n 表示第 n 笔交易，
+            n+1 表示执行后系统调用与提款。
+          </p>
+          <p>
+            状态：Last Call（2026-11）；EIP-7773 的 Glamsterdam 硬分叉元提案已引用它，
+            geth 与 reth 已有实现，其他客户端也有相关 PR。
+          </p>
+        </article>
+
+        <article class="code-card reveal">
+          <div class="code-head"><span>EIP-7928 摘要</span><span class="tag">Last Call · Glamsterdam</span></div>
+<pre><code># 区块级访问列表（RLP）
+BlockAccessList = List[AccountChanges]
+
+AccountChanges = [
+    Address,
+    List[SlotChanges],   # slot -> [[block_access_index, post_value]]
+    List[StorageKey],    # 只读槽
+    List[BalanceChange],
+    List[NonceChange],
+    List[CodeChange],
+]
+
+# 体积约束
+bal_items = addresses + storage_keys
+bal_items &lt;= block_gas_limit // 2000</code></pre>
+          <p class="code-note">
+            约束用 gas limit 表达，而不是固定条数；按 EIP 的抽样，平均 BAL 约 92 KiB。
+          </p>
+        </article>
+      </div>
+
+      <div class="card-grid three reveal" style="margin-top: 20px;">
+        <article class="info-card">
+          <h3>并行磁盘读</h3>
+          <p>知道全部地址与槽位后，可以在执行前把状态批量预取进缓存，I/O 与 EVM 计算重叠。</p>
+        </article>
+        <article class="info-card">
+          <h3>并行交易校验</h3>
+          <p>验证节点可以按 BAL 分片并行检查交易，不必等前一笔交易的状态结果。</p>
+        </article>
+        <article class="info-card">
+          <h3>并行状态根 + 免执行更新</h3>
+          <p>后置值都在 BAL 里，可以并行计算状态根；甚至不执行交易，直接把 post-state 装进数据库。</p>
+        </article>
+      </div>
+
+      <h3 class="sub-head reveal">geth 里已经落地</h3>
+      <p class="small reveal" style="margin-top: -6px;">
+        go-ethereum v1.17.4（Amsterdam）已包含 BAL 的构造、校验与 Engine API 支持。下面两段代码分别对应「执行时记录」和「免执行应用」。
+      </p>
+
+      <div class="split-layout">
+        <article class="code-card reveal">
+          <div class="code-head"><span>core/types/bal/bal.go</span><span class="tag">v1.17.4 · L100</span></div>
+<pre><code>func (b *ConstructionBlockAccessList) StorageWrite(
+    txIdx uint32, address common.Address, key, value common.Hash,
+) {
+    if _, ok := b.Accounts[address]; !ok {
+        b.Accounts[address] = NewConstructionAccountAccess()
+    }
+    if _, ok := b.Accounts[address].StorageWrites[key]; !ok {
+        b.Accounts[address].StorageWrites[key] =
+            make(map[uint32]common.Hash)
+    }
+    b.Accounts[address].StorageWrites[key][txIdx] = value
+    delete(b.Accounts[address].StorageReads, key)
+}</code></pre>
+          <p class="code-note">
+            每个写入都带 <code>txIdx</code>：BAL 记录的是「第几笔交易把槽改成了什么」，而不只是最终值。
+          </p>
+        </article>
+
+        <article class="code-card reveal">
+          <div class="code-head"><span>core/state/statedb_eip_7928.go</span><span class="tag">L36 / L107</span></div>
+<pre><code>// 不执行任何交易，直接把 BAL 里的 post-state 装进状态
+func (s *StateDB) ApplyBlockAccessList(
+    list *bal.BlockAccessList,
+) error {
+    if list == nil {
+        return nil
+    }
+    return s.applyBlockAccessList(*list, runtime.GOMAXPROCS(0))
+}
+
+// 按账户并行处理
+if err := parallelBALApply(len(accounts), threads,
+    func(i int) error {
+        return s.prepareBALAccount(accounts[i], &amp;ba)
+    }); err != nil {
+    return err
+}</code></pre>
+          <p class="code-note">
+            <code>threads</code> 来自 <code>GOMAXPROCS</code>；并行度作用在「账户」这一层，与执行无关。
+          </p>
+        </article>
+      </div>
+
+      <div class="callout warn reveal">
+        <strong>别把 BAL 当成「并行执行开关」。</strong>
+        BAL 由执行结果产生，所以它无法让第一次执行变并行；它加速的是验证、预取、状态根与同步。
+        另外，<code>storage_reads</code> 不绑定交易索引，恶意提议者可以塞入虚假读条目制造预取压力，
+        EIP 用 <code>bal_items ≤ gas_limit / 2000</code> 把这种攻击限制在可控范围。
+      </div>
+
+      <div class="src-links">
+        <a href="https://eips.ethereum.org/EIPS/eip-7928" target="_blank" rel="noreferrer">EIP-7928 原文</a>
+        <a href="https://github.com/ethereum/go-ethereum/blob/v1.17.4/core/types/bal/bal.go#L100" target="_blank" rel="noreferrer">geth · bal.go</a>
+        <a href="https://github.com/ethereum/go-ethereum/blob/02b73d4ea7181464175e0a6cbecc0a3a2655a562/core/state/statedb_eip_7928.go#L37" target="_blank" rel="noreferrer">geth · statedb_eip_7928.go</a>
+      </div>
+    </section>
+
+    
+    <section id="blockstm" class="section">
+      <div class="section-head reveal">
+        <p class="eyebrow">05 · Aptos · Block-STM</p>
+        <h2>把「必须按序」变成版本号</h2>
+        <p class="section-lede">
+          区块顺序已经固定，于是第 i 笔交易的每一层读值都有唯一版本 <code>(i, incarnation)</code>。
+          顺序从约束变成了索引：多版本内存、按版本校验、按索引提交。
+        </p>
+      </div>
+
+      <div class="chain reveal">
+        <div class="chain-head">
+          <h3>Block-STM</h3>
+          <span class="chain-tag hot">乐观 · 多版本</span>
+          <span class="chain-tag">Aptos v1.38.6</span>
+          <span class="chain-tag">论文 + 开源</span>
+        </div>
+        <div class="chain-body">
+          <p class="chain-summary">交易先并行执行并记录读到的版本；校验时重读，版本对不上就 abort、标记 estimate、换下一个 incarnation 重放；提交严格按 txn_idx 递增。</p>
+
+          <div class="aspects">
+            <div class="aspect"><b>并行单元</b><span>单笔交易；同一笔可执行多次（incarnation）</span></div>
+            <div class="aspect"><b>冲突判定</b><span>读集校验：重读每个 key，比较版本是否仍是当初读到的</span></div>
+            <div class="aspect"><b>冲突处理</b><span>abort → 写集标 estimate → incarnation + 1 重放</span></div>
+            <div class="aspect"><b>确定性</b><span>commit_idx 严格递增，提交顺序恒等于区块顺序</span></div>
+          </div>
+
+          <div class="split-layout">
+            <article class="code-card">
+              <div class="code-head"><span>block-executor/src/executor.rs</span><span class="tag">L819 · 节选</span></div>
+<pre><code>fn update_on_validation(
+    txn_idx: TxnIndex,
+    incarnation: Incarnation,
+    valid: bool,
+    validation_wave: Wave,
+    last_input_output: &amp;TxnLastInputOutput&lt;T, E::Output&gt;,
+    versioned_cache: &amp;MVHashMap&lt;T::Key, T::Tag, T::Value, DelayedFieldID&gt;,
+    scheduler: &amp;Scheduler,
+) -&gt; Result&lt;SchedulerTask, PanicError&gt; {
+    // 只有第一个抢到 abort 权的线程会成功
+    let aborted = !valid &amp;&amp; scheduler.try_abort(txn_idx, incarnation);
+
+    if aborted {
+        update_transaction_on_abort::&lt;T, E&gt;(
+            txn_idx, last_input_output, versioned_cache,
+        );
+        scheduler.finish_abort(txn_idx, incarnation)
+    } else {
+        scheduler.finish_validation(txn_idx, validation_wave);
+        if valid {
+            scheduler.queueing_commits_arm();
+        }
+        Ok(SchedulerTask::Retry)
+    }
+}</code></pre>
+              <p class="code-note">校验失败不是错误，只是「这一版作废」；<code>try_abort</code> 用 <code>Executed(inc) → Aborting(inc)</code> 的状态迁移保证同一版本最多 abort 一次。</p>
+            </article>
+
+            <article class="info-card">
+              <h3>三个关键设计</h3>
+              <p><strong>版本 =（交易索引，incarnation）。</strong>读 i 只取索引小于 i 的最新版本；未命中则读区块前状态。</p>
+              <p><strong>estimate 是依赖预测。</strong>abort 时把本次写集标成 estimate；后续交易一旦读到 estimate 可以立刻 abort，不必算到底。</p>
+              <p><strong>校验只往回看。</strong>不需要全局冲突图，只要确认 i 之前没人改过它读的键。</p>
+            </article>
+          </div>
+
+          <ul>
+            <li><strong>热点账户会放大重放。</strong>论文实测：只有 32 个账户时负载接近串行；8 个账户时并行度不超过 8 线程。</li>
+            <li><strong>顺序负载仍有开销。</strong>论文称完全顺序的负载最多约 30% 额外开销；高冲突负载仍有加速——并行度是冲突率的连续函数。</li>
+            <li><strong>不是「无冲突才并行」。</strong>它不需要预声明写集，用上一次 incarnation 的写集做估计；这与 Solana 的静态声明是两条路。</li>
+            <li><strong>会回退串行。</strong>v1.38.6 有 v1 / v2 两套调度器；模块发布、resource group、VM abort、超 gas 等情况会 halt 并回退顺序执行，incarnation 过高也有兜底。</li>
+            <li><strong>论文数字不是主网数字。</strong>110k TPS（Diem）/ 170k TPS（Aptos）@32 线程来自 benchmark；官方只说「runs in production at Aptos」。</li>
+          </ul>
+
+          <div class="src-links">
+            <a href="https://arxiv.org/abs/2203.06871" target="_blank" rel="noreferrer">Block-STM 论文</a>
+            <a href="https://github.com/aptos-labs/aptos-core/blob/7d99412c68ead35fe24d98bb8be1f5237646bda4/aptos-move/block-executor/src/executor.rs#L819" target="_blank" rel="noreferrer">executor.rs</a>
+            <a href="https://github.com/aptos-labs/aptos-core/blob/7d99412c68ead35fe24d98bb8be1f5237646bda4/aptos-move/block-executor/src/scheduler.rs#L463" target="_blank" rel="noreferrer">scheduler.rs · try_abort</a>
+            <a href="https://github.com/aptos-labs/aptos-core/blob/7d99412c68ead35fe24d98bb8be1f5237646bda4/aptos-move/mvhashmap/src/versioned_data.rs#L435" target="_blank" rel="noreferrer">mvhashmap · mark_estimate</a>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <section id="sei" class="section">
+      <div class="section-head reveal">
+        <p class="eyebrow">06 · Sei · OCC on Cosmos KV</p>
+        <h2>多版本放在 KV 层，而不是 VM 内</h2>
+        <p class="section-lede">
+          Sei 把 Cosmos 的 <code>CacheMultiStore</code> 包成版本索引存储：EVM 的每次读都被记录，校验时比较「值」。
+          它不要求交易声明访问集，也不依赖 EIP-2930。
+        </p>
+      </div>
+
+      <div class="chain reveal">
+        <div class="chain-head">
+          <h3>Sei OCC</h3>
+          <span class="chain-tag hot">乐观 · 值校验</span>
+          <span class="chain-tag">sei-chain v6.8.0</span>
+          <span class="chain-tag">Cosmos KV 层</span>
+        </div>
+        <div class="chain-body">
+          <p class="chain-summary">每笔交易拿到独立的 CacheMultiStore 和 (绝对索引, incarnation) 版本；读集落盘，校验时比对最新值；冲突重放，超过 10 轮整块退回同步执行。</p>
+
+          <div class="aspects">
+            <div class="aspect"><b>并行单元</b><span>单笔交易（deliverTxTask）</span></div>
+            <div class="aspect"><b>冲突判定</b><span>读集校验，比较该索引之前的最新「值」是否相等</span></div>
+            <div class="aspect"><b>冲突处理</b><span>invalidate + 依赖等待 + incarnation 递增重放</span></div>
+            <div class="aspect"><b>确定性</b><span>校验从第一个未 validated 索引推进；全块结束后一次性写回最新值</span></div>
+          </div>
+
+          <div class="split-layout">
+            <article class="code-card">
+              <div class="code-head"><span>sei-cosmos/store/multiversion/store.go</span><span class="tag">L392 · 节选</span></div>
+<pre><code>func (s *Store) checkReadsetAtIndex(index int) (bool, []int, []string) {
+    conflictSet := make(map[int]struct{})
+    valid := true
+    readSetAny, found := s.txReadSets.Load(index)
+    if !found { return true, []int{}, nil }
+
+    for key, valueArr := range readSetAny.(ReadSet) {
+        if len(valueArr) != 1 { valid = false; continue }
+        value := valueArr[0]
+        latestValue := s.GetLatestBeforeIndex(index, []byte(key))
+        if latestValue == nil {
+            if !bytes.Equal(s.parentStore.Get([]byte(key)), value) {
+                valid = false
+            }
+        } else if latestValue.IsEstimate() {
+            // 估计值只记依赖，不直接判失败
+            conflictSet[latestValue.Index()] = struct{}{}
+        } else if latestValue.IsDeleted() {
+            if value != nil { valid = false }
+        } else if !bytes.Equal(latestValue.Value(), value) {
+            valid = false
+        }
+    }
+    // 循环结束后把 conflictSet 排序成 conflictIndices，
+    // 再 return valid, conflictIndices, conflictKeys
+}</code></pre>
+              <p class="code-note">校验比较的是「值」而不是版本号：对 KV 状态足够，但无法识别「改了又改回」的 ABA。</p>
+            </article>
+
+            <article class="info-card">
+              <h3>读到 estimate 就立刻放弃</h3>
+              <p>
+                读路径如果命中一个还没确认的估计值，会写 abort 并通过 panic 中断当前执行：
+                这是用「提前失败」换「少算无用功」。
+              </p>
+              <p>
+                与 Block-STM 的差别：Sei 把多版本放在 Cosmos KV 层（<code>VersionIndexedStore</code>），
+                所以 EVM 与 Cosmos 模块共用同一套 OCC，而不需要 VM 提供读写集。
+              </p>
+              <p>
+                <code>maximumIterations = 10</code>：超过就把整块切成同步执行，避免病态冲突下的活锁。
+              </p>
+            </article>
+          </div>
+
+          <ul>
+            <li><strong>不是所有区块都并行。</strong>同一收款人、无 calldata 的纯 EVM 转账批次会走同步快路径（anti-pathological 优化）。</li>
+            <li><strong>access list 只影响 gas。</strong>Sei 的调度不读 EIP-2930 access list；源码里也没有 <code>DepAccessList</code> / <code>OptimisticScheduler</code> 这些名字。</li>
+            <li><strong>文档与实现有偏差。</strong>官方文档描述过 Dependency Generator、Bloom filter 预筛，但在 v6.8.0 源码中检索不到对应实现——只能当作文档说法。</li>
+            <li><strong>两层「乐观」别混。</strong>区块级预执行缓存（<code>ProcessProposal</code> 里 5s 超时提前跑）与交易级 OCC 是两件事。</li>
+          </ul>
+
+          <div class="src-links">
+            <a href="https://github.com/sei-protocol/sei-chain/blob/4d01ff302c3332c3bac35bbd9ddd2b052662199b/sei-cosmos/tasks/scheduler.go#L279" target="_blank" rel="noreferrer">scheduler.go · ProcessAll</a>
+            <a href="https://github.com/sei-protocol/sei-chain/blob/4d01ff302c3332c3bac35bbd9ddd2b052662199b/sei-cosmos/store/multiversion/store.go#L392" target="_blank" rel="noreferrer">store.go · checkReadsetAtIndex</a>
+            <a href="https://github.com/sei-protocol/sei-chain/blob/4d01ff302c3332c3bac35bbd9ddd2b052662199b/sei-cosmos/store/multiversion/mvkv.go#L145" target="_blank" rel="noreferrer">mvkv.go · 读路径</a>
+            <a href="https://blog.sei.io/sei-v2-the-first-parallelized-evm/" target="_blank" rel="noreferrer">Sei v2 博客</a>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <section id="monad" class="section">
+      <div class="section-head reveal">
+        <p class="eyebrow">07 · Monad · 乐观 + 流水线</p>
+        <h2>先投机执行，再按原序提交</h2>
+        <p class="section-lede">
+          Monad 的执行层把每笔交易放到独立状态副本上跑，然后等前序交易提交、逐项比对读过的账户与存储槽。
+          对不上就重跑——官方口径是每笔交易最多执行两次。
+        </p>
+      </div>
+
+      <div class="chain reveal">
+        <div class="chain-head">
+          <h3>Monad 执行客户端</h3>
+          <span class="chain-tag hot">乐观 · 槽级校验</span>
+          <span class="chain-tag">category-labs/monad</span>
+          <span class="chain-tag">C++ · 开源</span>
+        </div>
+        <div class="chain-body">
+          <p class="chain-summary">每笔交易在独立 State 上投机执行；提交前 <code>prev_.wait()</code> 等前序结果，<code>can_merge</code> 逐账户/逐槽比对原读值；失败则重试一次。</p>
+
+          <div class="aspects">
+            <div class="aspect"><b>并行单元</b><span>单笔交易（独立状态副本）</span></div>
+            <div class="aspect"><b>冲突判定</b><span>提交时按存储槽比对读集是否被改写</span></div>
+            <div class="aspect"><b>冲突处理</b><span>重执行；重执行期间阻塞后续提交</span></div>
+            <div class="aspect"><b>确定性</b><span>pending result 严格按交易原序串行提交</span></div>
+          </div>
+
+          <div class="split-layout">
+            <article class="code-card">
+              <div class="code-head"><span>category/execution/ethereum/execute_transaction.cpp</span><span class="tag">L438 · 节选</span></div>
+<pre><code>State state{block_state_, Incarnation{header_.number, i_ + 1}};
+auto result = execute_impl2(state);
+
+{
+    TRACE_TXN_EVENT(StartStall);
+    prev_.wait();          // 等前序交易提交
+}
+
+if (block_state_.can_merge(state)) {
+    auto const receipt = execute_final(state, result.value());
+    block_state_.merge(state);
+    return receipt;
+}
+
+++block_metrics_.num_retries;
+{
+    TRACE_TXN_EVENT(StartRetry);
+    State state{block_state_, Incarnation{header_.number, i_ + 1}};
+    auto result = execute_impl2(state);   // 拿最新状态重跑
+    MONAD_ASSERT_THROW(
+        block_state_.can_merge(state), "block state cannot be merged");
+    auto const receipt = execute_final(state, result.value());
+    block_state_.merge(state);
+    return receipt;
+}</code></pre>
+              <p class="code-note"><code>can_merge</code> 逐项比较账户与 storage slot 的原读值；只要有一项被改过就返回 false。</p>
+            </article>
+
+            <article class="info-card">
+              <h3>官方口径（docs.monad.xyz）</h3>
+              <p>「Pending results are committed serially in the original order of the transactions, checking each input for correctness at the time of commitment.」</p>
+              <p>「…all state contention is evaluated on a slot-by-slot basis.」——同一合约的不同槽不冲突，热点集中在同一槽。</p>
+              <p>「…every transaction will be executed at most twice.」——重放上限靠缓存与记忆化支撑，而不是无限重试。</p>
+            </article>
+          </div>
+
+          <ul>
+            <li><strong>不要求预声明访问集。</strong>官方明确不强制 EIP-2930：access list 不区分读/写，无法预判争用。</li>
+            <li><strong>mempool 不做冲突预判。</strong>只校验签名、nonce、gas 上限；冲突在提交阶段才暴露。</li>
+            <li><strong>流水线是另一半。</strong>共识与执行解耦，执行可以占满整个区块时间；MonadDB 用异步 I/O、绕过文件系统、持久化 trie 支撑并行读。</li>
+            <li><strong>代码是开源的。</strong><code>category-labs/monad</code> 是 C++ 执行客户端，<code>monad-bft</code> 只含共识/网络；不要再说「闭源无法分析」。</li>
+          </ul>
+
+          <div class="src-links">
+            <a href="https://docs.monad.xyz/monad-arch/execution/parallel-execution" target="_blank" rel="noreferrer">官方 · 并行执行</a>
+            <a href="https://docs.monad.xyz/faq" target="_blank" rel="noreferrer">官方 FAQ</a>
+            <a href="https://github.com/category-labs/monad/blob/main/category/execution/ethereum/execute_transaction.cpp" target="_blank" rel="noreferrer">execute_transaction.cpp</a>
+            <a href="https://docs.monad.xyz/monad-arch/execution/monaddb" target="_blank" rel="noreferrer">MonadDB</a>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <section id="solana" class="section">
+      <div class="section-head reveal">
+        <p class="eyebrow">08 · Solana · Sealevel</p>
+        <h2>把冲突挡在门外：静态账户锁</h2>
+        <p class="section-lede">
+          Solana 的交易在提交时就声明每个账户是只读还是可写。调度器<strong>执行前</strong>就能加锁、分组、分派，
+          不需要重放——代价是冲突交易必须排队，且粒度是账户级。
+        </p>
+      </div>
+
+      <div class="chain reveal">
+        <div class="chain-head">
+          <h3>Sealevel 调度</h3>
+          <span class="chain-tag hot">静态声明</span>
+          <span class="chain-tag">Agave v4.4.1</span>
+          <span class="chain-tag">账户级锁</span>
+        </div>
+        <div class="chain-body">
+          <p class="chain-summary">交易的 account_keys + is_writable 位图就是锁集合；GreedyScheduler 试锁、选线程、组批；冲突交易重新入队，而不是判为失败。</p>
+
+          <div class="aspects">
+            <div class="aspect"><b>并行单元</b><span>一笔交易锁定的账户集合</span></div>
+            <div class="aspect"><b>冲突判定</b><span>执行前静态判定：写锁独占、读锁共享</span></div>
+            <div class="aspect"><b>冲突处理</b><span>本次不调度、重新入队；bank 层 AccountInUse 立即重试</span></div>
+            <div class="aspect"><b>确定性</b><span>thread-aware 锁把同一账户钉在同一 worker 的 FIFO 上</span></div>
+          </div>
+
+          <div class="split-layout">
+            <article class="code-card">
+              <div class="code-head"><span>core/src/banking_stage/transaction_scheduler/greedy_scheduler.rs</span><span class="tag">L258 · 节选</span></div>
+<pre><code>let account_keys = transaction.account_keys();
+let write_account_locks = account_keys
+    .iter()
+    .enumerate()
+    .filter_map(|(index, key)| {
+        transaction.is_writable(index).then_some(key)
+    });
+let read_account_locks = account_keys
+    .iter()
+    .enumerate()
+    .filter_map(|(index, key)| {
+        (!transaction.is_writable(index)).then_some(key)
+    })
+    .chain(transaction.implicit_read_locks());
+
+let thread_id = match account_locks.try_lock_accounts(
+    write_account_locks,
+    read_account_locks,
+    schedulable_threads,
+    thread_selector,
+) {
+    Ok(thread_id) =&gt; thread_id,
+    Err(TryLockError::MultipleConflicts) =&gt; {
+        return Err(TransactionSchedulingError::UnschedulableConflicts);
+    }
+    Err(TryLockError::ThreadNotAllowed) =&gt; {
+        return Err(TransactionSchedulingError::UnschedulableThread);
+    }
+};</code></pre>
+              <p class="code-note">锁集合完全来自交易消息本身；<code>implicit_read_locks</code> 补上 sysvar 等隐式只读依赖。</p>
+            </article>
+
+            <article class="code-card">
+              <div class="code-head"><span>accounts-db/src/account_locks.rs</span><span class="tag">L56</span></div>
+<pre><code>fn can_lock_accounts&lt;'a&gt;(
+    &amp;self,
+    keys: impl Iterator&lt;Item = (&amp;'a Pubkey, bool)&gt;,
+) -&gt; TransactionResult&lt;()&gt; {
+    for (key, writable) in keys {
+        if writable {
+            if !self.can_write_lock(key) {
+                return Err(TransactionError::AccountInUse);
+            }
+        } else if !self.can_read_lock(key) {
+            return Err(TransactionError::AccountInUse);
+        }
+    }
+    Ok(())
+}</code></pre>
+              <p class="code-note">bank 层是最后一道闸：<code>AccountInUse</code> 在 consumer 里被标成 <code>immediately_retryable</code>，重新入队而不是写下失败回执。</p>
+            </article>
+          </div>
+
+          <ul>
+            <li><strong>粒度是账户，不是字段。</strong>同一个 <code>AccountSharedData</code> 里改不同字段也互斥；<code>TransactionAccounts</code> 的借用计数只解决单笔交易内部的别名问题。</li>
+            <li><strong>线程亲和带来顺序。</strong><code>ThreadAwareAccountLocks</code> 只允许「已经持有该账户锁的线程」继续调度，于是同一账户的交易被钉在同一 worker 上按 FIFO 执行。</li>
+            <li><strong>worker 数量有限。</strong>banking stage 默认 4 个、最多 64 个 consume worker；并行度还受每账户成本上限约束。</li>
+            <li><strong>没有 account_deps。</strong>v4.4.1 的 SVM 只做顺序执行一批交易，跨交易冲突由上层调度器与 bank 锁负责；旧文章里的 <code>account_deps</code> 结构已不存在。</li>
+            <li><strong>流水线是另一半。</strong>TPU 的 sigverify → banking stage → PoH 是同进程多线程流水线；「并行」不只发生在执行，也发生在阶段之间。</li>
+          </ul>
+
+          <div class="src-links">
+            <a href="https://github.com/anza-xyz/agave/blob/5bb304027fe1a166b02cb26dc8c161593f416fca/core/src/banking_stage/transaction_scheduler/greedy_scheduler.rs#L258" target="_blank" rel="noreferrer">greedy_scheduler.rs</a>
+            <a href="https://github.com/anza-xyz/agave/blob/5bb304027fe1a166b02cb26dc8c161593f416fca/scheduling-utils/src/thread_aware_account_locks.rs#L89" target="_blank" rel="noreferrer">thread_aware_account_locks.rs</a>
+            <a href="https://github.com/anza-xyz/agave/blob/5bb304027fe1a166b02cb26dc8c161593f416fca/accounts-db/src/account_locks.rs#L56" target="_blank" rel="noreferrer">account_locks.rs</a>
+            <a href="https://solana.com/news/sealevel---parallel-processing-thousands-of-smart-contracts" target="_blank" rel="noreferrer">Sealevel 官方文章</a>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <section id="sui" class="section">
+      <div class="section-head reveal">
+        <p class="eyebrow">09 · Sui · 对象版本</p>
+        <h2>用对象版本取代加锁</h2>
+        <p class="section-lede">
+          Sui 的并行单元是对象，不是账户：owned 对象的版本由交易指定，shared 对象由共识定序定版。
+          调度器按输入对象建依赖，冲突在「版本」这一层判定，没有加锁/解锁动作。
+        </p>
+      </div>
+
+      <div class="chain reveal">
+        <div class="chain-head">
+          <h3>Sui ExecutionScheduler</h3>
+          <span class="chain-tag hot">对象版本</span>
+          <span class="chain-tag">mainnet-v1.84.1</span>
+          <span class="chain-tag">共识定序 + 并发执行</span>
+        </div>
+        <div class="chain-body">
+          <p class="chain-summary">每笔交易的 <code>InputObjectKind</code> 给出待消费对象与版本；调度器等输入可用且 barrier 依赖完成才放行；owned 双花直接失败，shared 按共识顺序串行。</p>
+
+          <div class="aspects">
+            <div class="aspect"><b>并行单元</b><span>一笔交易及其输入对象</span></div>
+            <div class="aspect"><b>冲突判定</b><span>对象版本；shared 对象由共识分配版本</span></div>
+            <div class="aspect"><b>冲突处理</b><span>owned 同版本双花 → 确定性失败；shared → 按序执行</span></div>
+            <div class="aspect"><b>确定性</b><span>共识全序 + causal_index 准入 + 每个 (ID, version) 只消费一次</span></div>
+          </div>
+
+          <div class="split-layout">
+            <article class="code-card">
+              <div class="code-head"><span>crates/sui-types/src/transaction.rs</span><span class="tag">L4980</span></div>
+<pre><code>pub enum InputObjectKind {
+    // Move package，必须不可变
+    MovePackage(ObjectID),
+    // 不可变对象，或 owned 可变对象
+    ImmOrOwnedMoveObject(ObjectRef),
+    // shared 且可变，版本由共识分配
+    SharedMoveObject {
+        id: ObjectID,
+        initial_shared_version: SequenceNumber,
+        mutability: SharedObjectMutability,
+    },
+}</code></pre>
+              <p class="code-note">owned 的 <code>ObjectRef</code> 自带版本；shared 的版本不在交易里，等共识给出。</p>
+            </article>
+
+            <article class="code-card">
+              <div class="code-head"><span>crates/sui-core/src/execution_scheduler/execution_scheduler_impl.rs</span><span class="tag">L65 · 节选</span></div>
+<pre><code>pub fn process_tx(
+    &amp;mut self,
+    tx_digest: TransactionDigest,
+    tx: &amp;TransactionData,
+) -&gt; BTreeSet&lt;TransactionDigest&gt; {
+    let mut barrier_deps = BTreeSet::new();
+    for SharedInputObject { id, mutability, .. }
+        in tx.kind().shared_input_objects()
+    {
+        match mutability {
+            SharedObjectMutability::NonExclusiveWrite =&gt; {
+                self.dep_state.entry(id).or_default().insert(tx_digest);
+            }
+            SharedObjectMutability::Mutable =&gt; {
+                // 前面有非独占写 → 本交易是 barrier，先等它们
+                if let Some(deps) = self.dep_state.remove(&amp;id) {
+                    barrier_deps.extend(deps);
+                }
+            }
+            SharedObjectMutability::Immutable =&gt; (),
+        }
+    }
+    barrier_deps
+}</code></pre>
+              <p class="code-note"><code>NonExclusiveWrite</code> 目前不允许用户交易使用（源码会拒绝），只用于结算类交易。</p>
+            </article>
+          </div>
+
+          <ul>
+            <li><strong>并发上限是半核。</strong><code>CausalAdmission</code> 的并发度 = <code>max(1, num_cpus / 2)</code>，另一半留给共识、网络与 checkpoint。</li>
+            <li><strong>owned 双花是失败而非等待。</strong>同一版本的 owned 对象被两笔交易消费，后到者得到 <code>ObjectVersionUnavailableForConsumption</code>——与 Solana 的排队语义相反。</li>
+            <li><strong>「owned 交易完全不走共识」已过时。</strong>1.84.1 源码注释写明 single writer 交易也走共识路径；但它们的对象版本仍由交易自身指定，不需要为共享对象竞争版本。</li>
+            <li><strong>热点 shared 对象仍是串行瓶颈。</strong>同一 shared 对象的独占写必须按共识顺序一笔笔执行。</li>
+          </ul>
+
+          <div class="src-links">
+            <a href="https://github.com/MystenLabs/sui/blob/e83d69069e4023cce4a2dcde2b9c74384418fee1/crates/sui-types/src/transaction.rs#L4980" target="_blank" rel="noreferrer">InputObjectKind</a>
+            <a href="https://github.com/MystenLabs/sui/blob/e83d69069e4023cce4a2dcde2b9c74384418fee1/crates/sui-core/src/execution_scheduler/execution_scheduler_impl.rs#L65" target="_blank" rel="noreferrer">process_tx</a>
+            <a href="https://github.com/MystenLabs/sui/blob/e83d69069e4023cce4a2dcde2b9c74384418fee1/crates/sui-core/src/execution_scheduler/causal_admission.rs#L127" target="_blank" rel="noreferrer">causal_admission.rs</a>
+            <a href="https://docs.sui.io/develop/objects/versioning" target="_blank" rel="noreferrer">Sui · Object Versioning</a>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <section id="megaeth" class="section">
+      <div class="section-head reveal">
+        <p class="eyebrow">10 · MegaETH · 单 sequencer</p>
+        <h2>并行不是它的主卖点，但它确实在用</h2>
+        <p class="section-lede">
+          MegaETH 是构建在 OP Stack 上的 L2：单活跃 sequencer 负责排序与执行，~10ms 出一个 mini-block、
+          ~1s 封一个 EVM block，状态流式分发给 RPC 节点。并行是其中一环：sequencer 可自选并发控制，
+          验证者用 SALT witness 做无状态并行校验。
+        </p>
+      </div>
+
+      <div class="chain reveal">
+        <div class="chain-head">
+          <h3>MegaETH</h3>
+          <span class="chain-tag hot">专用架构</span>
+          <span class="chain-tag">mega-evm</span>
+          <span class="chain-tag">算法未公开</span>
+        </div>
+        <div class="chain-body">
+          <p class="chain-summary">sequencer 执行后把结果封进 mini-block 并流式分发；EVM block 定期把数据发到 EigenDA 并提交到 L1。验证者不存全量状态，而是拿 SALT witness 重执行每个块，核对后状态承诺。</p>
+
+          <div class="aspects">
+            <div class="aspect"><b>并行单元</b><span>交易；sequencer 侧可自选并发控制</span></div>
+            <div class="aspect"><b>冲突判定</b><span>官方未公开具体算法；用 gas detention 压缩共享状态访问后的计算</span></div>
+            <div class="aspect"><b>冲突处理</b><span>官方未公开；mega-evm 提供 execute / commit 分离</span></div>
+            <div class="aspect"><b>确定性</b><span>sequencer 定序 + 签名承诺；数据上 EigenDA，争议走 L1 争议解决</span></div>
+          </div>
+
+          <div class="split-layout">
+            <article class="code-card">
+              <div class="code-head"><span>crates/mega-evm/src/block/executor.rs</span><span class="tag">L587 · 注释</span></div>
+<pre><code>/// Block-level admission is re-validated here against the limiter
+/// state as it stands *now*, not as it stood when the transaction
+/// executed. Execution and commit are separate steps, so other
+/// transactions may have been committed in between (this is how the
+/// parallel executor works: speculatively execute many transactions,
+/// then commit the survivors one by one), and the block may have
+/// filled up in that window.</code></pre>
+              <p class="code-note">仓库只提供单笔交易引擎与 execute/commit 分离；调度器本身不在这个仓库里。</p>
+            </article>
+
+            <article class="info-card">
+              <h3>官方原话</h3>
+              <p>「The sequencer can utilize any concurrency control protocol, without being limited to deterministic methods like Block-STM. Meanwhile, full nodes leverage stateless validation to execute blocks in parallel…」</p>
+              <p>「Gas detention … Forces transactions that read shared state to terminate quickly, reducing parallel execution conflicts.」</p>
+              <p>「embarrassingly parallel, scaling linearly with the number of cores」——指的是验证侧，不是执行侧。</p>
+            </article>
+          </div>
+
+          <ul>
+            <li><strong>不要写成 Block-STM 实现。</strong>官方没有公开调度算法；「两阶段并行 / Block-STM 式」属于第三方推断。</li>
+            <li><strong>吞吐主因不是并行。</strong>免共识、状态驻内存、SALT 消除状态根随机 I/O、字节码编译、流式流水线，任何一项都比并行更影响 TPS。</li>
+            <li><strong>EVM 的答案是「不预声明」。</strong>执行期追踪 volatile 访问并加以限额（gas detention），而不是要求用户提交 access list。</li>
+            <li><strong>瓶颈在数据分发。</strong>官方 mini-block 文档把瓶颈指向分发而非执行，这与「并行度不够」是两回事。</li>
+          </ul>
+
+          <div class="src-links">
+            <a href="https://docs.megaeth.com/architecture" target="_blank" rel="noreferrer">官方 · 架构</a>
+            <a href="https://docs.megaeth.com/spec/overview" target="_blank" rel="noreferrer">官方 · 规范总览</a>
+            <a href="https://docs.megaeth.com/node-operation/stateless-validation" target="_blank" rel="noreferrer">无状态验证</a>
+            <a href="https://github.com/megaeth-labs/mega-evm/blob/cfdb825092c538f8c284abeaace06195166b6cef/crates/mega-evm/src/block/executor.rs#L587" target="_blank" rel="noreferrer">mega-evm · executor.rs</a>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <section id="hyperliquid" class="section">
+      <div class="section-head reveal">
+        <p class="eyebrow">11 · Hyperliquid · 专用 L1</p>
+        <h2>不做并行 EVM，做「语义感知的排序」</h2>
+        <p class="section-lede">
+          HyperCore 与 HyperEVM 是同一条 L1，共享 HyperBFT 的单一交易顺序。
+          并行不来自「发现冲突」，而来自把不该互相干扰的操作在<strong>排序阶段</strong>就分开。
+        </p>
+      </div>
+
+      <div class="chain reveal">
+        <div class="chain-head">
+          <h3>Hyperliquid</h3>
+          <span class="chain-tag">专用状态机</span>
+          <span class="chain-tag">HyperBFT</span>
+          <span class="chain-tag">核心闭源</span>
+        </div>
+        <div class="chain-body">
+          <p class="chain-summary">HyperCore 每个资产一本订单簿，但保证金/清算共享 clearinghouse；区块内 action 按「非 GTC/IOC → 撤单 → GTC/IOC」排序，再按提案顺序执行。</p>
+
+          <div class="aspects">
+            <div class="aspect"><b>并行单元</b><span>没有公开的并行执行单元；按资产撮合是逻辑隔离</span></div>
+            <div class="aspect"><b>冲突判定</b><span>排序阶段完成：语义感知的 action 分类 + 单一全序</span></div>
+            <div class="aspect"><b>冲突处理</b><span>串行状态机；跨资产仍共享 clearinghouse</span></div>
+            <div class="aspect"><b>确定性</b><span>HyperBFT 给出唯一顺序，one-block finality</span></div>
+          </div>
+
+          <div class="split-layout">
+            <article class="code-card">
+              <div class="code-head"><span>官方文档 · 区块内排序</span><span class="tag">order-book</span></div>
+<pre><code>1. 不向任何 book 发送 GTC / IOC 的 action
+2. 撤单
+3. 至少发送一个 GTC / IOC 的 action
+
+# 每个类别内部：按区块提议者给出的顺序
+# modify：按它新下的订单归类</code></pre>
+              <p class="code-note">这是「调度」而不是「冲突检测」：把撤单排在开单前，避免同一区块内的自成交与无谓冲突。</p>
+            </article>
+
+            <article class="info-card">
+              <h3>吞吐来自哪里</h3>
+              <p>官方：约 200k orders/s，端到端延迟中位 0.2s、p99 0.9s，「当前瓶颈是执行」。</p>
+              <p>低延迟来自 HyperBFT、网络栈、内存态撮合引擎与按资产独立的订单簿；这些是工程优化，不是并行 EVM。</p>
+              <p>HyperEVM 用双块架构解耦「快」与「大」：小块 1s / 3M gas，大块 60s / 30M gas，块号交错递增。</p>
+            </article>
+          </div>
+
+          <ul>
+            <li><strong>「Hyperliquid 是并行 EVM」不准确。</strong>官方文档没有公开 HyperEVM 的读写集、访问列表或线程模型；共识/撮合核心闭源。</li>
+            <li><strong>per-asset 订单簿 ≠ 并行执行。</strong>永续订单簿的保证金与清算都在共享 clearinghouse 里，跨资产仍需全序。</li>
+            <li><strong>HyperCore 与 HyperEVM 不是两条链。</strong>它们共享同一条 L1 与同一交易顺序。</li>
+            <li><strong>可核实材料有限。</strong>能做的是读官方文档与 <code>hyperliquid-dex</code> 的边缘仓库（节点启动器、EVM 同步器），不能声称看过撮合源码。</li>
+          </ul>
+
+          <div class="src-links">
+            <a href="https://hyperliquid.gitbook.io/hyperliquid-docs/hypercore/overview" target="_blank" rel="noreferrer">HyperCore Overview</a>
+            <a href="https://hyperliquid.gitbook.io/hyperliquid-docs/hypercore/order-book" target="_blank" rel="noreferrer">Order book</a>
+            <a href="https://hyperliquid.gitbook.io/hyperliquid-docs/for-developers/hyperevm/dual-block-architecture" target="_blank" rel="noreferrer">Dual-block</a>
+            <a href="https://github.com/hyperliquid-dex/node" target="_blank" rel="noreferrer">hyperliquid-dex/node</a>
+          </div>
+        </div>
+      </div>
+    </section>
+
+
+    
+    <section id="matrix" class="section">
+      <div class="section-head reveal">
+        <p class="eyebrow">12 · 对比矩阵</p>
+        <h2>同一张表看清取舍</h2>
+        <p class="section-lede">
+          不要横向比 TPS。先看并行单元、依赖来源与确定性机制，再看它在什么负载下会退化。
+        </p>
+      </div>
+
+      <div class="table-wrap reveal">
+        <table class="source-table" style="min-width: 980px;">
+          <thead>
+            <tr>
+              <th>方案</th><th>并行单元</th><th>依赖从哪来</th><th>冲突怎么处理</th><th>确定性靠什么</th><th>代码可核查</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr><td>BAL（EIP-7928）</td><td>地址 + 存储槽（区块级）</td><td>执行后生成的强制声明</td><td>不改首次执行；并行 IO / 校验 / 状态根</td><td>区块头哈希校验 BAL</td><td>是（geth / reth / erigon）</td></tr>
+            <tr><td>Block-STM</td><td>交易</td><td>运行时读集 + 版本</td><td>abort → estimate → 重放</td><td>txn_idx 递增提交</td><td>是（aptos-core）</td></tr>
+            <tr><td>Sei</td><td>交易</td><td>运行时 KV 读集（比值）</td><td>重放；10 轮后退回同步</td><td>按序校验 + 块末写回</td><td>是（sei-chain）</td></tr>
+            <tr><td>Monad</td><td>交易</td><td>运行时读集（槽级）</td><td>重执行一次，阻塞后续提交</td><td>pending result 原序串行提交</td><td>是（category-labs/monad）</td></tr>
+            <tr><td>Solana</td><td>交易 + 账户集合</td><td>交易静态声明 read/write</td><td>排队 / 重新入队</td><td>thread-aware 锁 + 账户 FIFO</td><td>是（agave）</td></tr>
+            <tr><td>Sui</td><td>交易 + 输入对象</td><td>对象版本；shared 由共识定版</td><td>owned 双花失败；shared 按序</td><td>共识全序 + 版本唯一消费</td><td>是（sui）</td></tr>
+            <tr><td>MegaETH</td><td>交易</td><td>官方未公开</td><td>官方未公开</td><td>sequencer 定序 + 承诺 / 证明</td><td>部分（mega-evm）</td></tr>
+            <tr><td>Hyperliquid</td><td>action / 资产</td><td>排序阶段的语义分类</td><td>串行状态机</td><td>HyperBFT 单一全序</td><td>否（核心闭源）</td></tr>
+          </tbody>
+        </table>
+      </div>
+
+      <div class="callout reveal">
+        <strong>「代码可核查」不等于「机制已证实」。</strong>
+        MegaETH 与 Hyperliquid 的关键调度部分读不到，矩阵里只能标「部分 / 否」；
+        标「是」的项目也只代表机制可读，不代表其性能数字有第三方复现。
+      </div>
+
+      <h3 class="sub-head reveal">三条选型直觉</h3>
+      <div class="card-grid three">
+        <article class="feature-card reveal">
+          <h3>通用 EVM、最小语义改动</h3>
+          <p>乐观并发 + 多版本/读集校验（Block-STM、Sei、Monad），或用 BAL 把 IO、验证、状态根并行化。交易无需预声明。</p>
+        </article>
+        <article class="feature-card reveal">
+          <h3>可预测延迟、状态局部性强</h3>
+          <p>静态声明（Solana）或对象模型（Sui）。冲突在进入执行前就可判定，代价是粒度粗、热点会排队。</p>
+        </article>
+        <article class="feature-card reveal">
+          <h3>极致吞吐、接受专用化</h3>
+          <p>单 sequencer（MegaETH）或专用撮合状态机（Hyperliquid）。省掉共识与通用执行的开销，换取信任与通用性上的取舍。</p>
+        </article>
+      </div>
+    </section>
+
+
+    
+
+    <section id="failure" class="section">
+      <div class="section-head reveal">
+        <p class="eyebrow">13 · 失败模式</p>
+        <h2>并行方案在哪里失效</h2>
+        <p class="section-lede">
+          所有并行方案都不是「越快越好」：它们在热点、重放、内存和回退路径上各有代价。
+          这一节用来判断一条链的宣传语在什么条件下不成立。
+        </p>
+      </div>
+
+      <div class="card-grid three">
+        <article class="info-card reveal">
+          <h3>热点键</h3>
+          <p>
+            同一个 slot / 同一个账户被大量交易读写时，冲突率趋近 1。
+            Block-STM 论文的实测是：32 个账户的负载已接近串行，8 个账户时并行度不超过 8 线程。
+          </p>
+        </article>
+        <article class="info-card reveal">
+          <h3>重放级联</h3>
+          <p>
+            一笔交易 abort 会让读到它写集的后续交易一起重算。
+            estimate 标记的作用就是让后来者尽早 abort，而不是算完再失败——它优化的是浪费，不是正确性。
+          </p>
+        </article>
+        <article class="info-card reveal">
+          <h3>多版本内存</h3>
+          <p>
+            MVHashMap / 多版本 KV 要保留同一键的多个版本，块越大、冲突越多，内存越高。
+            Sei 用「块末一次性写回」换取更简单的提交，但峰值内存仍然存在。
+          </p>
+        </article>
+        <article class="info-card reveal">
+          <h3>声明粒度</h3>
+          <p>
+            Solana 的锁是账户级：同一账户里改不同字段也互斥。
+            声明粒度越粗，误判冲突越多；越细，声明与校验成本越高。
+          </p>
+        </article>
+        <article class="info-card reveal">
+          <h3>回退串行</h3>
+          <p>
+            Sei 超过 10 轮迭代整块转同步；Aptos 在模块发布、resource group、VM abort、超 gas 等情况下 halt 回退；
+            Monad 重执行期间会阻塞后续提交。
+          </p>
+        </article>
+        <article class="info-card reveal">
+          <h3>测量陷阱</h3>
+          <p>
+            论文的 110k/170k TPS 是 32 线程 benchmark；厂商的峰值 TPS 通常不是主网 p99。
+            比较并行方案时，至少要对齐：串行基线、硬件核数、负载冲突率。
+          </p>
+        </article>
+      </div>
+
+      <div class="callout warn reveal">
+        <strong>看并行执行性能，先问三个数：</strong>冲突率（多少交易要重放）、并行度上限（线程/核数/并发闸门）、串行基线（同一负载顺序执行多快）。
+        缺一个，TPS 数字就没有可比性。
+      </div>
+    </section>
+
+
+    
+    <section id="tradeoffs" class="section">
+      <div class="section-head reveal">
+        <p class="eyebrow">14 · 工程取舍</p>
+        <h2>为什么没有统一答案</h2>
+        <p class="section-lede">
+          并行执行是吞吐的必要条件，不是充分条件。每种选择都在「通用性、确定性、延迟、实现成本」之间换筹码。
+        </p>
+      </div>
+
+      <div class="table-wrap reveal">
+        <table class="source-table">
+          <thead><tr><th>选择</th><th>收益</th><th>代价</th></tr></thead>
+          <tbody>
+            <tr><td>静态声明</td><td>执行前无冲突、无重放，延迟可预测</td><td>声明粒度粗；热点账户/对象排队</td></tr>
+            <tr><td>乐观 + 版本校验</td><td>通用，不需要预声明；冲突率低时接近线性加速</td><td>重放放大；多版本内存；活锁需要兜底</td></tr>
+            <tr><td>值校验（Sei）</td><td>实现贴在 KV 层，EVM 与 Cosmos 模块共用</td><td>无法区分 ABA；需要整块校验与写回</td></tr>
+            <tr><td>区块级 BAL</td><td>并行 IO、并行校验、并行状态根、免执行同步</td><td>区块体积；验证开销；不帮助首次执行</td></tr>
+            <tr><td>流水线</td><td>共识/执行/存储重叠，隐藏阶段延迟</td><td>工程复杂；回退与重放路径难写</td></tr>
+            <tr><td>单 sequencer</td><td>省掉共识往返，延迟极低</td><td>信任与可用性中心化；争议解决依赖证明</td></tr>
+            <tr><td>专用状态机</td><td>撮合与清算可极致优化</td><td>通用性弱；核心闭源，难以外部验证</td></tr>
+          </tbody>
+        </table>
+      </div>
+
+      <div class="quote-card reveal">
+        <p>并行度不是免费的：<strong>你要么在执行前付声明成本，要么在执行后付重放成本，要么在架构上付专用化成本。</strong></p>
+      </div>
+    </section>
+
+    <section id="source" class="section">
+      <div class="section-head reveal">
+        <p class="eyebrow">15 · 源码地图</p>
+        <h2>沿调用链读，不要从名词猜</h2>
+        <p class="section-lede">链接固定到各节标注的 commit / tag；没有源码的部分只列官方文档。</p>
+      </div>
+
+      <div class="table-wrap reveal">
+        <table class="source-table" style="min-width: 900px;">
+          <thead><tr><th>主题</th><th>入口</th><th>看什么</th></tr></thead>
+          <tbody>
+            <tr><td>BAL 规范</td><td><a href="https://eips.ethereum.org/EIPS/eip-7928" target="_blank" rel="noreferrer">EIP-7928</a></td><td>结构、体积约束、Engine API 校验</td></tr>
+            <tr><td>BAL 记录</td><td><a href="https://github.com/ethereum/go-ethereum/blob/v1.17.4/core/types/bal/bal.go#L100" target="_blank" rel="noreferrer">geth · bal.go</a></td><td><code>StorageWrite(txIdx, …)</code></td></tr>
+            <tr><td>BAL 并行执行</td><td><a href="https://github.com/ethereum/go-ethereum/blob/2b7829ea6aed9a95a3fd793cca46731202c6c310/core/state_processor_parallel.go#L155" target="_blank" rel="noreferrer">geth · state_processor_parallel.go</a></td><td><code>processParallel</code> / <code>result(i)</code> 按序收口</td></tr>
+            <tr><td>BAL 并行应用</td><td><a href="https://github.com/ethereum/go-ethereum/blob/2b7829ea6aed9a95a3fd793cca46731202c6c310/core/state/statedb_eip_7928.go#L37" target="_blank" rel="noreferrer">geth · statedb_eip_7928.go</a></td><td>免执行装 post-state，<code>parallelBALApply</code></td></tr>
+            <tr><td>BAL worker（reth）</td><td><a href="https://github.com/paradigmxyz/reth/blob/main/crates/engine/tree/src/tree/payload_processor/bal/mod.rs" target="_blank" rel="noreferrer">reth · payload_processor/bal</a></td><td>worker 并行、主线程按交易序提交</td></tr>
+            <tr><td>版本化重试（erigon）</td><td><a href="https://github.com/erigontech/erigon/blob/main/execution/exec/txtask.go" target="_blank" rel="noreferrer">erigon · txtask.go</a></td><td><code>VersionMap</code> / <code>ReadSet</code> / <code>QueueWithRetry</code></td></tr>
+            <tr><td>Block-STM 执行器</td><td><a href="https://github.com/aptos-labs/aptos-core/blob/7d99412c68ead35fe24d98bb8be1f5237646bda4/aptos-move/block-executor/src/executor.rs#L819" target="_blank" rel="noreferrer">aptos-core · executor.rs</a></td><td><code>update_on_validation</code>、<code>validate</code></td></tr>
+            <tr><td>Block-STM 调度</td><td><a href="https://github.com/aptos-labs/aptos-core/blob/7d99412c68ead35fe24d98bb8be1f5237646bda4/aptos-move/block-executor/src/scheduler.rs#L463" target="_blank" rel="noreferrer">aptos-core · scheduler.rs</a></td><td><code>try_abort</code> / <code>finish_abort</code> / <code>try_commit</code></td></tr>
+            <tr><td>多版本内存</td><td><a href="https://github.com/aptos-labs/aptos-core/blob/7d99412c68ead35fe24d98bb8be1f5237646bda4/aptos-move/mvhashmap/src/versioned_data.rs#L435" target="_blank" rel="noreferrer">aptos-core · versioned_data.rs</a></td><td><code>mark_estimate</code>、版本与 estimate 标记</td></tr>
+            <tr><td>Sei 调度</td><td><a href="https://github.com/sei-protocol/sei-chain/blob/4d01ff302c3332c3bac35bbd9ddd2b052662199b/sei-cosmos/tasks/scheduler.go#L279" target="_blank" rel="noreferrer">sei-chain · scheduler.go</a></td><td><code>ProcessAll</code>、10 轮上限、重放</td></tr>
+            <tr><td>Sei 读集校验</td><td><a href="https://github.com/sei-protocol/sei-chain/blob/4d01ff302c3332c3bac35bbd9ddd2b052662199b/sei-cosmos/store/multiversion/store.go#L392" target="_blank" rel="noreferrer">sei-chain · store.go</a></td><td><code>checkReadsetAtIndex</code> 比值</td></tr>
+            <tr><td>Sei 读路径</td><td><a href="https://github.com/sei-protocol/sei-chain/blob/4d01ff302c3332c3bac35bbd9ddd2b052662199b/sei-cosmos/store/multiversion/mvkv.go#L145" target="_blank" rel="noreferrer">sei-chain · mvkv.go</a></td><td>命中 estimate → abort</td></tr>
+            <tr><td>Monad 执行</td><td><a href="https://github.com/category-labs/monad/blob/main/category/execution/ethereum/execute_transaction.cpp" target="_blank" rel="noreferrer">monad · execute_transaction.cpp</a></td><td><code>prev_.wait()</code>、<code>can_merge</code>、重试</td></tr>
+            <tr><td>Monad 合并</td><td><a href="https://github.com/category-labs/monad/blob/main/category/execution/ethereum/state2/block_state.cpp" target="_blank" rel="noreferrer">monad · block_state.cpp</a></td><td><code>can_merge</code> 逐槽比对</td></tr>
+            <tr><td>Solana 调度</td><td><a href="https://github.com/anza-xyz/agave/blob/5bb304027fe1a166b02cb26dc8c161593f416fca/core/src/banking_stage/transaction_scheduler/greedy_scheduler.rs#L258" target="_blank" rel="noreferrer">agave · greedy_scheduler.rs</a></td><td>静态锁集合、选线程</td></tr>
+            <tr><td>Solana 锁</td><td><a href="https://github.com/anza-xyz/agave/blob/5bb304027fe1a166b02cb26dc8c161593f416fca/scheduling-utils/src/thread_aware_account_locks.rs#L89" target="_blank" rel="noreferrer">agave · thread_aware_account_locks.rs</a></td><td>thread-aware 锁与冲突错误</td></tr>
+            <tr><td>Solana bank 锁</td><td><a href="https://github.com/anza-xyz/agave/blob/5bb304027fe1a166b02cb26dc8c161593f416fca/accounts-db/src/account_locks.rs#L56" target="_blank" rel="noreferrer">agave · account_locks.rs</a></td><td><code>AccountInUse</code> 与重试</td></tr>
+            <tr><td>Sui 调度</td><td><a href="https://github.com/MystenLabs/sui/blob/e83d69069e4023cce4a2dcde2b9c74384418fee1/crates/sui-core/src/execution_scheduler/execution_scheduler_impl.rs#L65" target="_blank" rel="noreferrer">sui · execution_scheduler_impl.rs</a></td><td>输入对象、barrier 依赖</td></tr>
+            <tr><td>Sui 对象</td><td><a href="https://github.com/MystenLabs/sui/blob/e83d69069e4023cce4a2dcde2b9c74384418fee1/crates/sui-types/src/transaction.rs#L4980" target="_blank" rel="noreferrer">sui · transaction.rs</a></td><td><code>InputObjectKind</code></td></tr>
+            <tr><td>MegaETH 执行器</td><td><a href="https://github.com/megaeth-labs/mega-evm/blob/cfdb825092c538f8c284abeaace06195166b6cef/crates/mega-evm/src/block/executor.rs#L587" target="_blank" rel="noreferrer">mega-evm · executor.rs</a></td><td>execute / commit 分离</td></tr>
+            <tr><td>Hyperliquid</td><td><a href="https://hyperliquid.gitbook.io/hyperliquid-docs/hypercore/order-book" target="_blank" rel="noreferrer">官方 · order book</a></td><td>语义感知排序；无并行执行说明</td></tr>
+          </tbody>
+        </table>
+      </div>
+
+      <div class="callout reveal">
+        <strong>读源码时的三个核对点：</strong>
+        ① 版本到底由谁分配（交易 / 共识 / 执行序号）；
+        ② 校验比较的是版本还是值；
+        ③ 提交是边跑边提交还是块末统一写回。
+        这三点决定了确定性证明的形态。
+      </div>
+    </section>
+
+
+    <section class="section final-note">
+      <div class="quote-card reveal">
+        <p>并行执行没有银弹：<strong>静态声明用灵活性换确定性，乐观检测用重放换通用性，流水线用专用化换延迟。</strong>看懂一条链的取舍，比记住它的 TPS 有用得多。</p>
+      </div>
+      <p class="small reveal">
+        数据与源码基线见各节标注；EIP-7928 状态为 Last Call（2026-11）。相关页面：
+        <a href="../../solana/accountsdb/index.html">Solana AccountsDB 源码分析</a>。
+      </p>
+    </section>
+  </main>
+
+  <footer class="site-footer">
+    <span>Parallel Execution · 源码与取舍</span>
+    <a href="../../index.html#parallel-execution">返回 HTML 索引</a>
+  </footer>
+  <script src="./app.js"></script>
+</body>
+</html>

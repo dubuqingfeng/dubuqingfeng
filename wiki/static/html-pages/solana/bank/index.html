@@ -1,0 +1,372 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Solana Bank 源码分析 · Agave v4.4.1</title>
+  <meta name="description" content="沿 Agave v4.4.1 源码理解 Solana Bank：状态视图、new_from_parent、交易执行、freeze、squash/root、bank hash 与 Bank drop。">
+  <script src="../../theme.js"></script>
+  <link rel="stylesheet" href="../accountsdb/style.css">
+  <link rel="stylesheet" href="./style.css">
+  <script>document.documentElement.classList.add('js');</script>
+</head>
+<body>
+  <div class="progress" aria-hidden="true"><span id="progressBar"></span></div>
+  <a class="skip-link" href="#main">跳到正文</a>
+
+  <header class="site-header">
+    <a class="brand" href="./index.html">
+      <span class="brand-mark">▤</span>
+      <span>Solana Bank</span>
+    </a>
+    <nav class="site-nav" aria-label="章节导航">
+      <a href="#model">心智模型</a>
+      <a href="#create">创建</a>
+      <a href="#transactions">交易</a>
+      <a href="#freeze">freeze</a>
+      <a href="#root">root</a>
+      <a href="#drop">drop</a>
+      <a href="#source">源码</a>
+    </nav>
+    <div class="header-actions">
+      <a class="back-link" href="../accountsdb/index.html">AccountsDB</a>
+      <a class="back-link" href="../../index.html#bank">HTML 索引</a>
+      <button class="theme-toggle" type="button" data-theme-toggle aria-label="切换日间/夜间模式">
+        <span data-theme-icon aria-hidden="true">☾</span>
+      </button>
+    </div>
+  </header>
+
+  <main id="main">
+    <section class="hero">
+      <div class="hero-copy reveal">
+        <p class="eyebrow">Agave v4.4.1 · Bank Source Walkthrough</p>
+        <h1>Bank 不是账户数据库，<br><span>它是某条分叉上的执行状态视图。</span></h1>
+        <p class="lede">
+          一笔交易在 Bank 上执行，账户增量写入 AccountsDB；但 Bank 自己保存的是
+          <strong>parent、ancestors、root 路径、状态缓存、bank hash</strong>。
+          它把“执行”和“持久化”接在一起，却不等于账本最终确认。
+        </p>
+        <div class="hero-actions">
+          <a class="button primary" href="#model">先看心智模型</a>
+          <button class="button" type="button" data-play-lifecycle>播放生命周期</button>
+        </div>
+        <div class="hero-meta">
+          <span>基线：<code>5bb30402</code></span>
+          <span>边界：Bank 本地状态 ≠ 网络最终性</span>
+        </div>
+      </div>
+
+      <div class="hero-visual reveal" aria-label="Bank 与 SVM、AccountsDB 的关系">
+        <svg viewBox="0 0 760 360" role="img" aria-labelledby="bankHeroTitle bankHeroDesc">
+          <title id="bankHeroTitle">Bank 连接 SVM 与 AccountsDB</title>
+          <desc id="bankHeroDesc">Bank 持有 ancestors 和 parent 指针，调用 SVM 执行交易，把账户增量提交给 AccountsDB，并在 freeze 时计算 bank hash。</desc>
+          <defs>
+            <marker id="arrow" markerWidth="9" markerHeight="9" refX="8" refY="4.5" orient="auto">
+              <path d="M0 0L9 4.5L0 9Z" fill="currentColor"/>
+            </marker>
+            <linearGradient id="bankGlow" x1="0" x2="1">
+              <stop offset="0" stop-color="#2563eb" stop-opacity=".13"/>
+              <stop offset="1" stop-color="#2563eb" stop-opacity=".02"/>
+            </linearGradient>
+          </defs>
+          <rect x="16" y="20" width="728" height="320" rx="22" fill="url(#bankGlow)"/>
+
+          <g class="svg-node">
+            <rect x="44" y="72" width="180" height="82" rx="14"/>
+            <text x="134" y="106" text-anchor="middle" class="svg-title">Bank</text>
+            <text x="134" y="130" text-anchor="middle" class="svg-sub">ancestors · parent · hash</text>
+          </g>
+          <g class="svg-node">
+            <rect x="292" y="72" width="176" height="82" rx="14"/>
+            <text x="380" y="106" text-anchor="middle" class="svg-title">SVM</text>
+            <text x="380" y="130" text-anchor="middle" class="svg-sub">execute · CPI · CU</text>
+          </g>
+          <g class="svg-node">
+            <rect x="536" y="72" width="180" height="82" rx="14"/>
+            <text x="626" y="106" text-anchor="middle" class="svg-title">AccountsDB</text>
+            <text x="626" y="130" text-anchor="middle" class="svg-sub">cache · index · file</text>
+          </g>
+
+          <g class="svg-node">
+            <rect x="44" y="226" width="180" height="82" rx="14"/>
+            <text x="134" y="260" text-anchor="middle" class="svg-title">BankForks</text>
+            <text x="134" y="284" text-anchor="middle" class="svg-sub">分叉与 root</text>
+          </g>
+          <g class="svg-node">
+            <rect x="292" y="226" width="176" height="82" rx="14"/>
+            <text x="380" y="260" text-anchor="middle" class="svg-title">freeze</text>
+            <text x="380" y="284" text-anchor="middle" class="svg-sub">hash + lt hash</text>
+          </g>
+          <g class="svg-node">
+            <rect x="536" y="226" width="180" height="82" rx="14"/>
+            <text x="626" y="260" text-anchor="middle" class="svg-title">Replay / Ledger</text>
+            <text x="626" y="284" text-anchor="middle" class="svg-sub">账本与重放</text>
+          </g>
+
+          <path id="bp1" class="svg-edge" d="M224 113H292"/>
+          <path id="bp2" class="svg-edge" d="M468 113H536"/>
+          <path id="bp3" class="svg-edge" d="M134 154V226"/>
+          <path id="bp4" class="svg-edge" d="M380 154V226"/>
+          <path id="bp5" class="svg-edge" d="M468 267H536"/>
+
+          <circle r="4.5" class="svg-dot"><animateMotion dur="3.2s" repeatCount="indefinite"><mpath href="#bp1"/></animateMotion></circle>
+          <circle r="4.5" class="svg-dot"><animateMotion dur="3.2s" begin="1s" repeatCount="indefinite"><mpath href="#bp2"/></animateMotion></circle>
+          <circle r="4.5" class="svg-dot"><animateMotion dur="2.8s" begin=".4s" repeatCount="indefinite"><mpath href="#bp3"/></animateMotion></circle>
+          <circle r="4.5" class="svg-dot"><animateMotion dur="2.8s" begin="1.2s" repeatCount="indefinite"><mpath href="#bp4"/></animateMotion></circle>
+          <circle r="4.5" class="svg-dot"><animateMotion dur="2.8s" begin="1.8s" repeatCount="indefinite"><mpath href="#bp5"/></animateMotion></circle>
+
+          <text x="258" y="58" text-anchor="middle" class="svg-note">执行交易</text>
+          <text x="502" y="58" text-anchor="middle" class="svg-note">账户增量</text>
+          <text x="134" y="205" text-anchor="middle" class="svg-note">分叉可见性</text>
+          <text x="380" y="205" text-anchor="middle" class="svg-note">冻结后算 hash</text>
+        </svg>
+      </div>
+    </section>
+
+    <section id="model" class="section">
+      <div class="section-head reveal">
+        <p class="eyebrow">01 · 心智模型</p>
+        <h2>Bank 是“某个 slot 的执行视图”</h2>
+        <p class="section-lede">
+          Bank 的账户状态来自 AccountsDB，但 Bank 还保存了 parent、ancestors、状态缓存和 hash。
+          读账户时，先由 Bank 决定哪些 slot 可见，再由 AccountsDB 找位置。
+        </p>
+      </div>
+
+      <div class="quote-card reveal">
+        <p>Bank 不是账户本身，而是“在某个分叉上，账户和交易状态现在是什么样”的本地视图。</p>
+      </div>
+
+      <div class="table-wrap reveal">
+        <table class="source-table">
+          <thead><tr><th>Bank 字段</th><th>作用</th><th>不要误解</th></tr></thead>
+          <tbody>
+            <tr><td><code>rc.accounts</code></td><td>指向共享的 Accounts / AccountsDB</td><td>不是每个 Bank 复制一份账户</td></tr>
+            <tr><td><code>ancestors</code></td><td>当前分叉可见的 slot 集合</td><td>不是“最大 slot 一定可见”</td></tr>
+            <tr><td><code>rc.parent</code></td><td>父 Bank 的 Arc 指针</td><td>squash 后会清空</td></tr>
+            <tr><td><code>hash</code></td><td>freeze 后的 bank hash</td><td>freeze 前没有最终值</td></tr>
+            <tr><td><code>status_cache</code></td><td>签名状态缓存</td><td>不是账户状态</td></tr>
+            <tr><td><code>transaction_processor</code></td><td>程序缓存、sysvar cache、执行成本</td><td>不直接拥有账户</td></tr>
+            <tr><td><code>bank_id</code></td><td>区分同一 slot 的不同 Bank 实例</td><td>不能只用 slot 去重</td></tr>
+          </tbody>
+        </table>
+      </div>
+    </section>
+
+    <section id="create" class="section">
+      <div class="section-head reveal">
+        <p class="eyebrow">02 · 创建</p>
+        <h2 class="one-line-title">new_from_parent：先冻结父节点，再共享账户库</h2>
+        <p class="section-lede">
+          新 Bank 不是从空状态开始，而是继承父 Bank 的账户视图、状态缓存、blockhash 队列和程序缓存。
+        </p>
+      </div>
+
+      <div class="split-layout">
+        <article class="code-card reveal">
+          <div class="code-head"><span>bank.rs · new_from_parent</span><span class="tag">v4.4.1</span></div>
+<pre><code>parent.freeze();
+
+let accounts_db = Arc::clone(&amp;parent.rc.accounts.accounts_db);
+BankRc {
+    accounts: Arc::new(Accounts::new(accounts_db)),
+    parent: RwLock::new(Some(Arc::clone(&amp;parent))),
+    bank_id_generator: Arc::clone(&amp;parent.rc.bank_id_generator),
+}
+
+let status_cache = Arc::clone(&amp;parent.status_cache);
+let bank_id = rc.bank_id_generator.fetch_add(1, Relaxed) + 1;</code></pre>
+          <p class="code-note">父节点先 freeze；新 Bank 获得新的 bank_id，但共享 AccountsDB。</p>
+        </article>
+
+        <article class="info-card reveal">
+          <h3>继承什么</h3>
+          <p>blockhash queue、stakes cache、epoch stakes、feature set、program cache 的批内视图、transaction log 配置等。</p>
+          <h3 style="margin-top: 16px;">不继承什么</h3>
+          <p>新 Bank 有自己的 slot、bank_id、hash、transaction 计数和账户增量；它不是父 Bank 的别名。</p>
+        </article>
+      </div>
+    </section>
+
+    <section id="transactions" class="section">
+      <div class="section-head reveal">
+        <p class="eyebrow">03 · 交易路径</p>
+        <h2>execute 与 commit 是两段</h2>
+        <p class="section-lede">
+          Bank 先把交易交给 SVM 执行，拿到 <code>ProcessedTransaction</code>，再决定写回哪些账户。
+        </p>
+      </div>
+
+      <div class="bank-flow reveal">
+        <div class="flow-node"><b>Bank</b><small>load_execute_and_commit</small></div>
+        <div class="flow-arrow">→</div>
+        <div class="flow-node"><b>SVM</b><small>validate · load · execute</small></div>
+        <div class="flow-arrow">→</div>
+        <div class="flow-node"><b>ProcessedTransaction</b><small>Executed / FeesOnly / NoOp</small></div>
+        <div class="flow-arrow">→</div>
+        <div class="flow-node"><b>commit_transactions</b><small>collect + store</small></div>
+        <div class="flow-arrow">→</div>
+        <div class="flow-node"><b>AccountsDB</b><small>账户增量</small></div>
+      </div>
+
+      <div class="callout reveal">
+        <strong>失败交易也不是“什么都没发生”。</strong>成功交易写回 writable + touched 账户；
+        失败交易只写回 fee payer / nonce 的 rollback accounts；NoOp 不写账户。
+      </div>
+
+      <p class="small reveal" style="margin-top: 16px;">
+        SVM 细节见 <a href="/docs/Wiki/blockchain/solana/svm" target="_blank" rel="noreferrer">Solana SVM 源码分析</a>。
+      </p>
+    </section>
+
+    <section id="freeze" class="section">
+      <div class="section-head reveal">
+        <p class="eyebrow">04 · freeze</p>
+        <h2>冻结：把可变视图变成可哈希状态</h2>
+        <p class="section-lede">
+          freeze 是单向的本地生命周期变化；它阻止新提交，完成延迟费用处理，等待 lt hash 更新，然后计算 bank hash。
+        </p>
+      </div>
+
+      <div class="lifecycle-player reveal" data-lifecycle-player>
+        <div class="player-toolbar">
+          <button type="button" class="button small" data-lifecycle-prev>上一步</button>
+          <button type="button" class="button small primary" data-lifecycle-play>播放</button>
+          <button type="button" class="button small" data-lifecycle-next>下一步</button>
+          <span class="step-counter" data-lifecycle-counter>1 / 5</span>
+        </div>
+        <div class="lifecycle-stage">
+          <div class="lifecycle-node" data-lifecycle-node="create"><b>new_from_parent</b><small>共享账户库</small></div>
+          <div class="lifecycle-arrow">→</div>
+          <div class="lifecycle-node" data-lifecycle-node="execute"><b>execute</b><small>SVM 执行</small></div>
+          <div class="lifecycle-arrow">→</div>
+          <div class="lifecycle-node" data-lifecycle-node="freeze"><b>freeze</b><small>bank hash</small></div>
+          <div class="lifecycle-arrow">→</div>
+          <div class="lifecycle-node" data-lifecycle-node="squash"><b>squash</b><small>root</small></div>
+          <div class="lifecycle-arrow">→</div>
+          <div class="lifecycle-node" data-lifecycle-node="drop"><b>drop</b><small>清理未 root</small></div>
+        </div>
+        <p class="lifecycle-caption" data-lifecycle-caption></p>
+      </div>
+
+      <div class="timeline reveal" style="margin-top: 18px;">
+        <div class="timeline-step"><span class="dot"></span><h3>拿 hash 写锁</h3><p>阻止 BankingStage 在最后 tick 之后继续提交。</p></div>
+        <div class="timeline-step"><span class="dot"></span><h3>收尾</h3><p>分发费用、更新 slot history、运行 incinerator。</p></div>
+        <div class="timeline-step"><span class="dot"></span><h3>lt hash</h3><p><code>finish_accounts_lt_hash_updates</code> 等待异步更新。</p></div>
+        <div class="timeline-step"><span class="dot"></span><h3>bank hash</h3><p>parent hash + 签名数 + 最后 blockhash + lt hash。</p></div>
+        <div class="timeline-step"><span class="dot"></span><h3>标记 frozen</h3><p>写缓存标记 frozen，等待 flush/clean。</p></div>
+      </div>
+
+      <div class="code-card reveal" style="margin-top: 20px;">
+        <div class="code-head"><span>bank.rs · hash_internal_state</span><span class="tag">v4.4.1</span></div>
+<pre><code>let mut hash = hashv(&amp;[
+    self.parent_hash.as_ref(),
+    &amp;self.signature_count().to_le_bytes(),
+    self.last_blockhash().as_ref(),
+]);
+
+let lt_hash_bytes = bytemuck::must_cast_slice(&amp;accounts_lt_hash.0.0);
+hash = hashv(&amp;[hash.as_ref(), lt_hash_bytes]);</code></pre>
+      </div>
+    </section>
+
+    <section id="root" class="section">
+      <div class="section-head reveal">
+        <p class="eyebrow">05 · squash 与 root</p>
+        <h2>freeze 不等于 root</h2>
+        <p class="section-lede">
+          freeze 只是本地可哈希；root 是分叉选择后的持久边界。squash 会把这条路径上的 slot 标记为 root。
+        </p>
+      </div>
+
+      <div class="card-grid three">
+        <article class="info-card reveal"><h3>freeze</h3><p>本地状态固定，bank hash 计算完成；仍可能落在失败分叉上。</p></article>
+        <article class="info-card reveal"><h3>root</h3><p>分叉选择后的祖先路径边界；root 以下可以 flush、clean、进入快照。</p></article>
+        <article class="info-card reveal"><h3>finalized</h3><p>集群确认语义；不是 Bank 本地字段，不能从 freeze 直接推出。</p></article>
+      </div>
+
+      <div class="quote-card reveal" style="margin-top: 20px;">
+        <p><code>squash</code> 会先 freeze，然后对自身及父链调用 <code>add_root</code>，清空 parent 指针，并把 root 写入 status cache。</p>
+      </div>
+    </section>
+
+    <section id="drop" class="section">
+      <div class="section-head reveal">
+        <p class="eyebrow">06 · drop 与清理</p>
+        <h2>死分叉的账户状态怎么回收</h2>
+        <p class="section-lede">
+          Bank drop 会触发 drop callback 或直接 purge 未 root 的 slot；同一 slot 可能有多个 Bank 实例，所以要用 bank_id。
+        </p>
+      </div>
+
+      <div class="split-layout">
+        <article class="info-card reveal">
+          <h3>未 root 的 slot</h3>
+          <p>只存在于写缓存，不在主索引；drop 时从缓存清除，并让 clean 处理 secondary index / write-through 收尾。</p>
+        </article>
+        <article class="info-card reveal">
+          <h3>已 root 的 slot</h3>
+          <p>不会被当作死分叉删除；它已经进入持久化与快照生命周期。</p>
+        </article>
+      </div>
+    </section>
+
+    <section id="failure" class="section">
+      <div class="section-head reveal">
+        <p class="eyebrow">07 · 失败与边界</p>
+        <h2>哪些事情 Bank 不能替你保证</h2>
+      </div>
+
+      <div class="card-grid three">
+        <article class="info-card reveal"><h3>本地 freeze ≠ 最终确认</h3><p>失败分叉也可以 freeze；最终性由共识和 root 推进决定。</p></article>
+        <article class="info-card reveal"><h3>bank hash 不匹配</h3><p>重放或快照校验时 hash 不一致，不能把状态当作可信。</p></article>
+        <article class="info-card reveal"><h3>失败交易的副作用</h3><p>fee payer 扣费、durable nonce 推进仍可能保留；不是所有状态都回滚。</p></article>
+        <article class="info-card reveal"><h3>父节点已 freeze</h3><p>new_from_parent 会先冻结父节点；父状态不再接受新提交。</p></article>
+        <article class="info-card reveal"><h3>drop 顺序</h3><p>Bank drop 必须与 ABS 的 flush/clean/purge 串行，否则可能读到半清理状态。</p></article>
+        <article class="info-card reveal"><h3>账户可见性</h3><p>Bank 决定 ancestors；AccountsDB 只按这个可见集合选版本。</p></article>
+      </div>
+    </section>
+
+    <section id="source" class="section">
+      <div class="section-head reveal">
+        <p class="eyebrow">08 · 源码地图</p>
+        <h2>沿 Bank 生命周期读</h2>
+        <p class="section-lede">链接固定到 Agave v4.4.1 提交 <code>5bb30402</code>。</p>
+      </div>
+
+      <div class="table-wrap reveal">
+        <table class="source-table">
+          <thead><tr><th>主题</th><th>入口</th><th>看什么</th></tr></thead>
+          <tbody>
+            <tr><td>创建</td><td><a href="https://github.com/anza-xyz/agave/blob/5bb304027fe1a166b02cb26dc8c161593f416fca/runtime/src/bank.rs#L1429" target="_blank" rel="noreferrer">new_from_parent</a></td><td>父 freeze、共享 AccountsDB、bank_id</td></tr>
+            <tr><td>交易</td><td><a href="https://github.com/anza-xyz/agave/blob/5bb304027fe1a166b02cb26dc8c161593f416fca/runtime/src/bank.rs#L4787" target="_blank" rel="noreferrer">load_execute_and_commit_transactions</a></td><td>SVM 执行 + 提交</td></tr>
+            <tr><td>提交</td><td><a href="https://github.com/anza-xyz/agave/blob/5bb304027fe1a166b02cb26dc8c161593f416fca/runtime/src/bank.rs#L4548" target="_blank" rel="noreferrer">commit_transactions</a></td><td>collect accounts、lt hash、store</td></tr>
+            <tr><td>冻结</td><td><a href="https://github.com/anza-xyz/agave/blob/5bb304027fe1a166b02cb26dc8c161593f416fca/runtime/src/bank.rs#L3240" target="_blank" rel="noreferrer">freeze</a></td><td>hash 锁、lt hash、bank hash</td></tr>
+            <tr><td>root</td><td><a href="https://github.com/anza-xyz/agave/blob/5bb304027fe1a166b02cb26dc8c161593f416fca/runtime/src/bank.rs#L3309" target="_blank" rel="noreferrer">squash</a></td><td>add_root、清空 parent、status cache</td></tr>
+            <tr><td>读账户</td><td><a href="https://github.com/anza-xyz/agave/blob/5bb304027fe1a166b02cb26dc8c161593f416fca/runtime/src/bank.rs#L5310" target="_blank" rel="noreferrer">get_account</a></td><td>ancestors + AccountsDB load</td></tr>
+            <tr><td>哈希</td><td><a href="https://github.com/anza-xyz/agave/blob/5bb304027fe1a166b02cb26dc8c161593f416fca/runtime/src/bank.rs#L5609" target="_blank" rel="noreferrer">hash_internal_state</a></td><td>parent hash + signature count + lt hash</td></tr>
+            <tr><td>drop</td><td><a href="https://github.com/anza-xyz/agave/blob/5bb304027fe1a166b02cb26dc8c161593f416fca/runtime/src/bank.rs#L7453" target="_blank" rel="noreferrer">impl Drop for Bank</a></td><td>purge 未 root slot / callback</td></tr>
+          </tbody>
+        </table>
+      </div>
+    </section>
+
+    <section class="section final-note">
+      <div class="quote-card reveal">
+        <p>Bank 把“执行结果”变成“可提交的账户增量 + 可验证的 bank hash”；AccountsDB 负责把这些增量按 slot 存下来。</p>
+      </div>
+      <p class="small reveal">
+        版本基线：Agave v4.4.1 / <code>5bb30402</code>。账户侧见
+        <a href="../accountsdb/index.html">AccountsDB 源码分析</a>。
+      </p>
+    </section>
+  </main>
+
+  <footer class="site-footer">
+    <span>Solana Bank · Agave v4.4.1</span>
+    <a href="../../index.html#bank">返回 HTML 索引</a>
+  </footer>
+  <script src="./app.js"></script>
+</body>
+</html>

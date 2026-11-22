@@ -1,0 +1,83 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1200" height="760" viewBox="0 0 1200 760" role="img" aria-labelledby="title desc">
+  <title id="title">Solana RPC getAccountInfo 与 getProgramAccounts 的源码路径</title>
+  <desc id="desc">Agave v4.4.1：两个方法都先按 commitment 选 Bank；getAccountInfo 通过 account_resolver 调 Bank::get_account，走 AccountsDB 的 cache-first 读；getProgramAccounts 先校验和优化 filters，再在 ProgramId 二级索引可用时走 index_scan_accounts，否则全量 scan_accounts，随后过滤、可选排序和编码；dataSlice 只影响输出，context.slot 是 Bank 的 slot，minContextSlot 只是下限检查。</desc>
+  <defs>
+    <marker id="arrow" markerWidth="9" markerHeight="9" refX="8" refY="4.5" orient="auto"><path d="M0 0L9 4.5L0 9Z" fill="#475569"/></marker>
+    <style>
+      text { font-family: system-ui, 'PingFang SC', sans-serif; fill: #172033; font-size: 16px; }
+      .heading { font-size: 22px; font-weight: 700; }
+      .sub { font-size: 14px; fill: #475569; }
+      .small { font-size: 13px; fill: #475569; }
+      .box { fill: #fff; stroke: #64748b; stroke-width: 1.5; rx: 9; }
+      .edge { fill: none; stroke: #475569; stroke-width: 2; marker-end: url(#arrow); }
+      .dash { stroke-dasharray: 7 5; }
+    </style>
+  </defs>
+  <rect width="1200" height="760" fill="#f8fafc"/>
+  <text x="30" y="38" class="heading">两个账户接口：单键读取 与 程序账户扫描</text>
+  <text x="30" y="64" class="sub">基线 Agave v4.4.1。两者都从 commitment 选出的 Bank 读状态，不是从历史快照或账本任意 slot 读账户。</text>
+
+  <rect x="20" y="82" width="570" height="300" rx="12" fill="#e0f2fe"/>
+  <text x="38" y="112" class="heading">getAccountInfo：单 pubkey</text>
+  <rect class="box" x="40" y="132" width="220" height="70"/>
+  <text x="56" y="160">JSON-RPC 请求</text>
+  <text x="56" y="182" class="small">pubkey + RpcAccountInfoConfig</text>
+  <rect class="box" x="300" y="132" width="270" height="70"/>
+  <text x="316" y="160">get_bank_with_config</text>
+  <text x="316" y="182" class="small">commitment 选 Bank；检查 minContextSlot</text>
+  <rect class="box" x="40" y="235" width="220" height="70"/>
+  <text x="56" y="263">account_resolver</text>
+  <text x="56" y="285" class="small">Bank::get_account(pubkey)</text>
+  <rect class="box" x="300" y="235" width="270" height="70"/>
+  <text x="316" y="263">AccountsDb 读路径</text>
+  <text x="316" y="285" class="small">写缓存 → read cache → 索引/文件</text>
+  <rect class="box" x="40" y="338" width="530" height="30"/>
+  <text x="56" y="359" class="small">零 lamport 账户在 load 后被过滤为 None；context.slot = bank.slot()</text>
+  <path class="edge" d="M260 167H300"/>
+  <path class="edge" d="M435 202V235"/>
+  <path class="edge" d="M260 270H300"/>
+  <path class="edge" d="M435 305V338"/>
+
+  <rect x="610" y="82" width="570" height="300" rx="12" fill="#dcfce7"/>
+  <text x="628" y="112" class="heading">getProgramAccounts：程序 + filters</text>
+  <rect class="box" x="630" y="132" width="220" height="70"/>
+  <text x="646" y="160">RpcProgramAccountsConfig</text>
+  <text x="646" y="182" class="small">filters / encoding / withContext / sort</text>
+  <rect class="box" x="890" y="132" width="270" height="70"/>
+  <text x="906" y="160">verify + optimize filters</text>
+  <text x="906" y="182" class="small">最多 4 个；memcmp ≤ 128 B；转 raw bytes</text>
+  <rect class="box" x="630" y="235" width="220" height="70"/>
+  <text x="646" y="263">ProgramId 索引可用？</text>
+  <text x="646" y="285" class="small">是 → index_scan_accounts</text>
+  <rect class="box" x="890" y="235" width="270" height="70"/>
+  <text x="906" y="263">否则 scan_accounts</text>
+  <text x="906" y="285" class="small">缓存 + 主索引；owner + filters</text>
+  <rect class="box" x="630" y="338" width="530" height="30"/>
+  <text x="646" y="359" class="small">filter_allows：DataSize / Memcmp / TokenAccountState；可选按 pubkey 排序；dataSlice 只影响编码</text>
+  <path class="edge" d="M850 167H890"/>
+  <path class="edge" d="M1025 202V235"/>
+  <path class="edge" d="M850 270H890"/>
+  <path class="edge" d="M1025 305V338"/>
+
+  <rect x="20" y="405" width="1160" height="150" rx="12" fill="#fef3c7"/>
+  <text x="38" y="435" class="heading">共享语义：commitment、context、编码</text>
+  <rect class="box" x="40" y="455" width="330" height="80"/>
+  <text x="56" y="482">context.slot</text>
+  <text x="56" y="504" class="small">是所选 Bank 的 slot，不是账户最后修改 slot</text>
+  <text x="56" y="524" class="small">minContextSlot 不满足时直接报错</text>
+  <rect class="box" x="400" y="455" width="330" height="80"/>
+  <text x="416" y="482">encoding</text>
+  <text x="416" y="504" class="small">getAccountInfo 默认 Binary；getMultiple 默认 Base64</text>
+  <text x="416" y="524" class="small">base58 超过 128 B 要求改用 Base64</text>
+  <rect class="box" x="760" y="455" width="400" height="80"/>
+  <text x="776" y="482">dataSlice</text>
+  <text x="776" y="504" class="small">offset/length 在 encode 时裁剪输出</text>
+  <text x="776" y="524" class="small">不改变 filters 看到的完整账户数据</text>
+
+  <rect x="20" y="578" width="1160" height="140" rx="12" fill="#f1f5f9"/>
+  <text x="38" y="608" class="heading">边界</text>
+  <text x="40" y="636" class="small">• getProgramAccounts 没有分页；结果集大小和扫描成本由节点/提供商限制；索引路径受 scan_results_limit_bytes 约束，全量扫描路径没有同样的结果字节上限。</text>
+  <text x="40" y="660" class="small">• 零 lamport / 默认账户会被过滤；ProgramId 索引启用但 key 被 exclude 时返回 KeyExcludedFromSecondaryIndex。</text>
+  <text x="40" y="684" class="small">• getProgramAccounts 默认 withContext=false、sortResults=true；getAccountInfo 总是带 context。</text>
+  <text x="40" y="708" class="small">• filters 在完整 data 上执行；dataSlice 之后才编码，因此不能靠 dataSlice 降低过滤成本。</text>
+</svg>
