@@ -1,0 +1,1204 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Bitcoin Core 安全漏洞源码分析 · 2024–2026</title>
+  <meta name="description" content="基于 Bitcoin Core master（32.99 / 19128e8，2026-11-21）的 15 个安全漏洞源码分析：compact block、P2P 背压、TRUC、sighash、脚本 UAF、undo 文件、日志限速与 addrman。">
+  <script src="../../theme.js"></script>
+  <link rel="stylesheet" href="./style.css">
+  <script>document.documentElement.classList.add('js');</script>
+</head>
+<body>
+  <div class="progress" aria-hidden="true"><span id="progressBar"></span></div>
+  <a class="skip-link" href="#main">跳到正文</a>
+
+  <header class="site-header">
+    <a class="brand" href="./index.html">
+      <span class="brand-mark">₿</span>
+      <span>Bitcoin Security</span>
+    </a>
+    <nav class="site-nav" aria-label="章节导航">
+      <a href="#overview">总览</a>
+      <a href="#timeline">时间线</a>
+      <a href="#matrix">漏洞表</a>
+      <a href="#download">下载层</a>
+      <a href="#network">资源层</a>
+      <a href="#mempool">内存池</a>
+      <a href="#validation">验证层</a>
+      <a href="#storage">存储层</a>
+      <a href="#wiring">串联</a>
+      <a href="#versions">版本</a>
+      <a href="#source">源码</a>
+    </nav>
+    <div class="header-actions">
+      <a class="back-link" href="../../index.html">HTML 索引</a>
+      <button class="theme-toggle" type="button" data-theme-toggle aria-label="切换日间/夜间模式">
+        <span data-theme-icon aria-hidden="true">☾</span>
+      </button>
+    </div>
+  </header>
+
+  <main id="main">
+    <section class="hero">
+      <div class="hero-copy reveal">
+        <p class="eyebrow">BITCOIN CORE · MASTER 32.99 · 19128E8</p>
+        <h1>15 个 CVE，<br><span>没有一个是“印钞漏洞”。</span></h1>
+        <p class="lede">
+          2024–2026 这批 Bitcoin Core 披露的共同点，不是改账本，
+          而是让节点<strong>算不完、记不住、写不下、连不上</strong>。
+          它们分布在 compact block、P2P 背压、mempool 策略、脚本验证、
+          undo 文件、日志和 addrman 里。
+        </p>
+        <div class="hero-actions">
+          <a class="button primary" href="#matrix">看漏洞矩阵</a>
+          <button class="button" type="button" data-play-compact>播放 compact block 攻击</button>
+        </div>
+        <div class="hero-meta">
+          <span>基线：<code>19128e8b</code></span>
+          <span>代码日期：2026-11-21</span>
+          <span>官方公告：15 条</span>
+        </div>
+      </div>
+
+      <div class="hero-visual reveal" aria-label="Bitcoin Core P2P 消息到资源耗尽与崩溃的攻击面">
+        <svg viewBox="0 0 760 430" role="img" aria-labelledby="heroTitle heroDesc">
+          <title id="heroTitle">一条 P2P 消息的四个落点</title>
+          <desc id="heroDesc">恶意 peer 发送 compact block、inv、addr 或无效交易，进入 PeerManager 后分别影响下载状态、内存池、脚本验证和磁盘日志。</desc>
+          <defs>
+            <marker id="arrow" markerWidth="9" markerHeight="9" refX="8" refY="4.5" orient="auto">
+              <path d="M0 0L9 4.5L0 9Z" fill="currentColor"/>
+            </marker>
+            <linearGradient id="heroGlow" x1="0" x2="1">
+              <stop offset="0" stop-color="#f59e0b" stop-opacity=".15"/>
+              <stop offset="1" stop-color="#ef4444" stop-opacity=".03"/>
+            </linearGradient>
+          </defs>
+          <rect x="14" y="16" width="732" height="398" rx="24" fill="url(#heroGlow)"/>
+
+          <g class="svg-node">
+            <rect x="36" y="176" width="150" height="74" rx="14"/>
+            <text x="111" y="203" text-anchor="middle" class="svg-title">Malicious Peer</text>
+            <text x="111" y="225" text-anchor="middle" class="svg-sub">cmpctblock · inv · addr</text>
+          </g>
+
+          <g class="svg-node accent">
+            <rect x="268" y="164" width="208" height="98" rx="16"/>
+            <text x="372" y="194" text-anchor="middle" class="svg-title">PeerManager</text>
+            <text x="372" y="216" text-anchor="middle" class="svg-sub">net_processing.cpp</text>
+            <text x="372" y="238" text-anchor="middle" class="svg-sub">状态机 · 限流 · 策略</text>
+          </g>
+
+          <g class="svg-node">
+            <rect x="552" y="36" width="172" height="72" rx="13"/>
+            <text x="638" y="62" text-anchor="middle" class="svg-title">Download State</text>
+            <text x="638" y="83" text-anchor="middle" class="svg-sub">35202 · 62859 · 52922</text>
+          </g>
+          <g class="svg-node">
+            <rect x="552" y="140" width="172" height="72" rx="13"/>
+            <text x="638" y="166" text-anchor="middle" class="svg-title">Memory / CPU</text>
+            <text x="638" y="187" text-anchor="middle" class="svg-sub">117348 · 117349 · 117350</text>
+          </g>
+          <g class="svg-node">
+            <rect x="552" y="244" width="172" height="72" rx="13"/>
+            <text x="638" y="270" text-anchor="middle" class="svg-title">Mempool / Policy</text>
+            <text x="638" y="291" text-anchor="middle" class="svg-sub">62861 · 46598</text>
+          </g>
+          <g class="svg-node">
+            <rect x="552" y="348" width="172" height="62" rx="13"/>
+            <text x="638" y="374" text-anchor="middle" class="svg-title">Disk / Crash</text>
+            <text x="638" y="395" text-anchor="middle" class="svg-sub">52911 · 46597 · 117346</text>
+          </g>
+
+          <path id="hp1" class="svg-edge" d="M186 213H268"/>
+          <path id="hp2" class="svg-edge" d="M476 188C510 160, 518 92, 552 73"/>
+          <path id="hp3" class="svg-edge" d="M476 206H552"/>
+          <path id="hp4" class="svg-edge" d="M476 224C510 250, 518 270, 552 279"/>
+          <path id="hp5" class="svg-edge" d="M476 242C510 290, 518 370, 552 380"/>
+
+          <circle r="4" class="svg-dot"><animateMotion dur="2.6s" repeatCount="indefinite"><mpath href="#hp1"/></animateMotion></circle>
+          <circle r="4" class="svg-dot"><animateMotion dur="3.1s" begin=".6s" repeatCount="indefinite"><mpath href="#hp2"/></animateMotion></circle>
+          <circle r="4" class="svg-dot"><animateMotion dur="2.9s" begin="1s" repeatCount="indefinite"><mpath href="#hp3"/></animateMotion></circle>
+          <circle r="4" class="svg-dot"><animateMotion dur="3.2s" begin="1.3s" repeatCount="indefinite"><mpath href="#hp4"/></animateMotion></circle>
+          <circle r="4" class="svg-dot"><animateMotion dur="3.3s" begin="1.8s" repeatCount="indefinite"><mpath href="#hp5"/></animateMotion></circle>
+
+          <text x="224" y="202" text-anchor="middle" class="svg-note">消息入口</text>
+          <text x="512" y="156" text-anchor="middle" class="svg-note">重建/请求</text>
+          <text x="512" y="270" text-anchor="middle" class="svg-note">策略/验证</text>
+        </svg>
+      </div>
+    </section>
+
+    <section id="overview" class="section">
+      <div class="section-head reveal">
+        <p class="eyebrow">01 · 先把结论放前面</p>
+        <h2>它们不是“比特币被攻破”，而是节点被拖垮</h2>
+        <p class="section-lede">
+          15 个 CVE 里没有增发、没有共识分裂、没有私钥泄露。
+          影响集中在可用性：远程崩溃、CPU/内存/磁盘耗尽，以及一个会让矿工无法出块的 mempool 不一致。
+        </p>
+      </div>
+
+      <div class="stat-grid reveal">
+        <div class="stat-card"><strong>15</strong><span>个 CVE</span><small>2024-10 至 2026-11 公开</small></div>
+        <div class="stat-card"><strong>3</strong><span>High</span><small>52911 · 35202 · 62861</small></div>
+        <div class="stat-card"><strong>9</strong><span>DoS</span><small>CPU / 内存 / 磁盘 / 下载</small></div>
+        <div class="stat-card"><strong>0</strong><span>增发或共识分裂</span><small>这是最重要的边界</small></div>
+      </div>
+
+      <div class="card-grid three">
+        <article class="info-card reveal">
+          <span class="card-index">A</span>
+          <h3>崩溃型</h3>
+          <p>脚本检查的 use-after-free、compact block 的断言、32 位大小计算溢出、undo 文件位置回绕、addrman 溢出。共同点是“触发后节点直接退出”。</p>
+        </article>
+        <article class="info-card reveal">
+          <span class="card-index">B</span>
+          <h3>资源型</h3>
+          <p>用重复 inv、暂停的发送队列、TCP urgent data、慢验证交易、日志和坏区块把 CPU、内存或磁盘吃满。</p>
+        </article>
+        <article class="info-card reveal">
+          <span class="card-index">C</span>
+          <h3>状态机型</h3>
+          <p>compact block 与 reorg 后的 TRUC sibling eviction。状态没有清干净，后续消息就会走进错误分支，甚至让矿工无法出块。</p>
+        </article>
+      </div>
+
+      <div class="quote-card reveal">
+        <p>
+          读这批漏洞最值得带走的不是 CVE 编号，而是一条规律：
+          <strong>所有“外部输入 + 内部状态 + 无上限资源”的组合，最终都会变成 DoS。</strong>
+        </p>
+      </div>
+
+      <div class="table-wrap reveal">
+        <table class="source-table">
+          <thead><tr><th>攻击面</th><th>入口</th><th>被消耗的资源</th><th>代表 CVE</th></tr></thead>
+          <tbody>
+            <tr><td>P2P 下载</td><td><code>cmpctblock</code> / <code>blocktxn</code> / <code>inv</code></td><td>下载状态、时间、内存</td><td>35202 · 62859 · 52922 · 117348</td></tr>
+            <tr><td>网络与身份</td><td>Tor inbound / send queue / select()</td><td>权限、内存、连接</td><td>62860 · 117349 · 117350</td></tr>
+            <tr><td>内存池策略</td><td>TRUC / 未确认交易</td><td>模板生成、CPU</td><td>62861 · 46598</td></tr>
+            <tr><td>脚本与区块</td><td>区块验证 / 32 位大小计算</td><td>生命周期、地址空间</td><td>52911 · 46597</td></tr>
+            <tr><td>存储、日志与地址</td><td><code>rev*.dat</code> / log / <code>addr</code></td><td>磁盘、ID 空间</td><td>117346 · 54604/5 · 52919</td></tr>
+          </tbody>
+        </table>
+      </div>
+    </section>
+
+    <section id="timeline" class="section">
+      <div class="section-head reveal">
+        <p class="eyebrow">02 · 披露时间线</p>
+        <h2>从 2024 的 compact block，到 2026 的 LLM 扫描</h2>
+        <p class="section-lede">
+          2026 年的多条公告来自自动化 LLM 扫描（Project Loupe），
+          但它们并不是“低危噪音”：117348、117349、117350 都是 Medium。
+        </p>
+      </div>
+
+      <div class="timeline reveal" aria-label="CVE 公开披露时间线">
+        <article class="timeline-item">
+          <span class="timeline-date">2024-10</span>
+          <h3>CVE-2024-35202</h3>
+          <p>compact block 的 <code>blocktxn</code> 二次处理触发断言，远程崩溃。</p>
+        </article>
+        <article class="timeline-item">
+          <span class="timeline-date">2024-11</span>
+          <h3>CVE-2024-52922</h3>
+          <p>peer 先 announce 再 withhold，节点等 10 分钟，区块传播被拖慢。</p>
+        </article>
+        <article class="timeline-item">
+          <span class="timeline-date">2025-04</span>
+          <h3>CVE-2024-52919</h3>
+          <p>addrman 32 位 ID 溢出；速率限制后仍需数年，最终改 64 位。</p>
+        </article>
+        <article class="timeline-item">
+          <span class="timeline-date">2025-10</span>
+          <h3>46597 · 46598 · 54604 · 54605</h3>
+          <p>32 位崩溃、未确认交易 CPU DoS、自连接/无效区块日志填盘。</p>
+        </article>
+        <article class="timeline-item">
+          <span class="timeline-date">2026-05</span>
+          <h3>CVE-2024-52911</h3>
+          <p>脚本解释器 use-after-free；需要 PoW 的区块触发，理论可 RCE。</p>
+        </article>
+        <article class="timeline-item">
+          <span class="timeline-date">2026-10</span>
+          <h3>117346 · 117349 · 117350</h3>
+          <p>undo 文件溢出、暂停 pre-BIP31 peer 的内存增长、TCP urgent data OOM。</p>
+        </article>
+        <article class="timeline-item">
+          <span class="timeline-date">2026-11</span>
+          <h3>62859 · 62860 · 62861 · 117348</h3>
+          <p>compact block witness malleation、Tor 白名单、TRUC reorg、重复 orphan inv。</p>
+        </article>
+      </div>
+
+      <div class="callout warn reveal">
+        <strong>2026-11-20 的最新一条是 CVE-2026-117348。</strong>
+        它影响 29.0–29.5、30.0–30.4、31.0–31.2；29.x 已 EOL，不再修复。
+        30.5、31.3、32.1 已包含修复。
+      </div>
+    </section>
+
+    <section id="matrix" class="section">
+      <div class="section-head reveal">
+        <p class="eyebrow">03 · 漏洞矩阵</p>
+        <h2>15 个 CVE，按攻击面和严重度切开</h2>
+        <p class="section-lede">
+          点击筛选只看某一类。修复版本来自 Bitcoin Core 官方公告；
+          “影响版本”只写公告明确覆盖的范围，不把未确认的版本算进去。
+        </p>
+      </div>
+
+      <div class="filter-bar reveal" data-cve-filter>
+        <div class="filter-group" aria-label="按严重度筛选">
+          <button class="filter-button active" type="button" data-filter-severity="all">全部 15</button>
+          <button class="filter-button high" type="button" data-filter-severity="high">High 3</button>
+          <button class="filter-button medium" type="button" data-filter-severity="medium">Medium 6</button>
+          <button class="filter-button low" type="button" data-filter-severity="low">Low 6</button>
+        </div>
+        <div class="filter-group" aria-label="按攻击面筛选">
+          <button class="filter-button active" type="button" data-filter-surface="all">全部面</button>
+          <button class="filter-button" type="button" data-filter-surface="download">下载 4</button>
+          <button class="filter-button" type="button" data-filter-surface="network">网络 3</button>
+          <button class="filter-button" type="button" data-filter-surface="mempool">内存池 2</button>
+          <button class="filter-button" type="button" data-filter-surface="validation">验证 2</button>
+          <button class="filter-button" type="button" data-filter-surface="storage">存储 4</button>
+        </div>
+        <span class="filter-count" data-filter-count>显示 15 / 15</span>
+      </div>
+
+      <div class="table-wrap reveal">
+        <table class="cve-table" data-cve-table>
+          <thead>
+            <tr><th>CVE</th><th>问题</th><th>严重度</th><th>类型</th><th>影响版本</th><th>修复版本</th></tr>
+          </thead>
+          <tbody>
+            <tr data-severity="high" data-surface="validation">
+              <td><a href="https://bitcoincore.org/en/2026/05/05/disclose-cve-2024-52911/" target="_blank" rel="noreferrer">CVE-2024-52911</a></td>
+              <td>脚本解释器 use-after-free</td><td><span class="sev high">High</span></td><td>崩溃 / 潜在 RCE</td><td>0.14.0 – 28.x</td><td>29.0</td>
+            </tr>
+            <tr data-severity="high" data-surface="download">
+              <td><a href="https://bitcoincore.org/en/2024/10/08/disclose-blocktxn-crash/" target="_blank" rel="noreferrer">CVE-2024-35202</a></td>
+              <td><code>blocktxn</code> 二次处理触发断言</td><td><span class="sev high">High</span></td><td>远程崩溃</td><td>&lt; 25.0</td><td>25.0</td>
+            </tr>
+            <tr data-severity="high" data-surface="mempool">
+              <td><a href="https://bitcoincore.org/en/2026/11/10/disclose-cve-2025-62861/" target="_blank" rel="noreferrer">CVE-2025-62861</a></td>
+              <td>TRUC sibling eviction 在 reorg 中破坏 mempool</td><td><span class="sev high">High</span></td><td>出块停机</td><td>28.0–28.2, 29.0–29.1</td><td>28.3 · 29.2 · 30.0</td>
+            </tr>
+            <tr data-severity="medium" data-surface="download">
+              <td><a href="https://bitcoincore.org/en/2024/11/05/cb-stall-hindering-propagation/" target="_blank" rel="noreferrer">CVE-2024-52922</a></td>
+              <td>提前 announce 后 withhold，拖慢区块下载</td><td><span class="sev medium">Medium</span></td><td>区块传播 DoS</td><td>&lt; 25.1</td><td>25.1 · 26.0</td>
+            </tr>
+            <tr data-severity="medium" data-surface="download">
+              <td><a href="https://bitcoincore.org/en/2026/11/10/disclose-cve-2025-62859/" target="_blank" rel="noreferrer">CVE-2025-62859</a></td>
+              <td>compact block witness malleation 导致区块处理停顿</td><td><span class="sev medium">Medium</span></td><td>区块处理 DoS</td><td>&lt; 29.2, 30.0</td><td>29.2 · 30.0</td>
+            </tr>
+            <tr data-severity="medium" data-surface="network">
+              <td><a href="https://bitcoincore.org/en/2026/11/10/disclose-cve-2025-62860/" target="_blank" rel="noreferrer">CVE-2025-62860</a></td>
+              <td>Tor 入站连接错误获得 <code>-whitelist</code> 权限</td><td><span class="sev medium">Medium</span></td><td>DoS / 隐私</td><td>&lt; 28.3, 29.2, 30.0</td><td>28.3 · 29.2 · 30.0</td>
+            </tr>
+            <tr data-severity="medium" data-surface="download">
+              <td><a href="https://bitcoincore.org/en/2026/11/20/disclose-orphan-inv-stall/" target="_blank" rel="noreferrer">CVE-2026-117348</a></td>
+              <td>重复 orphan inv 让节点停止处理消息</td><td><span class="sev medium">Medium</span></td><td>节点停顿</td><td>29.0–29.5, 30.0–30.4, 31.0–31.2</td><td>30.5 · 31.3 · 32.1</td>
+            </tr>
+            <tr data-severity="medium" data-surface="network">
+              <td><a href="https://bitcoincore.org/en/2026/10/28/disclose-fpausesend-oom/" target="_blank" rel="noreferrer">CVE-2026-117349</a></td>
+              <td>暂停的 pre-BIP31 peer 让发送队列无限增长</td><td><span class="sev medium">Medium</span></td><td>内存 DoS</td><td>29.0–29.4, 30.0–30.3, 31.0–31.1, 32.0</td><td>29.5 · 30.4 · 31.2 · 32.1</td>
+            </tr>
+            <tr data-severity="medium" data-surface="network">
+              <td><a href="https://bitcoincore.org/en/2026/10/28/disclose-tcp-oom/" target="_blank" rel="noreferrer">CVE-2026-117350</a></td>
+              <td>TCP urgent data 绕过 select() 背压</td><td><span class="sev medium">Medium</span></td><td>内存 DoS</td><td>非 Linux，29.0–29.4, 30.0–30.3, 31.0–31.1, 32.0</td><td>29.5 · 30.4 · 31.2 · 32.1</td>
+            </tr>
+            <tr data-severity="low" data-surface="validation">
+              <td><a href="https://bitcoincore.org/en/2025/10/24/disclose-cve-2025-46597/" target="_blank" rel="noreferrer">CVE-2025-46597</a></td>
+              <td>32 位系统区块大小检查溢出</td><td><span class="sev low">Low</span></td><td>远程崩溃</td><td>32 位 &lt; 29.1 / 30.0</td><td>29.1 · 30.0</td>
+            </tr>
+            <tr data-severity="low" data-surface="mempool">
+              <td><a href="https://bitcoincore.org/en/2025/10/24/disclose-cve-2025-46598/" target="_blank" rel="noreferrer">CVE-2025-46598</a></td>
+              <td>未确认交易的最坏情况 CPU 验证</td><td><span class="sev low">Low</span></td><td>CPU DoS</td><td>&lt; 30.0</td><td>30.0</td>
+            </tr>
+            <tr data-severity="low" data-surface="storage">
+              <td><a href="https://bitcoincore.org/en/2025/10/24/disclose-cve-2025-54604/" target="_blank" rel="noreferrer">CVE-2025-54604</a></td>
+              <td>伪造自连接导致日志填盘</td><td><span class="sev low">Low</span></td><td>磁盘 DoS</td><td>&lt; 29.1 / 30.0</td><td>29.1 · 30.0</td>
+            </tr>
+            <tr data-severity="low" data-surface="storage">
+              <td><a href="https://bitcoincore.org/en/2025/10/24/disclose-cve-2025-54605/" target="_blank" rel="noreferrer">CVE-2025-54605</a></td>
+              <td>无效区块导致日志填盘</td><td><span class="sev low">Low</span></td><td>磁盘 DoS</td><td>&lt; 29.1 / 30.0</td><td>29.1 · 30.0</td>
+            </tr>
+            <tr data-severity="low" data-surface="storage">
+              <td><a href="https://bitcoincore.org/en/2025/04/28/disclose-cve-2024-52919/" target="_blank" rel="noreferrer">CVE-2024-52919</a></td>
+              <td>addrman 32 位 ID 溢出</td><td><span class="sev low">Low</span></td><td>远程崩溃</td><td>&lt; 29.0</td><td>29.0</td>
+            </tr>
+            <tr data-severity="low" data-surface="storage">
+              <td><a href="https://bitcoincore.org/en/2026/10/28/disclose-undo-overflow/" target="_blank" rel="noreferrer">CVE-2026-117346</a></td>
+              <td>undo 文件位置 32 位回绕</td><td><span class="sev low">Low</span></td><td>崩溃 / 数据损坏</td><td>64 位 &lt; 29.5 / 30.4 / 31.2 / 32.1；32 位与 FAT32 仍受影响</td><td>29.5 · 30.4 · 31.2 · 32.1</td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+      <p class="small reveal">严重度按 Bitcoin Core 公告，不按 NVD 分数。DoS 与“共识增发”是两种完全不同的风险。</p>
+    </section>
+
+    <section id="download" class="section">
+      <div class="section-head reveal">
+        <p class="eyebrow">04 · 攻击面：P2P 下载</p>
+        <h2>Compact block 是一个“先猜后补”的状态机</h2>
+        <p class="section-lede">
+          BIP152 用 6 字节 short ID 表示交易，先发 <code>cmpctblock</code>，
+          缺交易再用 <code>getblocktxn</code> / <code>blocktxn</code> 补齐。
+          只要“补齐”这一步的状态没清干净，后面的消息就会踩到旧状态。
+        </p>
+      </div>
+
+      <div class="compact-player reveal" data-compact-player>
+        <div class="player-toolbar">
+          <div class="mode-tabs" role="tablist" aria-label="compact block 场景">
+            <button class="mode-tab active" type="button" data-compact-mode="normal" role="tab" aria-selected="true">正常重建</button>
+            <button class="mode-tab" type="button" data-compact-mode="replay" role="tab" aria-selected="false">重复 blocktxn · 35202</button>
+            <button class="mode-tab" type="button" data-compact-mode="malleate" role="tab" aria-selected="false">witness 篡改 · 62859</button>
+          </div>
+          <button class="button small" type="button" data-compact-play>播放</button>
+          <button class="button small" type="button" data-compact-next>下一步</button>
+          <span class="step-counter" data-compact-counter>1 / 6</span>
+        </div>
+        <div class="compact-stage">
+          <div class="compact-node" data-compact-node="peer"><b>Peer</b><small>cmpctblock</small></div>
+          <div class="compact-arrow">→</div>
+          <div class="compact-node" data-compact-node="init"><b>InitData</b><small>mempool / extra</small></div>
+          <div class="compact-arrow">→</div>
+          <div class="compact-node" data-compact-node="request"><b>getblocktxn</b><small>缺哪些 tx</small></div>
+          <div class="compact-arrow">→</div>
+          <div class="compact-node" data-compact-node="fill"><b>FillBlock</b><small>重建 + 清状态</small></div>
+          <div class="compact-arrow">→</div>
+          <div class="compact-node" data-compact-node="mutate"><b>IsBlockMutated</b><small>merkle + witness</small></div>
+          <div class="compact-arrow">→</div>
+          <div class="compact-node" data-compact-node="process"><b>ProcessBlock</b><small>进入验证</small></div>
+        </div>
+        <p class="player-caption" data-compact-caption></p>
+      </div>
+
+      <div class="cve-grid">
+        <article class="cve-card reveal">
+          <header class="cve-head">
+            <div><span class="cve-id">CVE-2024-35202</span><h3>第二次 <code>blocktxn</code> 触发断言</h3></div>
+            <span class="sev high">High</span>
+          </header>
+          <p class="cve-meta">影响：&lt; 25.0 · 修复：25.0 · PR #26898</p>
+          <p class="cve-summary">
+            short ID 碰撞或恶意不匹配会让 <code>FillBlock</code> 失败，节点回退请求完整区块，
+            但旧的 <code>PartiallyDownloadedBlock</code> 仍然留在请求表里。
+            第二个 <code>blocktxn</code> 再次调用 <code>FillBlock</code>，命中“只能调用一次”的断言，节点崩溃。
+          </p>
+          <div class="attack-chain">
+            <span>cmpctblock</span><i>→</i><span>blocktxn 失败</span><i>→</i><span>GETDATA 回退</span><i>→</i><span>第二个 blocktxn</span><i>→</i><span>assert</span>
+          </div>
+          <details class="code-details" open>
+            <summary>当前源码：把“只能一次”变成显式状态</summary>
+<pre><code>// blockencodings.cpp · FillBlock
+header.SetNull();
+txn_available.clear();
+
+IsBlockMutatedFn check_mutated{...};
+if (check_mutated(block, /*check_witness_root=*/segwit_active)) {
+    return READ_STATUS_FAILED;
+}</code></pre>
+<pre><code>// net_processing.cpp · ProcessCompactBlockTxns
+if (partialBlock.header.IsNull()) {
+    RemoveBlockRequest(block_transactions.blockhash, pfrom.GetId());
+    Misbehaving(peer, "previous compact block reconstruction attempt failed");
+    return;
+}</code></pre>
+          </details>
+          <p class="cve-note">攻击者不需要真的撞 short ID，构造不承诺在 merkle root 里的交易即可强制失败。修复把 assert 换成 <code>READ_STATUS_INVALID</code>，并让重复消息进入惩罚分支。</p>
+          <footer class="cve-links">
+            <a href="https://bitcoincore.org/en/2024/10/08/disclose-blocktxn-crash/" target="_blank" rel="noreferrer">官方公告</a>
+            <a href="https://github.com/bitcoin/bitcoin/pull/26898" target="_blank" rel="noreferrer">PR #26898</a>
+            <a href="https://github.com/bitcoin/bitcoin/blob/19128e8b77553e4362fcbf3cb8f3f7dc5a2e4253/src/blockencodings.cpp#L243" target="_blank" rel="noreferrer">源码</a>
+          </footer>
+        </article>
+
+        <article class="cve-card reveal">
+          <header class="cve-head">
+            <div><span class="cve-id">CVE-2025-62859</span><h3>witness malleation 卡住区块处理</h3></div>
+            <span class="sev medium">Medium</span>
+          </header>
+          <p class="cve-meta">影响：&lt; 29.2 / 30.0 · 修复：29.2 / 30.0 · PR #32646</p>
+          <p class="cve-summary">
+            compact block 的 short ID 基于 txid，witness 不在 txid 的承诺里。
+            恶意 peer 可以在 <code>blocktxn</code> 里篡改 witness；旧逻辑在重建后过早清掉下载状态，
+            再发现 witness commitment 不匹配时，回退到同一个 peer 的 <code>GETDATA</code>，等 10 分钟。
+          </p>
+          <div class="attack-chain">
+            <span>cmpctblock</span><i>→</i><span>blocktxn 篡改 witness</span><i>→</i><span>重建后检查失败</span><i>→</i><span>GETDATA 同 peer</span><i>→</i><span>10 min 等待</span>
+          </div>
+          <details class="code-details">
+            <summary>当前源码：在返回 OK 前检查 witness root</summary>
+<pre><code>// blockencodings.cpp
+IsBlockMutatedFn check_mutated{m_check_block_mutated_mock
+    ? m_check_block_mutated_mock : IsBlockMutated};
+if (check_mutated(/*block=*/block,
+                  /*check_witness_root=*/segwit_active)) {
+    return READ_STATUS_FAILED; // Possible Short ID collision
+}</code></pre>
+<pre><code>// net_processing.cpp · 失败后的分流
+if (status == READ_STATUS_FAILED) {
+    if (first_in_flight) {
+        // 回退请求完整区块
+        MakeAndPushMessage(pfrom, NetMsgType::GETDATA, invs);
+    } else {
+        RemoveBlockRequest(hash, pfrom.GetId());
+        return;
+    }
+}</code></pre>
+          </details>
+          <p class="cve-note">控制 3 个 high-bandwidth peer，或节点运行 <code>-blocksonly</code> 时，可反复触发。修复把 witness mutation 检查提前到 <code>FillBlock</code> 内部，并让下载状态不可复用。</p>
+          <footer class="cve-links">
+            <a href="https://bitcoincore.org/en/2026/11/10/disclose-cve-2025-62859/" target="_blank" rel="noreferrer">官方公告</a>
+            <a href="https://github.com/bitcoin/bitcoin/pull/32646" target="_blank" rel="noreferrer">PR #32646</a>
+            <a href="https://github.com/bitcoin/bitcoin/blob/19128e8b77553e4362fcbf3cb8f3f7dc5a2e4253/src/blockencodings.cpp#L271" target="_blank" rel="noreferrer">源码</a>
+          </footer>
+        </article>
+
+        <article class="cve-card reveal">
+          <header class="cve-head">
+            <div><span class="cve-id">CVE-2024-52922</span><h3>先 announce，再 withhold</h3></div>
+            <span class="sev medium">Medium</span>
+          </header>
+          <p class="cve-meta">影响：&lt; 25.1 · 修复：25.1 / 26.0 · PR #27626</p>
+          <p class="cve-summary">
+            旧版每个区块只向一个 peer 请求。攻击者先通过 <code>headers</code> 或
+            <code>cmpctblock</code> 宣布区块，然后不回应；节点最多等 10 分钟才断开并重试。
+            攻击者可以多连接重复，拖慢网络收敛和矿工收益。
+          </p>
+          <div class="attack-chain">
+            <span>announce</span><i>→</i><span>占据唯一 in-flight 槽</span><i>→</i><span>不响应</span><i>→</i><span>10 min 超时</span><i>→</i><span>重复</span>
+          </div>
+          <details class="code-details">
+            <summary>当前源码：同一区块最多 3 个并发请求</summary>
+<pre><code>// net_processing.h
+inline constexpr unsigned int
+    MAX_CMPCTBLOCKS_INFLIGHT_PER_BLOCK = 3;
+
+// net_processing.cpp
+typedef std::multimap&lt;uint256,
+    std::pair&lt;NodeId, std::list&lt;QueuedBlock&gt;::iterator&gt;&gt;
+    BlockDownloadMap;
+BlockDownloadMap mapBlocksInFlight;</code></pre>
+          </details>
+          <p class="cve-note">修复还要求其中一个请求来自 outbound peer，并在删除单个 peer 的请求时重置 stalling 计时器。</p>
+          <footer class="cve-links">
+            <a href="https://bitcoincore.org/en/2024/11/05/cb-stall-hindering-propagation/" target="_blank" rel="noreferrer">官方公告</a>
+            <a href="https://github.com/bitcoin/bitcoin/pull/27626" target="_blank" rel="noreferrer">PR #27626</a>
+            <a href="https://github.com/bitcoin/bitcoin/blob/19128e8b77553e4362fcbf3cb8f3f7dc5a2e4253/src/net_processing.h#L50" target="_blank" rel="noreferrer">源码</a>
+          </footer>
+        </article>
+
+        <article class="cve-card reveal">
+          <header class="cve-head">
+            <div><span class="cve-id">CVE-2026-117348</span><h3>重复 orphan inv 让节点停顿</h3></div>
+            <span class="sev medium">Medium</span>
+          </header>
+          <p class="cve-meta">影响：29.0–29.5, 30.0–30.4, 31.0–31.2 · 修复：30.5 / 31.3 / 32.1 · PR #35878</p>
+          <p class="cve-summary">
+            一条 <code>inv</code> 最多 50,000 项，旧代码不跳过重复项。
+            攻击者先发一个有很多缺失父交易的 orphan，然后把同一 wtxid 重复 50,000 次；
+            每个条目都触发 orphan 父列表构建和 mempool/filter 检查，单条消息可卡住十几秒。
+          </p>
+          <div class="attack-chain">
+            <span>orphan tx</span><i>→</i><span>很多缺失 parent</span><i>→</i><span>inv 重复 wtxid 50k 次</span><i>→</i><span>父检查重复 50k 次</span><i>→</i><span>消息循环停顿</span>
+          </div>
+          <details class="code-details">
+            <summary>当前源码：每条 INV 内部的去重集合</summary>
+<pre><code>std::unordered_set&lt;uint256, SaltedUint256Hasher&gt;
+    seen_txids{0, m_txhash_hasher};
+std::unordered_set&lt;uint256, SaltedUint256Hasher&gt;
+    seen_wtxids{0, m_txhash_hasher};
+
+auto&amp; seen_hashes{inv.IsMsgWtx() ? seen_wtxids : seen_txids};
+if (!seen_hashes.insert(inv.hash).second) continue;</code></pre>
+          </details>
+          <p class="cve-note">去重范围是单条 INV 消息，不会影响跨消息的正常重试。<code>MSG_WITNESS_TX</code> 被当作 txid 处理，txid 与 wtxid 分开去重。</p>
+          <footer class="cve-links">
+            <a href="https://bitcoincore.org/en/2026/11/20/disclose-orphan-inv-stall/" target="_blank" rel="noreferrer">官方公告</a>
+            <a href="https://github.com/bitcoin/bitcoin/pull/35878" target="_blank" rel="noreferrer">PR #35878</a>
+            <a href="https://github.com/bitcoin/bitcoin/blob/19128e8b77553e4362fcbf3cb8f3f7dc5a2e4253/src/net_processing.cpp#L4355" target="_blank" rel="noreferrer">源码</a>
+          </footer>
+        </article>
+      </div>
+    </section>
+
+    <section id="network" class="section">
+      <div class="section-head reveal">
+        <p class="eyebrow">05 · 攻击面：网络资源与身份</p>
+        <h2>背压不是“有队列上限”就够了</h2>
+        <p class="section-lede">
+          这三条都发生在 PeerManager 之外的网络层：发送队列、select() 后端、Tor 入站身份。
+          它们的共同点是“把外部 peer 的属性错误地当成可信输入”。
+        </p>
+      </div>
+
+      <div class="cve-grid three">
+        <article class="cve-card reveal">
+          <header class="cve-head">
+            <div><span class="cve-id">CVE-2026-117349</span><h3>暂停的 pre-BIP31 peer 无限增长</h3></div>
+            <span class="sev medium">Medium</span>
+          </header>
+          <p class="cve-meta">影响：29.0–29.4, 30.0–30.3, 31.0–31.1, 32.0 · 修复：29.5 / 30.4 / 31.2 / 32.1 · PR #36667</p>
+          <p class="cve-summary">
+            发送队列超过 <code>nSendBufferMaxSize</code> 后，节点把 peer 标记为
+            <code>fPauseSend</code>，但仍然会把交易 <code>INV</code> 排进队列。
+            支持 BIP31 nonced ping 的 peer 会在 20 分钟无响应后断开；
+            不支持 BIP31 的 peer 可以永远 paused，让队列无上限增长。
+          </p>
+          <div class="attack-chain">
+            <span>慢读 peer</span><i>→</i><span>fPauseSend</span><i>→</i><span>仍排队 tx INV</span><i>→</i><span>无 BIP31 超时</span><i>→</i><span>内存增长</span>
+          </div>
+          <details class="code-details">
+            <summary>当前源码：记录 pause 起点，超时断开</summary>
+<pre><code>// net.cpp · SocketSendData
+const bool pause_send{node.m_send_memusage +
+    node.m_transport->GetSendMemoryUsage() > nSendBufferMaxSize};
+if (pause_send &amp;&amp; !node.fPauseSend) {
+    node.m_pause_send_since = NodeClock::now();
+}
+node.fPauseSend = pause_send;
+
+// net.cpp · InactivityCheck
+if (node.fPauseSend) {
+    const auto last_pause{node.m_pause_send_since.load()};
+    if (now > last_pause + TIMEOUT_INTERVAL) return true;
+}</code></pre>
+          </details>
+          <p class="cve-note">公告给出的增长速率约为入站 2MB/h、出站 5MB/h。修复没有改变背压阈值，只是给“暂停”加了最长时间。</p>
+          <footer class="cve-links">
+            <a href="https://bitcoincore.org/en/2026/10/28/disclose-fpausesend-oom/" target="_blank" rel="noreferrer">官方公告</a>
+            <a href="https://github.com/bitcoin/bitcoin/pull/36667" target="_blank" rel="noreferrer">PR #36667</a>
+            <a href="https://github.com/bitcoin/bitcoin/blob/19128e8b77553e4362fcbf3cb8f3f7dc5a2e4253/src/net.cpp#L2105" target="_blank" rel="noreferrer">源码</a>
+          </footer>
+        </article>
+
+        <article class="cve-card reveal">
+          <header class="cve-head">
+            <div><span class="cve-id">CVE-2026-117350</span><h3>TCP urgent data 绕过 select() 背压</h3></div>
+            <span class="sev medium">Medium</span>
+          </header>
+          <p class="cve-meta">影响：非 Linux 的 29.0–29.4, 30.0–30.3, 31.0–31.1, 32.0 · 修复：29.5 / 30.4 / 31.2 / 32.1 · PR #36665</p>
+          <p class="cve-summary">
+            Linux 使用 <code>poll()</code>，其他平台使用 <code>select()</code>。
+            旧 select 后端无条件把每个 socket 放进 <code>err</code> fdset；
+            TCP urgent（out-of-band）数据会触发 exceptional condition，处理时读 socket，
+            绕过 <code>fPauseRecv</code> 的背压，队列可无限增长。
+          </p>
+          <div class="attack-chain">
+            <span>paused peer</span><i>→</i><span>TCP urgent data</span><i>→</i><span>select 异常事件</span><i>→</i><span>仍然 read</span><i>→</i><span>队列增长</span>
+          </div>
+          <details class="code-details">
+            <summary>当前源码：只有请求 RecvEvent 才监听异常</summary>
+<pre><code>// util/sock.cpp · select() 分支
+if (events.requested &amp; RecvEvent) {
+    FD_SET(s, &amp;recv);
+    FD_SET(s, &amp;err);
+}
+if (events.requested &amp; SendEvent) {
+    FD_SET(s, &amp;send);
+}
+if (events.requested &amp; (RecvEvent | SendEvent)) {
+    socket_max = std::max(socket_max, s);
+}</code></pre>
+          </details>
+          <p class="cve-note"><strong>Linux 不受影响。</strong>Windows、macOS、BSD 受影响；公告说恶意 peer 可以较容易地让这些节点 OOM。</p>
+          <footer class="cve-links">
+            <a href="https://bitcoincore.org/en/2026/10/28/disclose-tcp-oom/" target="_blank" rel="noreferrer">官方公告</a>
+            <a href="https://github.com/bitcoin/bitcoin/pull/36665" target="_blank" rel="noreferrer">PR #36665</a>
+            <a href="https://github.com/bitcoin/bitcoin/blob/19128e8b77553e4362fcbf3cb8f3f7dc5a2e4253/src/util/sock.cpp#L219" target="_blank" rel="noreferrer">源码</a>
+          </footer>
+        </article>
+
+        <article class="cve-card reveal">
+          <header class="cve-head">
+            <div><span class="cve-id">CVE-2025-62860</span><h3>Tor 入站连接被错误白名单</h3></div>
+            <span class="sev medium">Medium</span>
+          </header>
+          <p class="cve-meta">影响：&lt; 28.3 / 29.2 / 30.0 · 修复：28.3 / 29.2 / 30.0 · PR #33395</p>
+          <p class="cve-summary">
+            入站 Tor 连接看到的 IP 是本地 Tor daemon（通常是 127.0.0.1 或局域网）。
+            如果 <code>-whitelist</code> 覆盖这个地址，所有 onion 入站都会被当成受信 peer，
+            解锁更高的 DoS 配额并关闭部分隐私保护。
+          </p>
+          <div class="attack-chain">
+            <span>Tor daemon 本地地址</span><i>→</i><span>匹配 -whitelist 网段</span><i>→</i><span>onion inbound 获得权限</span><i>→</i><span>DoS / 隐私边界被放宽</span>
+          </div>
+          <details class="code-details">
+            <summary>当前源码：onion inbound 传入空 optional</summary>
+<pre><code>// net.cpp
+const bool inbound_onion = std::find(
+    m_onion_binds.begin(), m_onion_binds.end(), addr_bind)
+    != m_onion_binds.end();
+
+AddWhitelistPermissionFlags(
+    permission_flags,
+    inbound_onion ? std::optional&lt;CNetAddr&gt;{} : addr,
+    vWhitelistedRangeIncoming);</code></pre>
+          </details>
+          <p class="cve-note">只有设置非默认 <code>-whitelist</code> 的节点受影响；但很多把 Bitcoin Core 与 Tor 一起打包的发行版正是这样配置，公告提到曾有数千个主网节点受影响。</p>
+          <footer class="cve-links">
+            <a href="https://bitcoincore.org/en/2026/11/10/disclose-cve-2025-62860/" target="_blank" rel="noreferrer">官方公告</a>
+            <a href="https://github.com/bitcoin/bitcoin/pull/33395" target="_blank" rel="noreferrer">PR #33395</a>
+            <a href="https://github.com/bitcoin/bitcoin/blob/19128e8b77553e4362fcbf3cb8f3f7dc5a2e4253/src/net.cpp#L1812" target="_blank" rel="noreferrer">源码</a>
+          </footer>
+        </article>
+      </div>
+    </section>
+
+    <section id="mempool" class="section">
+      <div class="section-head reveal">
+        <p class="eyebrow">06 · 攻击面：内存池与策略</p>
+        <h2>Policy 不是共识，但 policy bug 可以让矿工停摆</h2>
+        <p class="section-lede">
+          TRUC 和脚本验证都属于“节点自己的规则”。它们不会让区块变成无效，
+          但会让节点拒绝自己刚刚从区块里恢复出来的交易，或者把 CPU 耗在重复验证上。
+        </p>
+      </div>
+
+      <div class="cve-grid">
+        <article class="cve-card reveal">
+          <header class="cve-head">
+            <div><span class="cve-id">CVE-2025-62861</span><h3>reorg 后 TRUC sibling eviction 破坏 mempool</h3></div>
+            <span class="sev high">High</span>
+          </header>
+          <p class="cve-meta">影响：28.0–28.2, 29.0–29.1 · 修复：28.3 / 29.2 / 30.0 · PR #33504</p>
+          <p class="cve-summary">
+            BIP431 的 TRUC 规则限制一个未确认祖先/后代。它是 policy，不是共识，
+            所以合法区块里可以出现“一个 TRUC 父交易带多个子交易”的拓扑。
+            reorg 把断开的交易用 <code>bypass_limits=true</code> 重新加入 mempool 时，
+            旧代码仍然执行 sibling eviction，可能踢掉恢复的交易却留下它的子交易。
+          </p>
+          <div class="attack-chain">
+            <span>TRUC 拓扑进入区块</span><i>→</i><span>reorg 重新加入</span><i>→</i><span>sibling eviction 运行</span><i>→</i><span>父被踢、子还在</span><i>→</i><span>模板校验失败</span>
+          </div>
+          <details class="code-details">
+            <summary>当前源码：reorg 路径不再执行 TRUC 检查</summary>
+<pre><code>// validation.cpp · MemPoolAccept::PreChecks
+if (!args.m_bypass_limits) {
+    // Perform the TRUC checks, using the in-mempool parents.
+    if (const auto err{SingleTRUCChecks(
+            m_pool, ws.m_ptx, ws.m_parents,
+            ws.m_conflicts, ws.m_vsize)}) {
+        // sibling eviction / TRUC violation
+    }
+}</code></pre>
+          </details>
+          <p class="cve-note">受影响的节点在执行过这种 reorg 后，<code>getblocktemplate</code> 会持续失败，直到重启重新加载 mempool。修复把整段 TRUC 逻辑放进 <code>!bypass_limits</code>。</p>
+          <footer class="cve-links">
+            <a href="https://bitcoincore.org/en/2026/11/10/disclose-cve-2025-62861/" target="_blank" rel="noreferrer">官方公告</a>
+            <a href="https://github.com/bitcoin/bitcoin/pull/33504" target="_blank" rel="noreferrer">PR #33504</a>
+            <a href="https://github.com/bitcoin/bitcoin/blob/19128e8b77553e4362fcbf3cb8f3f7dc5a2e4253/src/validation.cpp#L944" target="_blank" rel="noreferrer">源码</a>
+          </footer>
+        </article>
+
+        <article class="cve-card reveal">
+          <header class="cve-head">
+            <div><span class="cve-id">CVE-2025-46598</span><h3>未确认交易的最坏 CPU 验证</h3></div>
+            <span class="sev low">Low</span>
+          </header>
+          <p class="cve-meta">影响：&lt; 30.0 · 修复：30.0 · PR #32473 / #33050 / #33105</p>
+          <p class="cve-summary">
+            攻击者发送最终会被拒绝、但不会触发断连的非标准交易。
+            旧路径在分类失败原因时会用放宽的 flags 再跑一遍脚本，
+            叠加 legacy ECDSA 每次重新序列化整笔交易，单笔可能耗时数秒；重复发送可延迟区块传播。
+          </p>
+          <div class="attack-chain">
+            <span>非标准 tx</span><i>→</i><span>脚本失败</span><i>→</i><span>放宽 flags 重跑</span><i>→</i><span>sighash 重新序列化</span><i>→</i><span>秒级 CPU</span>
+          </div>
+          <details class="code-details">
+            <summary>当前源码：sighash midstate 缓存 + 只跑一次脚本</summary>
+<pre><code>// script/interpreter.h
+class SigHashCache {
+    std::optional&lt;std::pair&lt;CScript, HashWriter&gt;&gt;
+        m_cache_entries[6];
+    bool Load(int32_t hash_type, const CScript&amp; script_code,
+              HashWriter&amp; writer) const noexcept;
+    void Store(int32_t hash_type, const CScript&amp; script_code,
+               const HashWriter&amp; writer) noexcept;
+};
+// SignatureHash(..., &amp;m_sighash_cache)</code></pre>
+<pre><code>// validation.cpp · 失败后不再用放宽 flags 重跑
+switch (check_for) {
+case CheckInputScriptsFor::Mempool:
+    return state.Invalid(TX_NOT_STANDARD,
+        "mempool-script-verify-flag-failed (...)");
+case CheckInputScriptsFor::Block:
+    return state.Invalid(TX_CONSENSUS,
+        "block-script-verify-flag-failed (...)");
+}</code></pre>
+          </details>
+          <p class="cve-note">#33105 还加了 <code>SpendsNonAnchorWitnessProg</code>，在不重跑脚本的情况下识别 witness stripping。注意：交易失败不再导致断连，这是为了避免非共识 policy 造成网络分裂。</p>
+          <footer class="cve-links">
+            <a href="https://bitcoincore.org/en/2025/10/24/disclose-cve-2025-46598/" target="_blank" rel="noreferrer">官方公告</a>
+            <a href="https://github.com/bitcoin/bitcoin/pull/32473" target="_blank" rel="noreferrer">PR #32473</a>
+            <a href="https://github.com/bitcoin/bitcoin/pull/33050" target="_blank" rel="noreferrer">PR #33050</a>
+            <a href="https://github.com/bitcoin/bitcoin/pull/33105" target="_blank" rel="noreferrer">PR #33105</a>
+          </footer>
+        </article>
+      </div>
+    </section>
+
+    <section id="validation" class="section">
+      <div class="section-head reveal">
+        <p class="eyebrow">07 · 攻击面：脚本与区块验证</p>
+        <h2>两条最“底层”的崩溃：生命周期与地址空间</h2>
+        <p class="section-lede">
+          这两条都不是网络协议问题，而是 C++ 对象生命周期和 32 位整数运算。
+          它们也最能说明：共识代码里“看起来不会失败”的早退，可能非常昂贵。
+        </p>
+      </div>
+
+      <div class="cve-grid">
+        <article class="cve-card reveal">
+          <header class="cve-head">
+            <div><span class="cve-id">CVE-2024-52911</span><h3>脚本检查的 use-after-free</h3></div>
+            <span class="sev high">High</span>
+          </header>
+          <p class="cve-meta">影响：0.14.0 – 28.x · 修复：29.0 · PR #31112</p>
+          <p class="cve-summary">
+            <code>ConnectBlock</code> 把脚本检查分发给后台线程。每个
+            <code>CScriptCheck</code> 只持有指向 <code>PrecomputedTransactionData</code> 的指针。
+            旧代码中 <code>CCheckQueueControl</code> 先于 <code>txsdata</code> 构造，且某些失败路径提前
+            <code>return</code>，没有等待后台线程；C++ 逆序析构让 <code>txsdata</code> 先释放，后台线程读到已释放内存。
+          </p>
+          <div class="attack-chain">
+            <span>带 PoW 的区块</span><i>→</i><span>ConnectBlock 早期失败</span><i>→</i><span>提前 return</span><i>→</i><span>txsdata 析构</span><i>→</i><span>后台线程读取</span><i>→</i><span>UAF</span>
+          </div>
+          <details class="code-details" open>
+            <summary>当前源码：声明顺序 + 统一 Complete</summary>
+<pre><code>// validation.cpp · ConnectBlock
+// Precomputed transaction data pointers must not be invalidated
+// until after `control` has run the script checks.
+std::vector&lt;PrecomputedTransactionData&gt; txsdata(block.vtx.size());
+std::optional&lt;CCheckQueueControl&lt;CScriptCheck&gt;&gt; control;
+if (auto&amp; queue = m_chainman.GetCheckQueue();
+    queue.HasThreads() &amp;&amp; fScriptChecks) {
+    control.emplace(queue);
+}
+
+// 失败不再立刻 return，而是写入 state 后 break
+if (!state.IsValid()) break;
+
+if (control) {
+    auto parallel_result = control-&gt;Complete();
+    if (parallel_result.has_value() &amp;&amp; state.IsValid()) {
+        state.Invalid(BLOCK_CONSENSUS,
+            strprintf("block-script-verify-flag-failed (%s)",
+                      ScriptErrorString(parallel_result-&gt;first)),
+            parallel_result-&gt;second);
+    }
+}</code></pre>
+          </details>
+          <p class="cve-note">
+            修复同时把 <code>CCheckQueue</code> 改成能携带具体 <code>ScriptError</code> 的结果，
+            并把 <code>Wait()</code> 改成 <code>Complete()</code>。
+            攻击需要有效 PoW 的区块；公告认为 RCE 理论可能但受输入约束，实际不太可能。
+          </p>
+          <footer class="cve-links">
+            <a href="https://bitcoincore.org/en/2026/05/05/disclose-cve-2024-52911/" target="_blank" rel="noreferrer">官方公告</a>
+            <a href="https://github.com/bitcoin/bitcoin/pull/31112" target="_blank" rel="noreferrer">PR #31112</a>
+            <a href="https://github.com/bitcoin/bitcoin/blob/19128e8b77553e4362fcbf3cb8f3f7dc5a2e4253/src/validation.cpp#L2587" target="_blank" rel="noreferrer">源码</a>
+          </footer>
+        </article>
+
+        <article class="cve-card reveal">
+          <header class="cve-head">
+            <div><span class="cve-id">CVE-2025-46597</span><h3>32 位系统的区块大小乘法溢出</h3></div>
+            <span class="sev low">Low</span>
+          </header>
+          <p class="cve-meta">影响：32 位 &lt; 29.1 / 30.0 · 修复：29.1 / 30.0 · PR #32530</p>
+          <p class="cve-summary">
+            <code>CheckBlock</code> 用 <code>GetSerializeSize(...) * 4 &gt; MAX_BLOCK_WEIGHT</code>
+            检查大小。32 位 <code>size_t</code> 下，区块序列化超过 1GB 时乘法溢出，
+            检查被绕过，写盘时崩溃。理论触发需要受害者把 <code>-maxmempool</code> 设到 3GB 以上，
+            且已有约 1GB 交易；32 位系统最多 4GiB 内存，因此极难。
+          </p>
+          <div class="attack-chain">
+            <span>32-bit size_t</span><i>→</i><span>&gt;1GB 区块</span><i>→</i><span>* 4 溢出</span><i>→</i><span>跳过 MAX_BLOCK_WEIGHT</span><i>→</i><span>写盘崩溃</span>
+          </div>
+          <details class="code-details">
+            <summary>当前源码：32 位参数上限</summary>
+<pre><code>// validation.cpp · CheckBlock
+if (block.vtx.empty() ||
+    block.vtx.size() * WITNESS_SCALE_FACTOR &gt; MAX_BLOCK_WEIGHT ||
+    ::GetSerializeSize(TX_NO_WITNESS(block)) * WITNESS_SCALE_FACTOR
+        &gt; MAX_BLOCK_WEIGHT) { ... }
+
+// node/mempool_args.cpp
+static constexpr int MAX_32BIT_MEMPOOL_MB{500};
+constexpr bool is_32bit{sizeof(void*) == 4};
+if (is_32bit &amp;&amp; *mb &gt; MAX_32BIT_MEMPOOL_MB) {
+    return util::Error{...};
+}
+
+// kernel/caches.h
+inline constexpr uint64_t MAX_DBCACHE_BYTES{
+    sizeof(void*) == 4 ? 1_GiB
+                       : std::numeric_limits&lt;uint64_t&gt;::max()};</code></pre>
+          </details>
+          <p class="cve-note">修复是“间接”的：限制 32 位节点的 mempool 和 dbcache，阻止构造出 1GB 级别的 compact block 重建条件，而不是改掉乘法本身。</p>
+          <footer class="cve-links">
+            <a href="https://bitcoincore.org/en/2025/10/24/disclose-cve-2025-46597/" target="_blank" rel="noreferrer">官方公告</a>
+            <a href="https://github.com/bitcoin/bitcoin/pull/32530" target="_blank" rel="noreferrer">PR #32530</a>
+            <a href="https://github.com/bitcoin/bitcoin/blob/19128e8b77553e4362fcbf3cb8f3f7dc5a2e4253/src/node/mempool_args.cpp#L30" target="_blank" rel="noreferrer">源码</a>
+          </footer>
+        </article>
+      </div>
+    </section>
+
+    <section id="storage" class="section">
+      <div class="section-head reveal">
+        <p class="eyebrow">08 · 攻击面：存储、日志与地址管理器</p>
+        <h2>“写不下”比“算不完”更安静</h2>
+        <p class="section-lede">
+          undo 文件、日志和 addrman 都不会影响当前区块的共识，
+          但它们能让节点在几天或几个月后突然退出，或者让运维无法从磁盘告警里看出根因。
+        </p>
+      </div>
+
+      <div class="cve-grid">
+        <article class="cve-card reveal">
+          <header class="cve-head">
+            <div><span class="cve-id">CVE-2026-117346</span><h3>undo 文件位置 32 位回绕</h3></div>
+            <span class="sev low">Low</span>
+          </header>
+          <p class="cve-meta">影响：64 位 &lt; 29.5 / 30.4 / 31.2 / 32.1；32 位与 FAT32 仍受影响 · PR #36669</p>
+          <p class="cve-summary">
+            <code>blk*.dat</code> 限制 128MiB，但 <code>rev*.dat</code>（undo）没有大小上限，
+            位置却用 32 位整数。矿工可以出合法但 undo 数据极大的区块，把单个 undo 文件推过 4GiB，
+            位置回绕覆盖旧数据；之后 reorg 断开受影响区块时读不到 undo，节点退出。
+          </p>
+          <div class="attack-chain">
+            <span>矿工准备数千区块</span><i>→</i><span>undo 数据极大</span><i>→</i><span>rev 文件 &gt;4GiB</span><i>→</i><span>位置回绕</span><i>→</i><span>reorg 读不到 undo</span><i>→</i><span>shutdown</span>
+          </div>
+          <details class="code-details">
+            <summary>当前源码：位置和大小改成 64 位</summary>
+<pre><code>// flatfile.h
+struct FlatFilePos {
+    int32_t nFile{-1};
+    uint64_t nPos{0};
+};
+
+// chain.h · CBlockIndex
+uint64_t nDataPos GUARDED_BY(::cs_main){0};
+uint64_t nUndoPos GUARDED_BY(::cs_main){0};
+
+// util/fs_helpers.h
+inline int FileSeek64(FILE* file, int64_t offset, int origin) {
+#if defined(WIN32)
+    return _fseeki64(file, offset, origin);
+#else
+    return std::fseek(file, offset, origin);
+#endif
+}</code></pre>
+          </details>
+          <p class="cve-note">
+            磁盘格式没有变：位置仍用 VARINT 序列化。64 位系统上的利用需要矿工准备约一个月全网出块量，
+            再精确命中文件边界和 2 块 reorg，公告认为不实际；32 位和 FAT32 仍会因 2GiB/4GiB 限制失败。
+          </p>
+          <footer class="cve-links">
+            <a href="https://bitcoincore.org/en/2026/10/28/disclose-undo-overflow/" target="_blank" rel="noreferrer">官方公告</a>
+            <a href="https://github.com/bitcoin/bitcoin/pull/36669" target="_blank" rel="noreferrer">PR #36669</a>
+            <a href="https://github.com/bitcoin/bitcoin/blob/19128e8b77553e4362fcbf3cb8f3f7dc5a2e4253/src/flatfile.h#L14" target="_blank" rel="noreferrer">源码</a>
+          </footer>
+        </article>
+
+        <article class="cve-card reveal">
+          <header class="cve-head">
+            <div><span class="cve-id">CVE-2025-54604</span><h3>伪造自连接填满日志磁盘</h3></div>
+            <span class="sev low">Low</span>
+          </header>
+          <p class="cve-meta">影响：&lt; 29.1 / 30.0 · 修复：29.1 / 30.0 · PR #32604</p>
+          <p class="cve-summary">
+            节点在检测到 self-connection 时无条件写日志。攻击者等待受害者主动连接，
+            复用 version 消息 nonce 建立大量连接，让受害者把它们都识别为 self-connection，
+            持续写日志直到磁盘满。初始连接默认 60 秒超时，因此速率有限。
+          </p>
+          <div class="attack-chain">
+            <span>受害者主动连接</span><i>→</i><span>复用 version nonce</span><i>→</i><span>大量假 self-connection</span><i>→</i><span>无条件的日志</span><i>→</i><span>磁盘增长</span>
+          </div>
+          <details class="code-details">
+            <summary>当前源码：按 source location 限速</summary>
+<pre><code>// logging.h
+inline constexpr uint64_t RATELIMIT_MAX_BYTES{1_MiB};
+inline constexpr auto RATELIMIT_WINDOW{1h};
+inline constexpr bool DEFAULT_LOGRATELIMIT{true};
+
+// logging.cpp
+if (entry.should_ratelimit &amp;&amp; m_limiter) {
+    auto status{m_limiter-&gt;Consume(entry.source_loc, str_prefixed)};
+    ...
+}
+if (m_print_to_file &amp;&amp; !ratelimit) {
+    // 写文件
+}</code></pre>
+          </details>
+          <p class="cve-note">每个日志源位置 1MiB/小时；超限只抑制写文件，控制台不受影响，并加 <code>[*]</code> 前缀。这个修复同时覆盖 54605。</p>
+          <footer class="cve-links">
+            <a href="https://bitcoincore.org/en/2025/10/24/disclose-cve-2025-54604/" target="_blank" rel="noreferrer">官方公告</a>
+            <a href="https://github.com/bitcoin/bitcoin/pull/32604" target="_blank" rel="noreferrer">PR #32604</a>
+            <a href="https://github.com/bitcoin/bitcoin/blob/19128e8b77553e4362fcbf3cb8f3f7dc5a2e4253/src/logging.h#L66" target="_blank" rel="noreferrer">源码</a>
+          </footer>
+        </article>
+
+        <article class="cve-card reveal">
+          <header class="cve-head">
+            <div><span class="cve-id">CVE-2025-54605</span><h3>无效区块填满日志磁盘</h3></div>
+            <span class="sev low">Low</span>
+          </header>
+          <p class="cve-meta">影响：&lt; 29.1 / 30.0 · 修复：29.1 / 30.0 · PR #32604</p>
+          <p class="cve-summary">
+            节点对“基本 sanity check 失败”的区块，以及分叉在最后 checkpoint 之前的区块，
+            会无条件写日志。攻击者反复发送这类无效区块，就能慢慢把磁盘写满。
+          </p>
+          <div class="attack-chain">
+            <span>无效区块</span><i>→</i><span>sanity check 失败</span><i>→</i><span>无条件的 log</span><i>→</i><span>重复发送</span><i>→</i><span>磁盘满</span>
+          </div>
+          <details class="code-details">
+            <summary>同一个日志限速器</summary>
+<pre><code>// logging.cpp · 达到配额后只抑制文件输出
+bool ratelimit{false};
+if (entry.should_ratelimit &amp;&amp; m_limiter) {
+    auto status{m_limiter-&gt;Consume(entry.source_loc, str_prefixed)};
+    ratelimit = status == LogRateLimiter::Status::STILL_SUPPRESSED;
+}
+if (m_print_to_file &amp;&amp; !ratelimit) { ... }</code></pre>
+          </details>
+          <p class="cve-note">公告提到 <code>practicalswift</code> 之前就提出过磁盘填满风险；这次修复把日志限速做成全局机制，避免同类问题反复出现。</p>
+          <footer class="cve-links">
+            <a href="https://bitcoincore.org/en/2025/10/24/disclose-cve-2025-54605/" target="_blank" rel="noreferrer">官方公告</a>
+            <a href="https://github.com/bitcoin/bitcoin/pull/32604" target="_blank" rel="noreferrer">PR #32604</a>
+            <a href="https://github.com/bitcoin/bitcoin/blob/19128e8b77553e4362fcbf3cb8f3f7dc5a2e4253/src/logging.cpp#L467" target="_blank" rel="noreferrer">源码</a>
+          </footer>
+        </article>
+
+        <article class="cve-card reveal">
+          <header class="cve-head">
+            <div><span class="cve-id">CVE-2024-52919</span><h3>addrman 32 位 ID 溢出</h3></div>
+            <span class="sev low">Low</span>
+          </header>
+          <p class="cve-meta">影响：&lt; 29.0 · 修复：29.0 · PR #30568</p>
+          <p class="cve-summary">
+            addrman 给每个地址条目分配一个递增 ID，旧代码用 32 位 <code>int</code>。
+            攻击者长期 spam <code>addr</code> 消息可让 ID 溢出并触发断言。
+            v22.0 先加了“每 peer 每 10 秒最多 1 个地址”的速率限制，使攻击需要一年以上；
+            v29.0 把 ID 改成 64 位。
+          </p>
+          <div class="attack-chain">
+            <span>addr spam</span><i>→</i><span>nIdCount++</span><i>→</i><span>32 位溢出</span><i>→</i><span>断言崩溃</span>
+          </div>
+          <details class="code-details">
+            <summary>当前源码：nid_type = int64_t</summary>
+<pre><code>// addrman_impl.h
+using nid_type = int64_t;
+
+nid_type nIdCount GUARDED_BY(cs){0};
+std::unordered_map&lt;nid_type, AddrInfo&gt; mapInfo;
+std::unordered_map&lt;CService, nid_type, CServiceHash&gt; mapAddr;
+mutable std::vector&lt;nid_type&gt; vRandom;</code></pre>
+          </details>
+          <p class="cve-note">这条是“低成本修复、低危但真实”：速率限制把攻击成本推高，64 位 ID 则从根上消除溢出。</p>
+          <footer class="cve-links">
+            <a href="https://bitcoincore.org/en/2025/04/28/disclose-cve-2024-52919/" target="_blank" rel="noreferrer">官方公告</a>
+            <a href="https://github.com/bitcoin/bitcoin/pull/30568" target="_blank" rel="noreferrer">PR #30568</a>
+            <a href="https://github.com/bitcoin/bitcoin/blob/19128e8b77553e4362fcbf3cb8f3f7dc5a2e4253/src/addrman_impl.h#L40" target="_blank" rel="noreferrer">源码</a>
+          </footer>
+        </article>
+      </div>
+    </section>
+
+    <section id="wiring" class="section">
+      <div class="section-head reveal">
+        <p class="eyebrow">09 · 串起来</p>
+        <h2>从一条 P2P 消息，到一次资源耗尽</h2>
+        <p class="section-lede">
+          把 15 条放在一起看，攻击链几乎都是同一个模板：
+          外部输入进入一个有状态的处理路径，路径上没有上限、没有超时、没有清理，最后消耗一个本地资源。
+        </p>
+      </div>
+
+      <div class="flow-strip reveal" aria-label="从 P2P 消息到资源耗尽的通用攻击链">
+        <div class="strip-node"><b>外部输入</b><small>cmpctblock · inv · addr · block</small></div>
+        <div class="strip-arrow">→</div>
+        <div class="strip-node"><b>状态机</b><small>下载状态 · mempool · reorg</small></div>
+        <div class="strip-arrow">→</div>
+        <div class="strip-node"><b>缺失的边界</b><small>超时 · 去重 · 生命周期 · 64 位</small></div>
+        <div class="strip-arrow">→</div>
+        <div class="strip-node accent"><b>资源</b><small>CPU · 内存 · 磁盘 · 可用性</small></div>
+        <div class="strip-arrow">→</div>
+        <div class="strip-node"><b>影响</b><small>崩溃 · 停顿 · 无法出块</small></div>
+      </div>
+
+      <div class="table-wrap reveal">
+        <table class="source-table">
+          <thead><tr><th>入口</th><th>内部状态</th><th>缺失的边界</th><th>后果</th><th>修复模式</th></tr></thead>
+          <tbody>
+            <tr><td><code>blocktxn</code></td><td><code>PartiallyDownloadedBlock</code></td><td>失败后状态未清理 / 可重复调用</td><td>断言崩溃</td><td>显式状态 + 幂等失败</td></tr>
+            <tr><td><code>blocktxn</code> witness</td><td>compact block 下载状态</td><td>witness root 检查太晚</td><td>区块处理停顿</td><td>在 FillBlock 内检查 mutation</td></tr>
+            <tr><td><code>inv</code> 重复 wtxid</td><td>orphanage / tx download</td><td>单条消息内不去重</td><td>消息循环停顿</td><td>per-message set</td></tr>
+            <tr><td>慢读 peer</td><td><code>vSendMsg</code> / pause 状态</td><td>pause 没有最长时间</td><td>内存增长</td><td>pause 超时断开</td></tr>
+            <tr><td>TCP urgent</td><td>select 事件集合</td><td>异常事件不受背压控制</td><td>队列无限增长</td><td>只在请求 Recv 时监听 err</td></tr>
+            <tr><td>reorg 交易</td><td>mempool TRUC 拓扑</td><td><code>bypass_limits</code> 没绕过 policy</td><td>模板生成失败</td><td>policy 检查按 bypass 跳过</td></tr>
+            <tr><td>区块验证</td><td>后台脚本线程 + txdata</td><td>对象生命周期 / 早退</td><td>UAF 崩溃</td><td>RAII 顺序 + 统一 Complete</td></tr>
+            <tr><td>undo 写入</td><td><code>rev*.dat</code> 位置</td><td>32 位位置 / 无文件上限</td><td>回绕 + 重启失败</td><td>64 位位置</td></tr>
+            <tr><td>日志</td><td>文件输出</td><td>无速率限制</td><td>磁盘满</td><td>按 source location 1MiB/h</td></tr>
+            <tr><td><code>addr</code></td><td>addrman ID</td><td>32 位递增</td><td>溢出断言</td><td>64 位 ID</td></tr>
+          </tbody>
+        </table>
+      </div>
+
+      <div class="card-grid three" style="margin-top: 18px;">
+        <article class="info-card reveal">
+          <h3>模式一：状态机</h3>
+          <p>失败路径必须把状态恢复到“可再次进入”或“明确终止”。compact block 的 header 清理、TRUC 的 bypass_limits、undo 的位置，都属于这一类。</p>
+        </article>
+        <article class="info-card reveal">
+          <h3>模式二：资源上限</h3>
+          <p>每个外部输入触发的队列都要有上限和超时：发送队列、日志、undo 文件、addr ID。只加“队列容量”不加“最长时间”仍然会漏。</p>
+        </article>
+        <article class="info-card reveal">
+          <h3>模式三：平台边界</h3>
+          <p>32 位 <code>size_t</code>、Windows <code>long</code>、FAT32 4GiB、select 与 poll 的语义差异，都会让同一份代码在不同平台上变成不同漏洞。</p>
+        </article>
+      </div>
+    </section>
+
+    <section id="versions" class="section">
+      <div class="section-head reveal">
+        <p class="eyebrow">10 · 版本与运营</p>
+        <h2>该升到哪个版本？</h2>
+        <p class="section-lede">
+          按官方公告整理的修复窗口。29.x 已在 2026-10-27 EOL，117348 不再有 29.x 修复。
+        </p>
+      </div>
+
+      <div class="table-wrap reveal">
+        <table class="source-table">
+          <thead><tr><th>版本 / 分支</th><th>包含的修复</th><th>说明</th></tr></thead>
+          <tbody>
+            <tr><td>25.0 / 25.1 / 26.0</td><td>35202 · 52922</td><td>older branch；25.1 修复 stalling peers</td></tr>
+            <tr><td>28.3</td><td>62860 · 62861</td><td>28.x 的最后修复版本</td></tr>
+            <tr><td>29.0</td><td>52911 · 52919</td><td>脚本 UAF + addrman 64 位 ID</td></tr>
+            <tr><td>29.1</td><td>46597 · 54604 · 54605</td><td>32 位上限 + 日志限速</td></tr>
+            <tr><td>29.2</td><td>62859 · 62860 · 62861</td><td>compact block / Tor / TRUC</td></tr>
+            <tr><td>29.5</td><td>117346 · 117349 · 117350</td><td>undo 64 位 + 网络资源修复</td></tr>
+            <tr><td>30.0</td><td>46597 · 46598 · 54604/5 · 62859/60/61</td><td>2025-10 主版本</td></tr>
+            <tr><td>30.4</td><td>117346 · 117349 · 117350</td><td>与 31.2 / 32.1 同日修复</td></tr>
+            <tr><td>30.5</td><td>117348</td><td>2026-11-20 发布</td></tr>
+            <tr><td>31.2</td><td>117346 · 117349 · 117350</td><td>与 30.4 / 32.1 同日修复</td></tr>
+            <tr><td>31.3</td><td>117348</td><td>2026-11-20 发布</td></tr>
+            <tr><td>32.1</td><td>117346 · 117349 · 117350 · 117348</td><td>最新修复线</td></tr>
+          </tbody>
+        </table>
+      </div>
+
+      <div class="split-layout" style="margin-top: 20px;">
+        <article class="info-card reveal">
+          <h3>节点运营 checklist</h3>
+          <ul class="clean-list">
+            <li>确认版本至少是 <strong>30.5 / 31.3 / 32.1</strong>；29.x 已 EOL。</li>
+            <li>32 位系统即使升级也无法完全消除 117346；计划迁移到 64 位，避免 FAT32。</li>
+            <li>非 Linux 节点优先升级 117350；Linux 的 poll 路径不受影响。</li>
+            <li>使用 Tor 且设置 <code>-whitelist</code> 的节点，升级到 28.3 / 29.2 / 30.0+，并检查是否把 onion inbound 错误放行。</li>
+            <li>监控磁盘、<code>debug.log</code> 增长、<code>getblocktemplate</code> 失败、peer 发送队列和 OOM。</li>
+            <li>32 位节点的 <code>-maxmempool</code> 现在硬上限 500MB，<code>-dbcache</code> 上限 1GiB。</li>
+          </ul>
+        </article>
+
+        <article class="info-card reveal">
+          <h3>升级之外的观察点</h3>
+          <ul class="clean-list">
+            <li><strong>区块模板失败：</strong>如果 reorg 后 <code>getblocktemplate</code> 持续失败，重启可清空 mempool，但根治要升级 28.3/29.2/30.0+。</li>
+            <li><strong>日志限速：</strong>看到 <code>[*]</code> 前缀说明有源位置被抑制；控制台仍输出，但文件日志会缺失，别误判为“没有日志”。</li>
+            <li><strong>paused peer：</strong>新版本会在 20 分钟超时断开，旧的“永远 paused”连接会消失。</li>
+            <li><strong>Tor 权限：</strong>升级后 onion inbound 不再继承地址白名单，依赖白名单的运营脚本需要重新评估。</li>
+          </ul>
+        </article>
+      </div>
+
+      <div class="callout warn reveal">
+        <strong>不要用“没有增发”来低估这批漏洞。</strong>
+        62861 会让矿工无法出块，117350 可以远程打爆非 Linux 节点，52911 是 UAF；
+        对基础设施来说，可用性就是安全边界。
+      </div>
+    </section>
+
+    <section id="source" class="section">
+      <div class="section-head reveal">
+        <p class="eyebrow">11 · 源码地图</p>
+        <h2>按“消息 → 状态 → 资源”读代码</h2>
+        <p class="section-lede">
+          链接固定到 Bitcoin Core master <code>19128e8b</code>。官方公告与 PR 也在每张卡片底部。
+        </p>
+      </div>
+
+      <div class="table-wrap reveal">
+        <table class="source-table">
+          <thead><tr><th>主题</th><th>文件 / 入口</th><th>看什么</th></tr></thead>
+          <tbody>
+            <tr><td>消息分发</td><td><a href="https://github.com/bitcoin/bitcoin/blob/19128e8b77553e4362fcbf3cb8f3f7dc5a2e4253/src/net_processing.cpp#L4345" target="_blank" rel="noreferrer">net_processing.cpp · ProcessMessage</a></td><td>INV、cmpctblock、blocktxn 的入口和去重</td></tr>
+            <tr><td>下载状态</td><td><a href="https://github.com/bitcoin/bitcoin/blob/19128e8b77553e4362fcbf3cb8f3f7dc5a2e4253/src/net_processing.cpp#L1038" target="_blank" rel="noreferrer">mapBlocksInFlight</a></td><td>multimap、3 个并发请求、按 peer 删除</td></tr>
+            <tr><td>compact block</td><td><a href="https://github.com/bitcoin/bitcoin/blob/19128e8b77553e4362fcbf3cb8f3f7dc5a2e4253/src/blockencodings.cpp#L243" target="_blank" rel="noreferrer">FillBlock</a></td><td>清状态、witness mutation、失败返回</td></tr>
+            <tr><td>发送背压</td><td><a href="https://github.com/bitcoin/bitcoin/blob/19128e8b77553e4362fcbf3cb8f3f7dc5a2e4253/src/net.cpp#L1690" target="_blank" rel="noreferrer">SocketSendData</a></td><td><code>fPauseSend</code> / <code>m_pause_send_since</code></td></tr>
+            <tr><td>select 后端</td><td><a href="https://github.com/bitcoin/bitcoin/blob/19128e8b77553e4362fcbf3cb8f3f7dc5a2e4253/src/util/sock.cpp#L209" target="_blank" rel="noreferrer">Sock::WaitMany</a></td><td>recv/send/err 三个 fdset 的条件</td></tr>
+            <tr><td>Tor 白名单</td><td><a href="https://github.com/bitcoin/bitcoin/blob/19128e8b77553e4362fcbf3cb8f3f7dc5a2e4253/src/net.cpp#L1812" target="_blank" rel="noreferrer">CreateNodeFromAcceptedSocket</a></td><td><code>inbound_onion</code> 传空 optional</td></tr>
+            <tr><td>TRUC / reorg</td><td><a href="https://github.com/bitcoin/bitcoin/blob/19128e8b77553e4362fcbf3cb8f3f7dc5a2e4253/src/validation.cpp#L944" target="_blank" rel="noreferrer">MemPoolAccept::PreChecks</a></td><td><code>bypass_limits</code> 包住 <code>SingleTRUCChecks</code></td></tr>
+            <tr><td>sighash 缓存</td><td><a href="https://github.com/bitcoin/bitcoin/blob/19128e8b77553e4362fcbf3cb8f3f7dc5a2e4253/src/script/interpreter.h#L255" target="_blank" rel="noreferrer">SigHashCache</a></td><td>6 个 hash type 的 SHA256 midstate</td></tr>
+            <tr><td>脚本只跑一次</td><td><a href="https://github.com/bitcoin/bitcoin/blob/19128e8b77553e4362fcbf3cb8f3f7dc5a2e4253/src/validation.cpp#L2089" target="_blank" rel="noreferrer">CheckInputScripts</a></td><td>Mempool / Block 分流，不再放宽 flags 重跑</td></tr>
+            <tr><td>UAF 生命周期</td><td><a href="https://github.com/bitcoin/bitcoin/blob/19128e8b77553e4362fcbf3cb8f3f7dc5a2e4253/src/validation.cpp#L2587" target="_blank" rel="noreferrer">ConnectBlock</a></td><td>txsdata 声明顺序、control-&gt;Complete</td></tr>
+            <tr><td>32 位上限</td><td><a href="https://github.com/bitcoin/bitcoin/blob/19128e8b77553e4362fcbf3cb8f3f7dc5a2e4253/src/node/mempool_args.cpp#L30" target="_blank" rel="noreferrer">MAX_32BIT_MEMPOOL_MB</a></td><td>mempool 500MB / dbcache 1GiB</td></tr>
+            <tr><td>undo 位置</td><td><a href="https://github.com/bitcoin/bitcoin/blob/19128e8b77553e4362fcbf3cb8f3f7dc5a2e4253/src/flatfile.h#L14" target="_blank" rel="noreferrer">FlatFilePos</a></td><td><code>uint64_t nPos</code>、<code>FileSeek64</code></td></tr>
+            <tr><td>日志限速</td><td><a href="https://github.com/bitcoin/bitcoin/blob/19128e8b77553e4362fcbf3cb8f3f7dc5a2e4253/src/logging.h#L66" target="_blank" rel="noreferrer">LogRateLimiter</a></td><td>1MiB/h per source location</td></tr>
+            <tr><td>addrman ID</td><td><a href="https://github.com/bitcoin/bitcoin/blob/19128e8b77553e4362fcbf3cb8f3f7dc5a2e4253/src/addrman_impl.h#L40" target="_blank" rel="noreferrer">nid_type</a></td><td><code>int64_t</code> 取代 <code>int</code></td></tr>
+          </tbody>
+        </table>
+      </div>
+    </section>
+
+    <section id="pitfalls" class="section">
+      <div class="section-head reveal">
+        <p class="eyebrow">12 · 常见误区</p>
+        <h2>别把 DoS 读成“币没了”</h2>
+      </div>
+
+      <div class="card-grid two">
+        <article class="info-card reveal"><h3>“High 就是能偷币”</h3><p>不是。52911/35202 是崩溃，62861 是出块停机；这批公告没有增发、没有私钥泄露、没有共识分裂。</p></article>
+        <article class="info-card reveal"><h3>“所有节点都受影响”</h3><p>46597 只影响 32 位；117350 只影响非 Linux；62860 需要非默认 <code>-whitelist</code>；117346 的 64 位利用条件极其苛刻。</p></article>
+        <article class="info-card reveal"><h3>“升级内核就够了”</h3><p>32 位和 FAT32 在 117346 修复后仍有文件大小限制；需要迁移到 64 位文件系统和平台。</p></article>
+        <article class="info-card reveal"><h3>“日志限速会丢关键证据”</h3><p>控制台不受影响，只有写文件被抑制；出现 <code>[*]</code> 前缀说明有源位置超限。对排障要同时看控制台。</p></article>
+        <article class="info-card reveal"><h3>“TRUC 是共识规则”</h3><p>它是 policy，合法区块可以违反。reorg 恢复交易时必须绕过 policy，否则就会出现“区块有效、mempool 不一致”。</p></article>
+        <article class="info-card reveal"><h3>“compact block 只省带宽”</h3><p>它还是一个下载状态机。short ID、witness、重复 blocktxn 都能影响区块处理，而不仅是网络流量。</p></article>
+        <article class="info-card reveal"><h3>“undo 溢出只影响矿工”</h3><p>准备阶段是矿工做的，崩溃的是受害节点；Windows/32 位甚至不需要 reorg，只要文件过 2GiB。</p></article>
+        <article class="info-card reveal"><h3>“LLM 扫出来的都是低危”</h3><p>117348/117349/117350 都是 Medium；Project Loupe 的发现经过人工验证，不能按来源打折。</p></article>
+      </div>
+    </section>
+
+    <section class="section final-note">
+      <div class="quote-card reveal">
+        <p>
+          这批漏洞真正教给我们的，是三条工程原则：
+          <strong>失败路径要清状态、每个队列要有上限和超时、每个平台边界都要单独验证。</strong>
+          共识代码不会因为“看起来很安全”而安全。
+        </p>
+      </div>
+      <p class="small reveal">
+        基线：Bitcoin Core master <code>19128e8b</code>（2026-11-21，版本线 32.99）。
+        漏洞细节与影响版本以 Bitcoin Core 官方 Security Advisories 为准；页面中的源码片段对应当前 master 的修复后状态。
+      </p>
+    </section>
+  </main>
+
+  <footer class="site-footer">
+    <span>Bitcoin Core Security · 2024–2026 · 19128e8b</span>
+    <a href="../../index.html">返回 HTML 索引</a>
+  </footer>
+
+  <script src="./app.js"></script>
+</body>
+</html>
