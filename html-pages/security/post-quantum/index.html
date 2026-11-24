@@ -1,0 +1,1127 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>后量子密码学：从 Shor 到 ML-KEM 源码 · CIRCL v1.6.5</title>
+  <meta name="description" content="用动画和 CIRCL v1.6.5 源码理解后量子密码：Shor/Grover 威胁、ML-KEM、ML-DSA、SLH-DSA、X25519MLKEM768 混合密钥交换、实现坑与迁移清单。">
+  <script src="../../theme.js"></script>
+  <link rel="stylesheet" href="./style.css">
+  <script>document.documentElement.classList.add('js');</script>
+</head>
+<body>
+  <div class="progress" aria-hidden="true"><span id="progressBar"></span></div>
+  <a class="skip-link" href="#main">跳到正文</a>
+
+  <header class="site-header">
+    <a class="brand" href="./index.html">
+      <span class="brand-mark">PQ</span>
+      <span>Post-Quantum</span>
+    </a>
+    <nav class="site-nav" aria-label="章节导航">
+      <a href="#threat">威胁</a>
+      <a href="#families">家族</a>
+      <a href="#mlkem">ML-KEM</a>
+      <a href="#mldsa">ML-DSA</a>
+      <a href="#slhdsa">SLH-DSA</a>
+      <a href="#hybrid">混合</a>
+      <a href="#pitfalls">实现坑</a>
+      <a href="#migrate">迁移</a>
+      <a href="#source">源码</a>
+    </nav>
+    <div class="header-actions">
+      <a class="back-link" href="../../index.html">HTML 索引</a>
+      <button class="theme-toggle" type="button" data-theme-toggle aria-label="切换日间/夜间模式">
+        <span data-theme-icon aria-hidden="true">☾</span>
+      </button>
+    </div>
+  </header>
+
+  <main id="main">
+    <section class="hero">
+      <div class="hero-copy reveal">
+        <p class="eyebrow">Post-Quantum Cryptography · CIRCL v1.6.5</p>
+        <h1>量子计算机还没来，<br><span>RSA 已经在搬家</span></h1>
+        <p class="lede">
+          Shor 会让 RSA / ECC / DH 的数学假设失效；Grover 只是把对称密钥搜索开平方。
+          真正要迁移的不是“加密”一个动作，而是<strong>密钥交换、签名、证书、协议和实现</strong>。
+          这篇从 ML-KEM 的真实 Go 源码开始，把“为什么”和“怎么写”放在一起看。
+        </p>
+        <div class="hero-actions">
+          <button class="button primary" type="button" data-play-kem>播放 KEM 流程</button>
+          <a class="button" href="#mlkem">从 ML-KEM 源码开始</a>
+        </div>
+        <div class="hero-meta">
+          <span>CIRCL <code>v1.6.5</code></span>
+          <span>commit <code>cfa7c70</code></span>
+          <span>Go 1.26.10 实测</span>
+        </div>
+      </div>
+
+      <div class="hero-visual reveal" aria-label="经典密码与格密码的对比示意图">
+        <svg viewBox="0 0 760 380" role="img" aria-labelledby="heroTitle heroDesc">
+          <title id="heroTitle">Shor 破解 RSA/ECC，格密码提供新的假设</title>
+          <desc id="heroDesc">左侧是带裂缝的经典锁，右侧是格点、基向量和噪声点，底部说明两者依赖的数学假设不同。</desc>
+          <defs>
+            <marker id="arrow" markerWidth="9" markerHeight="9" refX="8" refY="4.5" orient="auto">
+              <path d="M0 0L9 4.5L0 9Z" fill="currentColor"/>
+            </marker>
+            <marker id="arrowViolet" markerWidth="9" markerHeight="9" refX="8" refY="4.5" orient="auto">
+              <path d="M0 0L9 4.5L0 9Z" fill="#6d28d9"/>
+            </marker>
+            <pattern id="latticeDots" width="28" height="28" patternUnits="userSpaceOnUse">
+              <circle cx="2" cy="2" r="1.7" fill="currentColor" opacity=".22"/>
+            </pattern>
+            <linearGradient id="heroGlow" x1="0" x2="1">
+              <stop offset="0" stop-color="#6d28d9" stop-opacity=".12"/>
+              <stop offset="1" stop-color="#0891b2" stop-opacity=".04"/>
+            </linearGradient>
+          </defs>
+
+          <rect x="14" y="14" width="732" height="352" rx="24" fill="url(#heroGlow)"/>
+
+          <g class="svg-node">
+            <rect x="44" y="74" width="184" height="150" rx="16"/>
+            <text x="136" y="104" text-anchor="middle" class="svg-title">RSA / ECC / DH</text>
+            <text x="136" y="124" text-anchor="middle" class="svg-sub">大整数分解 / 离散对数</text>
+          </g>
+
+          <path d="M88 150 v-22 a26 26 0 0 1 52 0 v22" class="svg-danger" fill="none"/>
+          <rect x="78" y="150" width="72" height="52" rx="8" fill="var(--surface)" stroke="var(--red)" stroke-width="1.6"/>
+          <circle cx="114" cy="172" r="5" fill="var(--red)"/>
+          <path d="M114 177 v10" stroke="var(--red)" stroke-width="3" stroke-linecap="round"/>
+          <path d="M96 146 l16 18 l-10 12 l18 14" class="svg-danger crack"/>
+
+          <text x="136" y="230" text-anchor="middle" class="svg-label" style="fill:var(--red)">Shor：私钥可被恢复</text>
+
+          <g class="svg-node">
+            <rect x="532" y="64" width="184" height="180" rx="16"/>
+            <text x="624" y="94" text-anchor="middle" class="svg-title">ML-KEM / ML-DSA</text>
+            <text x="624" y="114" text-anchor="middle" class="svg-sub">Module-LWE / Module-SIS</text>
+          </g>
+
+          <g class="svg-lattice">
+            <rect x="556" y="130" width="136" height="96" fill="url(#latticeDots)" color="currentColor"/>
+            <line x1="572" y1="210" x2="640" y2="146" class="svg-accent" marker-end="url(#arrowViolet)"/>
+            <line x1="572" y1="210" x2="676" y2="210" class="svg-cyan" marker-end="url(#arrow)"/>
+            <circle cx="572" cy="210" r="4" fill="var(--accent)"/>
+            <circle cx="640" cy="146" r="4" fill="var(--accent)"/>
+            <circle cx="676" cy="210" r="4" fill="var(--accent-2)"/>
+            <circle cx="612" cy="178" r="3.5" fill="var(--red)" class="float-dot"/>
+          </g>
+
+          <text x="624" y="238" text-anchor="middle" class="svg-label" style="fill:var(--green)">格上的“找最近向量”很难</text>
+
+          <path d="M246 150 L520 150" class="svg-line dash" marker-end="url(#arrow)"/>
+          <text x="383" y="138" text-anchor="middle" class="svg-label">迁移 / hybrid</text>
+
+          <path d="M44 300 L716 300" class="svg-line" stroke-dasharray="4 8" opacity=".45"/>
+          <text x="380" y="326" text-anchor="middle" class="svg-label">不是“换一个更长的密钥”，而是换一组数学假设</text>
+        </svg>
+      </div>
+    </section>
+
+    <section class="section" id="threat">
+      <div class="section-head reveal">
+        <div>
+          <p class="section-kicker">01 · Threat Model</p>
+          <h2>Shor 破公钥，Grover 削对称</h2>
+        </div>
+        <p class="section-note">
+          先把两种量子算法分开：它们影响的不是同一类密码学，迁移优先级也不同。
+        </p>
+      </div>
+
+      <div class="tabs reveal" role="tablist" aria-label="量子算法">
+        <button class="tab active" type="button" data-threat-tab="shor">Shor：破公钥</button>
+        <button class="tab" type="button" data-threat-tab="grover">Grover：削对称</button>
+      </div>
+
+      <div class="threat-panel reveal" data-threat-panel="shor">
+        <div class="threat-row">
+          <strong>RSA</strong>
+          <p>量子计算机可在多项式时间内做大整数分解，从公钥恢复私钥。</p>
+          <span class="pill red">不再安全</span>
+        </div>
+        <div class="threat-row">
+          <strong>ECC / ECDH / ECDSA</strong>
+          <p>椭圆曲线离散对数被 Shor 攻破；TLS 的 ECDHE、签名的 ECDSA 都受影响。</p>
+          <span class="pill red">不再安全</span>
+        </div>
+        <div class="threat-row">
+          <strong>有限域 DH</strong>
+          <p>经典 Diffie-Hellman 同样依赖离散对数；大素数群也挡不住 Shor。</p>
+          <span class="pill red">不再安全</span>
+        </div>
+        <div class="threat-row">
+          <strong>对称加密 / 哈希</strong>
+          <p>Shor 对它们没有直接的多项式时间算法；它们主要面对 Grover。</p>
+          <span class="pill green">仍可用，需加长</span>
+        </div>
+      </div>
+
+      <div class="threat-panel reveal" data-threat-panel="grover" hidden>
+        <div class="threat-row">
+          <strong>AES-128</strong>
+          <p>Grover 把穷举从 2¹²⁸ 降到约 2⁶⁴；安全级别减半。</p>
+          <span class="pill amber">迁到 AES-256</span>
+        </div>
+        <div class="threat-row">
+          <strong>AES-256</strong>
+          <p>Grover 后仍有约 2¹²⁸ 的工作量；在可预见的量子模型下仍可接受。</p>
+          <span class="pill green">继续使用</span>
+        </div>
+        <div class="threat-row">
+          <strong>SHA-256 原像</strong>
+          <p>原像搜索从 2²⁵⁶ 降到约 2¹²⁸；碰撞安全需要单独评估参数与协议。</p>
+          <span class="pill amber">关注协议参数</span>
+        </div>
+        <div class="threat-row">
+          <strong>哈希签名</strong>
+          <p>SLH-DSA 依赖哈希安全；Grover 只降低安全余量，不会像 Shor 那样直接破私钥。</p>
+          <span class="pill green">保守可选</span>
+        </div>
+      </div>
+
+      <div class="callout danger reveal">
+        <span class="icon">!</span>
+        <p>
+          <strong>真正紧迫的是 HNDL（Harvest Now, Decrypt Later）：</strong>
+          攻击者今天录下 TLS 流量，等量子计算机成熟后再解密。只要数据的保密期长于“CRQC 到来时间”，
+          现在就应该把密钥交换迁到 hybrid。签名可以稍后，但证书链和根信任要提前规划。
+        </p>
+      </div>
+    </section>
+
+    <section class="section" id="families">
+      <div class="section-head reveal">
+        <div>
+          <p class="section-kicker">02 · Families</p>
+          <h2>后量子不是一种算法，是几组不同的数学</h2>
+        </div>
+        <p class="section-note">
+          NIST 已经标准化 ML-KEM（FIPS 203）、ML-DSA（FIPS 204）、SLH-DSA（FIPS 205）；
+          但“后量子”不等于“都安全”，SIKE、Rainbow 都已经被攻破。
+        </p>
+      </div>
+
+      <div class="grid-4">
+        <div class="family-card reveal">
+          <div class="family-head">
+            <h3>格密码</h3>
+            <span class="pill violet">主流</span>
+          </div>
+          <p>Module-LWE / Module-SIS。密钥和密文尺寸相对平衡，适合通用场景。</p>
+          <ul>
+            <li>ML-KEM：密钥封装</li>
+            <li>ML-DSA：数字签名</li>
+            <li>Falcon：短签名，实现更难</li>
+          </ul>
+        </div>
+        <div class="family-card reveal">
+          <div class="family-head">
+            <h3>哈希签名</h3>
+            <span class="pill green">保守</span>
+          </div>
+          <p>只依赖哈希函数的安全性；状态管理简单（无状态），但签名很大。</p>
+          <ul>
+            <li>SLH-DSA / SPHINCS+</li>
+            <li>WOTS+ / XMSS / FORS</li>
+            <li>适合根信任、固件签名</li>
+          </ul>
+        </div>
+        <div class="family-card reveal">
+          <div class="family-head">
+            <h3>编码密码</h3>
+            <span class="pill cyan">大公钥</span>
+          </div>
+          <p>基于纠错码解码难题；Classic McEliece 历史长、假设保守，但公钥很大。</p>
+          <ul>
+            <li>Classic McEliece</li>
+            <li>HQC（NIST 备用 KEM）</li>
+            <li>适合不介意带宽的场景</li>
+          </ul>
+        </div>
+        <div class="family-card reveal">
+          <div class="family-head">
+            <h3>其他路线</h3>
+            <span class="pill red">有前车之鉴</span>
+          </div>
+          <p>多变量、同源等路线提供不同 trade-off，但安全性波动更大。</p>
+          <ul>
+            <li>Rainbow：已被攻破</li>
+            <li>SIKE：已被攻破</li>
+            <li>不要因为“后量子”就跳过审计</li>
+          </ul>
+        </div>
+      </div>
+
+      <div class="callout warn reveal">
+        <span class="icon">i</span>
+        <p>
+          <strong>选型不是只看安全级别。</strong>
+          公钥/密文/签名尺寸、握手轮数、CPU、内存、侧信道、代码成熟度、协议互操作，
+          都会决定它能不能真正上线。ML-KEM 先上，签名后上，是更现实的路线。
+        </p>
+      </div>
+    </section>
+
+    <section class="section" id="mlkem">
+      <div class="section-head reveal">
+        <div>
+          <p class="section-kicker">03 · ML-KEM</p>
+          <h2>一次 KEM，三段代码</h2>
+        </div>
+        <p class="section-note">
+          ML-KEM 不是“加密一段消息”，而是双方协商一个 32 字节共享密钥。
+          下面用 CIRCL 的 ML-KEM-768 源码走一遍 KeyGen → Encaps → Decaps。
+        </p>
+      </div>
+
+      <div class="kem-stage reveal" id="kemStage">
+        <div class="packet" aria-hidden="true"></div>
+        <div class="actor" id="actorAlice">
+          <h4>Alice <span class="pill violet">接收方</span></h4>
+          <p class="svg-sub">生成密钥对，保存私钥</p>
+          <div class="keybox" id="aliceBox">pk = ?<br>sk = ?</div>
+        </div>
+        <div class="actor eve" id="actorEve">
+          <h4>Eve <span class="pill red">观察者</span></h4>
+          <p class="svg-sub">能看到公钥和密文</p>
+          <div class="keybox bad" id="eveBox">pk ✓<br>ct ✓<br>ss = ?</div>
+        </div>
+        <div class="actor" id="actorBob">
+          <h4>Bob <span class="pill cyan">发送方</span></h4>
+          <p class="svg-sub">封装一个共享密钥</p>
+          <div class="keybox" id="bobBox">pk ✓<br>ss = ?</div>
+        </div>
+      </div>
+
+      <div class="kem-steps reveal" aria-label="ML-KEM 步骤">
+        <div class="kem-step active" data-kem-step="0">
+          <span class="n">1</span>
+          <div><strong>KeyGen</strong><p>Alice 生成 <code>(pk, sk)</code>，把 <code>pk</code> 发给 Bob。</p></div>
+        </div>
+        <div class="kem-step" data-kem-step="1">
+          <span class="n">2</span>
+          <div><strong>Encaps</strong><p>Bob 采样 <code>m</code>，算 <code>(K,r)=G(m‖H(pk))</code>，<code>c=K-PKE.Enc(pk,m,r)</code>，发 <code>c</code>，留下 <code>K</code>。</p></div>
+        </div>
+        <div class="kem-step" data-kem-step="2">
+          <span class="n">3</span>
+          <div><strong>Decaps</strong><p>Alice 解出 <code>m'</code>，重算 <code>c'</code>；比较 <code>c==c'</code>，相等取 <code>K''</code>，否则取 <code>PRF(z‖c)</code>。</p></div>
+        </div>
+        <div class="kem-step" data-kem-step="3">
+          <span class="n">4</span>
+          <div><strong>Shared secret</strong><p>双方得到 32 字节；Eve 有 <code>pk</code> 和 <code>c</code>，但没有 <code>ss</code>。</p></div>
+        </div>
+      </div>
+
+      <div class="kem-controls reveal">
+        <button class="button small" type="button" id="kemPrev">上一步</button>
+        <button class="button small" type="button" id="kemNext">下一步</button>
+        <button class="button small primary" type="button" id="kemPlay">播放</button>
+        <span class="counter" id="kemCounter">1 / 4</span>
+      </div>
+      <div class="kem-status reveal" id="kemStatus">
+        <strong>KeyGen：</strong>Alice 生成密钥对。公钥可以公开；私钥里的 <code>z</code> 用于隐式拒绝。
+      </div>
+
+      <div class="grid-2" style="margin-top:16px">
+        <div class="card reveal">
+          <h3>Decaps 的两种结果</h3>
+          <p class="svg-sub">把 ciphertext 改一个 bit，观察共享密钥是否变化、是否报错。</p>
+          <button class="toggle" type="button" id="corruptToggle" aria-pressed="false">
+            <span class="knob" aria-hidden="true"></span>
+            <span>篡改 ciphertext</span>
+          </button>
+          <div class="keybox" id="decapsBox" style="margin-top:12px">c == c'：ss = K''，err = nil</div>
+          <p class="svg-sub" id="decapsNote" style="margin-top:8px">正常路径：重加密结果与收到的密文一致。</p>
+        </div>
+        <div class="card reveal">
+          <h3>为什么不是“报错”？</h3>
+          <p class="svg-sub">
+            如果 Decaps 对错误密文返回可区分的错误，攻击者就拿到一个解密 oracle。
+            ML-KEM 用 <strong>implicit rejection</strong>：失败时返回一个伪随机密钥，
+            但长度、流程都正常。
+          </p>
+          <div class="code-block">
+            <div class="code-head"><span>kyber.go · DecapsulateTo</span><a href="https://github.com/cloudflare/circl/blob/cfa7c70defd831ffb0792ab2af560bfef43d60ca/kem/mlkem/mlkem768/kyber.go#L144-L187" target="_blank" rel="noreferrer">source</a></div>
+            <pre><code>subtle.ConstantTimeCopy(
+    subtle.ConstantTimeCompare(ct, ct2[:]),
+    ss2[:],
+    kr2[:SharedKeySize],
+)</code></pre>
+          </div>
+        </div>
+      </div>
+
+      <h3 style="margin-top:28px">源码：KeyGen 把种子拆成两半</h3>
+      <p class="section-note" style="margin-bottom:0">
+        <code>NewKeyFromSeed</code> 里，前 32 字节给 K-PKE，后 32 字节保存为 <code>z</code>。
+        <code>z</code> 不参与正常封装，只在解封装失败时生成伪随机共享密钥。
+      </p>
+      <div class="code-block reveal">
+        <div class="code-head"><span>kem/mlkem/mlkem768/kyber.go · NewKeyFromSeed</span><a href="https://github.com/cloudflare/circl/blob/cfa7c70defd831ffb0792ab2af560bfef43d60ca/kem/mlkem/mlkem768/kyber.go#L57-L80" target="_blank" rel="noreferrer">L57–L80</a></div>
+        <pre><code>pk.pk, sk.sk = cpapke.NewKeyFromSeedMLKEM(seed[:cpapke.KeySeedSize])
+sk.pk = pk.pk
+copy(sk.z[:], seed[cpapke.KeySeedSize:])
+
+// H(pk)
+var ppk [cpapke.PublicKeySize]byte
+sk.pk.Pack(ppk[:])
+h := sha3.New256()
+h.Write(ppk[:])
+h.Read(sk.hpk[:])</code></pre>
+      </div>
+
+      <h3 style="margin-top:28px">源码：Encaps 不是“加密随机数”</h3>
+      <p class="section-note" style="margin-bottom:0">
+        Bob 先采样 <code>m</code>，用 <code>G(m ‖ H(pk))</code> 同时得到共享密钥 <code>K</code> 和加密随机数 <code>r</code>，
+        再用 K-PKE 加密 <code>m</code>。共享密钥来自哈希，不是密文本身。
+      </p>
+      <div class="code-block reveal">
+        <div class="code-head"><span>kem/mlkem/mlkem768/kyber.go · EncapsulateTo</span><a href="https://github.com/cloudflare/circl/blob/cfa7c70defd831ffb0792ab2af560bfef43d60ca/kem/mlkem/mlkem768/kyber.go#L103-L142" target="_blank" rel="noreferrer">L103–L142</a></div>
+        <pre><code>var m [32]byte
+copy(m[:], seed)
+
+// (K', r) = G(m ‖ H(pk))
+var kr [64]byte
+g := sha3.New512()
+g.Write(m[:])
+g.Write(pk.hpk[:])
+g.Read(kr[:])
+
+// c = Kyber.CPAPKE.Enc(pk, m, r)
+pk.pk.EncryptTo(ct, m[:], kr[32:])
+copy(ss, kr[:SharedKeySize])</code></pre>
+      </div>
+
+      <h3 style="margin-top:28px">源码：Decaps 先解密，再重加密</h3>
+      <p class="section-note" style="margin-bottom:0">
+        Alice 解出 <code>m'</code>，用同样的 <code>G</code> 得到 <code>K''</code> 和 <code>r'</code>，
+        重新加密得到 <code>c'</code>。只有 <code>c == c'</code> 才采用 <code>K''</code>；
+        否则采用 <code>PRF(z ‖ c)</code>，并用常量时间选择，避免错误 oracle。
+      </p>
+      <div class="code-block reveal">
+        <div class="code-head"><span>kem/mlkem/mlkem768/kyber.go · DecapsulateTo</span><a href="https://github.com/cloudflare/circl/blob/cfa7c70defd831ffb0792ab2af560bfef43d60ca/kem/mlkem/mlkem768/kyber.go#L144-L187" target="_blank" rel="noreferrer">L144–L187</a></div>
+        <pre><code>// m' = Kyber.CPAPKE.Dec(sk, ct)
+sk.sk.DecryptTo(m2[:], ct)
+
+// (K'', r') = G(m' ‖ H(pk))
+g := sha3.New512()
+g.Write(m2[:])
+g.Write(sk.hpk[:])
+g.Read(kr2[:])
+
+// c' = Kyber.CPAPKE.Enc(pk, m', r')
+sk.pk.EncryptTo(ct2[:], m2[:], kr2[32:])
+
+// 失败时的伪随机密钥：ss2 = PRF(z ‖ c)
+prf := sha3.NewShake256()
+prf.Write(sk.z[:])
+prf.Write(ct[:CiphertextSize])
+prf.Read(ss2[:])
+
+// c == c' 时用 K''，否则保留 ss2
+subtle.ConstantTimeCopy(
+    subtle.ConstantTimeCompare(ct, ct2[:]),
+    ss2[:],
+    kr2[:SharedKeySize],
+)</code></pre>
+      </div>
+
+      <h3 style="margin-top:28px">源码：K-PKE 里的格运算</h3>
+      <p class="section-note" style="margin-bottom:0">
+        ML-KEM 的内层是一个 IND-CPA 的公钥加密（K-PKE）。它在环
+        <code>R_q = Z_q[x]/(x²⁵⁶+1)</code> 上做矩阵向量乘法，再用 NTT 加速。
+      </p>
+      <div class="grid-2">
+        <div class="code-block reveal">
+          <div class="code-head"><span>pke/kyber/kyber768/internal/params.go</span><a href="https://github.com/cloudflare/circl/blob/cfa7c70defd831ffb0792ab2af560bfef43d60ca/pke/kyber/kyber768/internal/params.go#L1-L25" target="_blank" rel="noreferrer">source</a></div>
+          <pre><code>K             = 3
+Eta1          = 2
+DU            = 10
+DV            = 4
+PublicKeySize = 32 + K*common.PolySize
+PrivateKeySize = K * common.PolySize
+CiphertextSize = 1088</code></pre>
+        </div>
+        <div class="code-block reveal">
+          <div class="code-head"><span>pke/kyber/kyber768/internal/cpapke.go · EncryptTo</span><a href="https://github.com/cloudflare/circl/blob/cfa7c70defd831ffb0792ab2af560bfef43d60ca/pke/kyber/kyber768/internal/cpapke.go#L137-L182" target="_blank" rel="noreferrer">L137–L182</a></div>
+          <pre><code>// u = Aᵀ r + e₁
+for i := 0; i &lt; K; i++ {
+    PolyDotHat(&amp;u[i], &amp;pk.aT[i], &amp;rh)
+}
+u.InvNTT()
+u.Add(&amp;u, &amp;e1)
+
+// v = &lt;t, r&gt; + e₂ + Decompress(m)
+PolyDotHat(&amp;v, &amp;pk.th, &amp;rh)
+v.InvNTT()
+v.Add(&amp;v, &amp;m)
+v.Add(&amp;v, &amp;e2)
+
+u.CompressTo(ct, DU)
+v.CompressTo(ct[K*compressedPolySize(DU):], DV)</code></pre>
+        </div>
+      </div>
+
+      <div class="callout reveal">
+        <span class="icon">∑</span>
+        <p>
+          <strong>NTT 在这里做什么？</strong>
+          多项式乘法如果直接做是 O(N²)；NTT 把它变成点乘，O(N log N)。
+          CIRCL 的 <code>Zetas[128]</code> 是 <code>ζ=17</code> 的幂，<code>q=3329</code>，
+          <code>N=256</code>。这不是“更安全的魔法”，只是让格运算在 CPU 上可接受。
+          <a href="https://github.com/cloudflare/circl/blob/cfa7c70defd831ffb0792ab2af560bfef43d60ca/pke/kyber/internal/common/ntt.go#L60-L144" target="_blank" rel="noreferrer">ntt.go</a>
+        </p>
+      </div>
+
+      <h3 style="margin-top:28px">参数与尺寸</h3>
+      <div class="table-wrap reveal">
+        <table>
+          <thead><tr><th>参数集</th><th>公钥</th><th>私钥</th><th>密文</th><th>共享密钥</th><th>适用</th></tr></thead>
+          <tbody>
+            <tr><td>ML-KEM-512</td><td>800 B</td><td>1632 B</td><td>768 B</td><td>32 B</td><td>资源受限，安全级别较低</td></tr>
+            <tr><td>ML-KEM-768</td><td>1184 B</td><td>2400 B</td><td>1088 B</td><td>32 B</td><td>TLS 默认常用</td></tr>
+            <tr><td>ML-KEM-1024</td><td>1568 B</td><td>3168 B</td><td>1568 B</td><td>32 B</td><td>更高安全级别</td></tr>
+          </tbody>
+        </table>
+      </div>
+
+      <div class="size-chart reveal" aria-label="公钥与签名尺寸对比">
+        <div class="size-row"><span>RSA-2048 公钥</span><div class="bar"><span data-size="3.2"></span></div><span class="val">256 B</span></div>
+        <div class="size-row cyan"><span>P-256 公钥</span><div class="bar"><span data-size="0.4"></span></div><span class="val">32 B</span></div>
+        <div class="size-row"><span>ML-KEM-768 公钥</span><div class="bar"><span data-size="14.8"></span></div><span class="val">1184 B</span></div>
+        <div class="size-row"><span>ML-DSA-65 公钥</span><div class="bar"><span data-size="24.4"></span></div><span class="val">1952 B</span></div>
+        <div class="size-row amber"><span>ML-DSA-65 签名</span><div class="bar"><span data-size="41.4"></span></div><span class="val">3309 B</span></div>
+        <div class="size-row red"><span>SLH-DSA-128s 签名</span><div class="bar"><span data-size="98.2"></span></div><span class="val">7856 B</span></div>
+      </div>
+      <p class="svg-sub" style="margin-top:8px">条形按 8000 B 上限缩放，只用于直观比较，不是精确比例。</p>
+    </section>
+
+    <section class="section" id="mldsa">
+      <div class="section-head reveal">
+        <div>
+          <p class="section-kicker">04 · ML-DSA</p>
+          <h2>签名：Fiat–Shamir with aborts</h2>
+        </div>
+        <p class="section-note">
+          ML-DSA（Dilithium）不是“哈希一下再签”。它用拒绝采样保证签名不泄露私钥信息；
+          一次签名可能重试多次，这是设计的一部分。
+        </p>
+      </div>
+
+      <div class="grid-2">
+        <div class="card reveal">
+          <h3>签名流程</h3>
+          <ol style="margin:0;padding-left:18px;color:var(--muted);font-size:13px;line-height:1.8">
+            <li><code>μ = CRH(tr ‖ msg)</code>，绑定公钥和消息。</li>
+            <li><code>ρ' = CRH(key ‖ μ)</code>，派生 mask 种子。</li>
+            <li><code>y = ExpandMask(ρ')</code>，采样掩码。</li>
+            <li><code>w = A y</code>，分解出 <code>w1</code>。</li>
+            <li><code>c = H(μ ‖ w1)</code>，挑战。</li>
+            <li><code>z = y + c·s1</code>；检查 <code>‖z‖∞</code> 和 <code>‖w0−c·s2‖∞</code>，不满足就重试。</li>
+          </ol>
+        </div>
+        <div class="code-block reveal" style="margin-top:0">
+          <div class="code-head"><span>sign/mldsa/mldsa65/internal/dilithium.go · SignTo</span><a href="https://github.com/cloudflare/circl/blob/cfa7c70defd831ffb0792ab2af560bfef43d60ca/sign/mldsa/mldsa65/internal/dilithium.go#L340-L472" target="_blank" rel="noreferrer">L340–L472</a></div>
+          <pre><code>// μ = CRH(tr ‖ msg)
+h := sha3.NewShake256()
+h.Write(sk.tr[:])
+msg(&amp;h)
+h.Read(mu[:])
+
+// ρ' = CRH(key ‖ μ)
+h.Reset()
+h.Write(sk.key[:])
+if NIST { h.Write(rnd[:]) }
+h.Write(mu[:])
+h.Read(rhop[:])
+
+for {
+    // y = ExpandMask(ρ', key)
+    VecLDeriveUniformLeGamma1(&amp;y, &amp;rhop, yNonce)
+    // w = A y
+    // c = H(μ ‖ w1)
+    // z = y + c·s1
+    // if ‖z‖∞ or ‖w0−c·s2‖∞ too large: continue
+}</code></pre>
+        </div>
+      </div>
+
+      <div class="grid-3" style="margin-top:16px">
+        <div class="card reveal"><h4>尺寸</h4><p class="svg-sub">ML-DSA-65：pk 1952 B，sk 4032 B，签名 3309 B。</p></div>
+        <div class="card reveal"><h4>随机性</h4><p class="svg-sub"><code>randomized=true</code> 时混入 <code>rnd</code>，降低故障攻击与确定性签名的风险；确定性与随机化都要正确处理。</p></div>
+        <div class="card reveal"><h4>边界</h4><p class="svg-sub">拒绝采样是安全的一部分，不是“实现慢”。不要为了性能删掉范数检查。</p></div>
+      </div>
+
+      <div class="callout warn reveal">
+        <span class="icon">!</span>
+        <p>
+          <strong>签名尺寸会改变协议。</strong>
+          X.509 证书、JWT、固件分区、区块链交易都可能因为 3 KB 签名而超限。
+          迁移前先量清楚：握手、存储、MTU、日志、数据库字段。
+        </p>
+      </div>
+    </section>
+
+    <section class="section" id="slhdsa">
+      <div class="section-head reveal">
+        <div>
+          <p class="section-kicker">05 · SLH-DSA</p>
+          <h2>哈希签名：慢、大，但假设最保守</h2>
+        </div>
+        <p class="section-note">
+          SLH-DSA（SPHINCS+）不依赖格；它用 WOTS+、XMSS 和 FORS 组成无状态哈希签名。
+          公钥很小，签名很大，适合根信任和长期固件签名。
+        </p>
+      </div>
+
+      <div class="grid-2">
+        <div class="card reveal">
+          <h3>结构</h3>
+          <ul style="margin:0;padding-left:18px;color:var(--muted);font-size:13px;line-height:1.8">
+            <li><strong>WOTS+</strong>：一次性签名，签一个哈希值。</li>
+            <li><strong>XMSS</strong>：Merkle 树把多个 WOTS+ 公钥聚合。</li>
+            <li><strong>Hypertree</strong>：多层 XMSS，减少单树高度。</li>
+            <li><strong>FORS</strong>：少量一次性签名，签消息摘要。</li>
+          </ul>
+        </div>
+        <div class="code-block reveal" style="margin-top:0">
+          <div class="code-head"><span>sign/slhdsa/params.go · 参数集</span><a href="https://github.com/cloudflare/circl/blob/cfa7c70defd831ffb0792ab2af560bfef43d60ca/sign/slhdsa/params.go#L20-L34" target="_blank" rel="noreferrer">L20–L34</a></div>
+          <pre><code>SHA2_128s  ID = iota + 1 // SLH-DSA-SHA2-128s
+SHAKE_128s               // SLH-DSA-SHAKE-128s
+SHA2_128f                // SLH-DSA-SHA2-128f
+SHAKE_128f
+SHA2_192s
+SHAKE_192s
+SHA2_192f
+SHAKE_192f
+SHA2_256s
+SHAKE_256s
+SHA2_256f
+SHAKE_256f</code></pre>
+        </div>
+      </div>
+
+      <div class="table-wrap reveal" style="margin-top:16px">
+        <table>
+          <thead><tr><th>参数集</th><th>公钥</th><th>私钥</th><th>签名</th><th>特点</th></tr></thead>
+          <tbody>
+            <tr><td>SLH-DSA-SHA2-128s</td><td>32 B</td><td>64 B</td><td>7856 B</td><td>小公钥，签名较大，签名慢</td></tr>
+            <tr><td>SLH-DSA-SHA2-128f</td><td>32 B</td><td>64 B</td><td>17088 B</td><td>更快，签名更大</td></tr>
+            <tr><td>SLH-DSA-SHA2-256s</td><td>32 B</td><td>64 B</td><td>29792 B</td><td>更高安全级别</td></tr>
+          </tbody>
+        </table>
+      </div>
+
+      <div class="callout ok reveal">
+        <span class="icon">✓</span>
+        <p>
+          <strong>适合什么？</strong>
+          根 CA、固件签名、长期归档、对带宽不敏感但要求安全假设简单的场景。
+          不适合“每个 TLS 握手都签一次”的高频场景。
+        </p>
+      </div>
+    </section>
+
+    <section class="section" id="hybrid">
+      <div class="section-head reveal">
+        <div>
+          <p class="section-kicker">06 · Hybrid</p>
+          <h2>X25519MLKEM768：先上车，再换引擎</h2>
+        </div>
+        <p class="section-note">
+          迁移不是“今晚把 ECDHE 换成 ML-KEM”。更现实的是 hybrid：
+          经典 ECDH + PQC KEM 同时跑，任何一方没被破，密钥就还安全。
+        </p>
+      </div>
+
+      <div class="grid-2">
+        <div class="card reveal">
+          <h3>组合方式</h3>
+          <p class="svg-sub">
+            CIRCL 的 <code>X25519MLKEM768</code> 让 ML-KEM-768 和 X25519 各自封装，
+            返回 <code>ct = ML-KEM ct ‖ X25519 ct</code>，<code>ss = ML-KEM ss ‖ X25519 ss</code>。
+            协议层必须把拼接结果和握手 transcript 一起送进 KDF，而不是直接当密钥用。
+          </p>
+          <div class="size-chart" style="margin-top:10px">
+            <div class="size-row"><span>公钥</span><div class="bar"><span data-size="15.2"></span></div><span class="val">1216 B</span></div>
+            <div class="size-row cyan"><span>密文</span><div class="bar"><span data-size="14.0"></span></div><span class="val">1120 B</span></div>
+            <div class="size-row"><span>共享密钥</span><div class="bar"><span data-size="0.8"></span></div><span class="val">64 B</span></div>
+          </div>
+        </div>
+        <div class="code-block reveal" style="margin-top:0">
+          <div class="code-head"><span>kem/hybrid/hybrid.go · X25519MLKEM768</span><a href="https://github.com/cloudflare/circl/blob/cfa7c70defd831ffb0792ab2af560bfef43d60ca/kem/hybrid/hybrid.go#L63-L72" target="_blank" rel="noreferrer">L63–L72</a></div>
+          <pre><code>func X25519MLKEM768() kem.Scheme { return xmlkem768 }
+
+var xmlkem768 kem.Scheme = &amp;scheme{
+    "X25519MLKEM768",
+    mlkem768.Scheme(),
+    x25519Kem,
+}
+
+// Encapsulate:
+ct1, ss1, _ := sch.first.Encapsulate(pub.first)
+ct2, ss2, _ := sch.second.Encapsulate(pub.second)
+return append(ct1, ct2...), append(ss1, ss2...), nil</code></pre>
+        </div>
+      </div>
+
+      <div class="callout danger reveal">
+        <span class="icon">!</span>
+        <p>
+          <strong>Hybrid 不是“把两个密钥拼起来就完事”。</strong>
+          组合器必须绑定协议上下文，防止 cross-protocol / 混淆攻击；
+          TLS 里用 HKDF 吸收 transcript；自定义协议不要自己发明拼接规则。
+        </p>
+      </div>
+    </section>
+
+    <section class="section" id="pitfalls">
+      <div class="section-head reveal">
+        <div>
+          <p class="section-kicker">07 · Pitfalls</p>
+          <h2>PQC 的实现坑，和算法一样重要</h2>
+        </div>
+        <p class="section-note">
+          从 RSA 换到 ML-KEM，不会自动获得安全；常量时间、密钥校验、隐式拒绝、随机性、
+          参数长度和组合器，任何一个出错都可能把安全性还回去。
+        </p>
+      </div>
+
+      <div class="grid-2">
+        <div class="card reveal"><h4>常量时间</h4><p class="svg-sub">比较、选择、解压都不能依赖秘密分支。CIRCL 用 <code>crypto/subtle</code>；自己写时先问“这条分支会不会随密钥变化”。</p></div>
+        <div class="card reveal"><h4>隐式拒绝</h4><p class="svg-sub">Decaps 失败不要返回可区分错误；返回伪随机密钥，让攻击者拿不到 oracle。</p></div>
+        <div class="card reveal"><h4>密钥校验</h4><p class="svg-sub">CIRCL 的 <code>Unpack</code> 会检查 <code>H(pk)</code> 是否匹配；不要跳过反序列化校验。</p></div>
+        <div class="card reveal"><h4>随机性</h4><p class="svg-sub">用 <code>crypto/rand</code>；确定性 seed 只用于测试/KAT。不要用时间、计数器或 <code>math/rand</code>。</p></div>
+        <div class="card reveal"><h4>参数长度</h4><p class="svg-sub">ML-KEM-512/768/1024 的公钥、密文长度不同；API 必须按 scheme 分派，不能只看“都是 ML-KEM”。</p></div>
+        <div class="card reveal"><h4>侧信道</h4><p class="svg-sub">NTT、压缩、解压和内存访问都可能泄漏；CIRCL 有汇编优化，但 README 明确说不是每个包都常量时间。</p></div>
+        <div class="card reveal"><h4>组合器</h4><p class="svg-sub">Hybrid 的拼接结果要经过 KDF，并绑定 transcript；不要直接拿 64 字节当会话密钥。</p></div>
+        <div class="card reveal"><h4>审计边界</h4><p class="svg-sub">CIRCL README 明确写“experimental、无保证”。源码分析不是审计报告，生产要跟库的安全策略和版本更新。</p></div>
+      </div>
+
+      <div class="callout warn reveal">
+        <span class="icon">i</span>
+        <p>
+          <strong>一个值得记住的细节：</strong>
+          CIRCL 的 <code>PrivateKey.Unpack</code> 会重新计算 <code>H(pk)</code> 并与存储值比较。
+          这不是“多余校验”，而是防止私钥文件里的公钥部分被替换后，解密/解封装行为偏离预期。
+        </p>
+      </div>
+    </section>
+
+    <section class="section" id="migrate">
+      <div class="section-head reveal">
+        <div>
+          <p class="section-kicker">08 · Migration</p>
+          <h2>迁移清单：先保密，再签名</h2>
+        </div>
+        <p class="section-note">
+          不要等“量子计算机什么时候来”有确定答案。把迁移拆成可交付的工程步骤，
+          每一步都能独立验证。
+        </p>
+      </div>
+
+      <div class="timeline reveal">
+        <div class="timeline-item"><strong>1. 盘点</strong><p>列出 RSA/ECC/DH 的使用点：TLS、SSH、VPN、证书、代码签名、固件、数据库字段、硬件模块。</p></div>
+        <div class="timeline-item"><strong>2. 先上 hybrid KEM</strong><p>TLS 1.3 用 X25519MLKEM768；保留经典 ECDH 作为后备。先解决 HNDL，不急着换签名。</p></div>
+        <div class="timeline-item"><strong>3. 再做签名</strong><p>从内部服务、代码签名、固件开始试点 ML-DSA；根信任/长期归档评估 SLH-DSA。</p></div>
+        <div class="timeline-item"><strong>4. 量尺寸与性能</strong><p>握手字节、证书链、MTU、存储、签名/验证 CPU、移动端电量；把 3 KB 签名当成协议变更。</p></div>
+        <div class="timeline-item"><strong>5. 测试与回滚</strong><p>KAT、互操作、负向测试、侧信道评审、灰度、回滚开关。不要一次切换全部流量。</p></div>
+        <div class="timeline-item"><strong>6. 设废弃时间</strong><p>给 RSA/ECC 设明确的下线窗口；监控残留流量；把 crypto agility 写进架构。</p></div>
+      </div>
+
+      <h3 style="margin-top:24px">最小检查清单</h3>
+      <ul class="checklist reveal">
+        <li><span><strong>算法清单</strong>：知道每个 RSA/ECC/DH 用在哪里、保护什么、保密期多长。</span></li>
+        <li><span><strong>Hybrid 优先</strong>：TLS/SSH/VPN 先上 hybrid KEM，保留经典算法作为后备。</span></li>
+        <li><span><strong>密钥/签名尺寸</strong>：协议、存储、证书链、数据库字段都能容纳 PQC 尺寸。</span></li>
+        <li><span><strong>常量时间</strong>：比较、选择、解压不依赖秘密；使用经过审查的库。</span></li>
+        <li><span><strong>负向测试</strong>：错误密文、畸形公钥、长度错误、重放、跨协议输入都有测试。</span></li>
+        <li><span><strong>版本固定</strong>：记录库版本/提交；PQC 实现仍在快速演进。</span></li>
+        <li><span><strong>回滚方案</strong>：算法协商失败时能退回经典算法，而不是整站不可用。</span></li>
+      </ul>
+    </section>
+
+    <section class="section" id="source">
+      <div class="section-head reveal">
+        <div>
+          <p class="section-kicker">09 · Source & Experiment</p>
+          <h2>源码与实测输出</h2>
+        </div>
+        <p class="section-note">
+          源码基线：CIRCL <code>v1.6.5</code>，提交
+          <code>cfa7c70defd831ffb0792ab2af560bfef43d60ca</code>，2026-08-05 发布。
+          实验环境：macOS arm64、Go 1.26.10。
+        </p>
+      </div>
+
+      <div class="table-wrap reveal">
+        <table class="source-table">
+          <thead><tr><th>文件</th><th>类型</th><th>看什么</th></tr></thead>
+          <tbody>
+            <tr><td><a href="https://github.com/cloudflare/circl/blob/cfa7c70defd831ffb0792ab2af560bfef43d60ca/kem/mlkem/mlkem768/kyber.go#L57-L80" target="_blank" rel="noreferrer">kem/mlkem/mlkem768/kyber.go</a></td><td><span class="pill violet">KEM</span></td><td>KeyGen：种子拆分、<code>z</code>、<code>H(pk)</code></td></tr>
+            <tr><td><a href="https://github.com/cloudflare/circl/blob/cfa7c70defd831ffb0792ab2af560bfef43d60ca/kem/mlkem/mlkem768/kyber.go#L103-L142" target="_blank" rel="noreferrer">…/kyber.go L103–L142</a></td><td><span class="pill violet">KEM</span></td><td>Encaps：<code>G(m‖H(pk))</code>、K-PKE 加密</td></tr>
+            <tr><td><a href="https://github.com/cloudflare/circl/blob/cfa7c70defd831ffb0792ab2af560bfef43d60ca/kem/mlkem/mlkem768/kyber.go#L144-L187" target="_blank" rel="noreferrer">…/kyber.go L144–L187</a></td><td><span class="pill violet">KEM</span></td><td>Decaps：重加密、常量时间比较、隐式拒绝</td></tr>
+            <tr><td><a href="https://github.com/cloudflare/circl/blob/cfa7c70defd831ffb0792ab2af560bfef43d60ca/pke/kyber/kyber768/internal/params.go#L1-L25" target="_blank" rel="noreferrer">pke/kyber/kyber768/internal/params.go</a></td><td><span class="pill cyan">PKE</span></td><td>K=3、DU=10、DV=4、密文 1088 B</td></tr>
+            <tr><td><a href="https://github.com/cloudflare/circl/blob/cfa7c70defd831ffb0792ab2af560bfef43d60ca/pke/kyber/kyber768/internal/cpapke.go#L137-L182" target="_blank" rel="noreferrer">pke/kyber/…/cpapke.go L137–L182</a></td><td><span class="pill cyan">PKE</span></td><td>u/v 计算、NTT、压缩</td></tr>
+            <tr><td><a href="https://github.com/cloudflare/circl/blob/cfa7c70defd831ffb0792ab2af560bfef43d60ca/pke/kyber/internal/common/ntt.go#L60-L144" target="_blank" rel="noreferrer">pke/kyber/internal/common/ntt.go</a></td><td><span class="pill amber">NTT</span></td><td>NTT、Zetas、q=3329、N=256</td></tr>
+            <tr><td><a href="https://github.com/cloudflare/circl/blob/cfa7c70defd831ffb0792ab2af560bfef43d60ca/sign/mldsa/mldsa65/internal/dilithium.go#L340-L472" target="_blank" rel="noreferrer">sign/mldsa/mldsa65/internal/dilithium.go</a></td><td><span class="pill green">签名</span></td><td>拒绝采样、μ、ρ'、z、范数检查</td></tr>
+            <tr><td><a href="https://github.com/cloudflare/circl/blob/cfa7c70defd831ffb0792ab2af560bfef43d60ca/sign/slhdsa/params.go#L20-L34" target="_blank" rel="noreferrer">sign/slhdsa/params.go</a></td><td><span class="pill green">签名</span></td><td>SLH-DSA 参数集</td></tr>
+            <tr><td><a href="https://github.com/cloudflare/circl/blob/cfa7c70defd831ffb0792ab2af560bfef43d60ca/kem/hybrid/hybrid.go#L63-L72" target="_blank" rel="noreferrer">kem/hybrid/hybrid.go</a></td><td><span class="pill violet">Hybrid</span></td><td>X25519MLKEM768 组合</td></tr>
+          </tbody>
+        </table>
+      </div>
+
+      <h3 style="margin-top:24px">实测：ML-KEM-768 与隐式拒绝</h3>
+      <div class="stack">
+        <div class="code-block reveal">
+          <div class="code-head"><span>cmd/pq-demo/main.go（节选）</span></div>
+          <pre><code>pk, sk, _ := mlkem768.GenerateKeyPair(nil)
+ct, ss1, _ := mlkem768.Scheme().Encapsulate(pk)
+ss2, _ := mlkem768.Scheme().Decapsulate(sk, ct)
+
+bad := append([]byte(nil), ct...)
+bad[0] ^= 1
+ss3, err := mlkem768.Scheme().Decapsulate(sk, bad)
+
+fmt.Println(len(pk), len(sk), len(ct), len(ss1))
+fmt.Println(bytes.Equal(ss1, ss2))
+fmt.Println(err, len(ss3), bytes.Equal(ss1, ss3))</code></pre>
+        </div>
+        <div class="terminal reveal">
+          <div class="terminal-bar">
+            <span class="dot red"></span><span class="dot amber"></span><span class="dot green"></span>
+            <span class="cmd">go run ./cmd/pq-demo</span>
+          </div>
+          <pre>ML-KEM-512   pk=800  sk=1632 ct=768  ss=32
+ML-KEM-768   pk=1184 sk=2400 ct=1088 ss=32
+ML-KEM-1024  pk=1568 sk=3168 ct=1568 ss=32
+X25519MLKEM768 pk=1216 sk=2432 ct=1120 ss=64
+
+ML-KEM-768 encaps/decaps: shared_equal=true ct_len=1088
+ML-KEM-768 corrupted ct: err=&lt;nil&gt; ss_len=32 shared_equal=false
+
+ML-DSA-65: pk=1952 sk=4032 sig=3309 verify=true
+SLH-DSA-SHA2-128s: pk=32 sk=64 sig=7856</pre>
+        </div>
+      </div>
+
+      <div class="callout danger reveal">
+        <span class="icon">!</span>
+        <p>
+          <strong>边界：</strong>
+          上面的输出证明的是“这个版本、这个 API、这组输入”的行为，不是安全证明；
+          没有做侧信道测量、没有做 TLS 互操作、没有做长期密钥生命周期测试。
+          CIRCL README 明确说它是 experimental、无保证，且不是所有包都常量时间。
+        </p>
+      </div>
+    </section>
+  </main>
+
+  <footer class="footer">
+    <p><strong>Post-Quantum Cryptography · CIRCL v1.6.5</strong> · commit <code>cfa7c70</code> · 页面核查 2026-11-24</p>
+    <p>源码与实测基于固定提交；不是审计报告，也不证明任意部署/任意输入的安全。生产使用请跟随库的安全策略与版本更新。</p>
+    <p><a href="../../index.html">返回 HTML 索引</a> · <a href="https://github.com/cloudflare/circl/tree/cfa7c70defd831ffb0792ab2af560bfef43d60ca" target="_blank" rel="noreferrer">CIRCL 源码</a> · <a href="https://csrc.nist.gov/projects/post-quantum-cryptography" target="_blank" rel="noreferrer">NIST PQC</a></p>
+  </footer>
+
+  <script>
+    (function () {
+      const codeKeywords = new Set([
+        'package', 'import', 'func', 'var', 'const', 'type', 'struct', 'interface',
+        'map', 'chan', 'for', 'range', 'if', 'else', 'return', 'go', 'defer',
+        'switch', 'case', 'default', 'break', 'continue', 'nil', 'true', 'false',
+        'make', 'new', 'len', 'cap', 'append', 'copy', 'panic', 'select',
+        'fallthrough', 'goto'
+      ]);
+      const codeTypes = new Set([
+        'byte', 'int', 'int8', 'int16', 'int32', 'int64', 'uint', 'uint8',
+        'uint16', 'uint32', 'uint64', 'uintptr', 'float32', 'float64',
+        'complex64', 'complex128', 'string', 'bool', 'error', 'rune', 'any'
+      ]);
+
+      function escapeCodeHtml(s) {
+        return s.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
+      }
+
+      function highlightGoLine(line) {
+        let out = '';
+        let i = 0;
+        while (i < line.length) {
+          if (line.startsWith('//', i)) {
+            out += '<span class="tok-cm">' + escapeCodeHtml(line.slice(i)) + '</span>';
+            break;
+          }
+          const ch = line[i];
+          if (ch === '"' || ch === '`') {
+            const quote = ch;
+            let j = i + 1;
+            while (j < line.length) {
+              if (line[j] === '\\' && quote === '"') { j += 2; continue; }
+              if (line[j] === quote) { j += 1; break; }
+              j += 1;
+            }
+            out += '<span class="tok-str">' + escapeCodeHtml(line.slice(i, j)) + '</span>';
+            i = j;
+            continue;
+          }
+          if (/[0-9]/.test(ch)) {
+            let j = i + 1;
+            while (j < line.length && /[0-9a-fA-FxX._]/.test(line[j])) j += 1;
+            out += '<span class="tok-num">' + escapeCodeHtml(line.slice(i, j)) + '</span>';
+            i = j;
+            continue;
+          }
+          if (/[A-Za-z_]/.test(ch)) {
+            let j = i + 1;
+            while (j < line.length && /[A-Za-z0-9_]/.test(line[j])) j += 1;
+            const word = line.slice(i, j);
+            let cls = '';
+            if (codeKeywords.has(word)) {
+              cls = 'tok-kw';
+            } else if (codeTypes.has(word)) {
+              cls = 'tok-type';
+            } else {
+              let k = j;
+              while (k < line.length && line[k] === ' ') k += 1;
+              if (line[k] === '(') cls = 'tok-fn';
+            }
+            out += cls
+              ? '<span class="' + cls + '">' + escapeCodeHtml(word) + '</span>'
+              : escapeCodeHtml(word);
+            i = j;
+            continue;
+          }
+          out += escapeCodeHtml(ch);
+          i += 1;
+        }
+        return out;
+      }
+
+      function copyText(text) {
+        if (navigator.clipboard && window.isSecureContext) {
+          return navigator.clipboard.writeText(text);
+        }
+        const ta = document.createElement('textarea');
+        ta.value = text;
+        ta.style.position = 'fixed';
+        ta.style.opacity = '0';
+        document.body.appendChild(ta);
+        ta.select();
+        document.execCommand('copy');
+        ta.remove();
+        return Promise.resolve();
+      }
+
+      function decorateCode(block) {
+        const code = block.querySelector('pre > code');
+        if (!code || code.dataset.decorated) return;
+        const raw = code.textContent.replace(/[ \t]+$/gm, '').replace(/\s+$/, '');
+        const lines = raw.split('\n');
+        code.innerHTML = lines.map((line, idx) => {
+          const hot = line.includes('subtle.ConstantTimeCopy') ||
+            line.includes('copy(ss, kr') ||
+            line.includes('return append(ct1') ||
+            line.includes('if NIST');
+          const body = highlightGoLine(line) || '&nbsp;';
+          return '<span class="line' + (hot ? ' hl' : '') + '"><span class="ln">' +
+            (idx + 1) + '</span><span class="lc">' + body + '</span></span>';
+        }).join('');
+        code.dataset.decorated = '1';
+
+        const head = block.querySelector('.code-head');
+        if (!head) return;
+        const firstSpan = head.querySelector('span');
+        if (firstSpan) firstSpan.classList.add('code-file');
+        if (head.querySelector('.code-actions')) return;
+        const actions = document.createElement('span');
+        actions.className = 'code-actions';
+        const lang = document.createElement('span');
+        lang.className = 'code-lang';
+        lang.textContent = 'Go';
+        const btn = document.createElement('button');
+        btn.type = 'button';
+        btn.className = 'copy-btn';
+        btn.textContent = '复制';
+        btn.addEventListener('click', () => {
+          copyText(raw).then(() => {
+            btn.textContent = '已复制';
+            setTimeout(() => { btn.textContent = '复制'; }, 1200);
+          });
+        });
+        actions.appendChild(lang);
+        actions.appendChild(btn);
+        head.appendChild(actions);
+      }
+
+      document.querySelectorAll('.code-block').forEach(decorateCode);
+
+      const bar = document.getElementById('progressBar');
+      const onScroll = () => {
+        const h = document.documentElement.scrollHeight - window.innerHeight;
+        bar.style.width = (h > 0 ? (window.scrollY / h) * 100 : 0) + '%';
+      };
+      window.addEventListener('scroll', onScroll, { passive: true });
+      onScroll();
+
+      const io = new IntersectionObserver((entries) => {
+        entries.forEach((entry) => {
+          if (!entry.isIntersecting) return;
+          entry.target.classList.add('is-visible');
+          entry.target.querySelectorAll('[data-size]').forEach((el) => {
+            el.style.width = el.dataset.size + '%';
+          });
+          io.unobserve(entry.target);
+        });
+      }, { threshold: 0.12 });
+      document.querySelectorAll('.reveal').forEach((el) => io.observe(el));
+      document.querySelectorAll('.size-chart').forEach((el) => {
+        el.querySelectorAll('[data-size]').forEach((barEl) => {
+          barEl.style.width = '0%';
+        });
+      });
+
+      // Threat tabs
+      document.querySelectorAll('[data-threat-tab]').forEach((btn) => {
+        btn.addEventListener('click', () => {
+          const key = btn.dataset.threatTab;
+          document.querySelectorAll('[data-threat-tab]').forEach((b) => {
+            b.classList.toggle('active', b === btn);
+          });
+          document.querySelectorAll('[data-threat-panel]').forEach((panel) => {
+            panel.hidden = panel.dataset.threatPanel !== key;
+          });
+        });
+      });
+
+      // KEM flow
+      const kemSteps = Array.from(document.querySelectorAll('[data-kem-step]'));
+      const actorAlice = document.getElementById('actorAlice');
+      const actorBob = document.getElementById('actorBob');
+      const actorEve = document.getElementById('actorEve');
+      const aliceBox = document.getElementById('aliceBox');
+      const bobBox = document.getElementById('bobBox');
+      const eveBox = document.getElementById('eveBox');
+      const kemStatus = document.getElementById('kemStatus');
+      const kemCounter = document.getElementById('kemCounter');
+      const kemPrev = document.getElementById('kemPrev');
+      const kemNext = document.getElementById('kemNext');
+      const kemPlay = document.getElementById('kemPlay');
+      const kemStage = document.getElementById('kemStage');
+
+      const kemTexts = [
+        '<strong>KeyGen：</strong>Alice 生成密钥对。公钥可以公开；私钥里的 <code>z</code> 用于隐式拒绝。',
+        '<strong>Encaps：</strong>Bob 采样 <code>m</code>，用 <code>G(m‖H(pk))</code> 得到 <code>K</code> 和 <code>r</code>，再算 <code>c</code>。Eve 看得到 <code>c</code>。',
+        '<strong>Decaps：</strong>Alice 解出 <code>m\'</code>，重算 <code>c\'</code>；相等取 <code>K\'\'</code>，否则取 <code>PRF(z‖c)</code>。',
+        '<strong>Shared secret：</strong>双方都有 32 字节共享密钥；Eve 有公钥和密文，但没有密钥。'
+      ];
+
+      function setBox(el, html, cls) {
+        el.innerHTML = html;
+        el.classList.remove('hot', 'bad');
+        if (cls) el.classList.add(cls);
+      }
+
+      let kemIndex = 0;
+      let kemTimer = null;
+
+      function renderKem(i) {
+        kemIndex = Math.max(0, Math.min(kemSteps.length - 1, i));
+        kemSteps.forEach((step, idx) => {
+          step.classList.toggle('active', idx === kemIndex);
+        });
+        kemCounter.textContent = (kemIndex + 1) + ' / ' + kemSteps.length;
+        kemStatus.innerHTML = kemTexts[kemIndex];
+
+        actorAlice.classList.toggle('active', kemIndex === 0 || kemIndex >= 2);
+        actorBob.classList.toggle('active', kemIndex === 1 || kemIndex === 3);
+        actorEve.classList.toggle('active', kemIndex === 1);
+
+        if (kemIndex === 0) {
+          setBox(aliceBox, 'pk = 1184 B<br>sk = 2400 B', 'hot');
+          setBox(bobBox, 'pk = ?<br>ss = ?');
+          setBox(eveBox, 'pk ✓<br>ct = ?<br>ss = ?', 'bad');
+        } else if (kemIndex === 1) {
+          setBox(aliceBox, 'pk ✓<br>sk ✓', 'hot');
+          setBox(bobBox, 'm ← random<br>(K,r) = G(m‖H(pk))<br>c = Enc(pk,m,r)', 'hot');
+          setBox(eveBox, 'pk ✓<br>ct ✓<br>ss = ?', 'bad');
+        } else if (kemIndex === 2) {
+          setBox(aliceBox, "m' = Dec(sk,c)<br>c' = Enc(pk,m',r')<br>c == c' ?", 'hot');
+          setBox(bobBox, 'K = ss', 'hot');
+          setBox(eveBox, 'pk ✓<br>ct ✓<br>ss = ?', 'bad');
+        } else {
+          setBox(aliceBox, 'ss = K\'\' (32 B)', 'hot');
+          setBox(bobBox, 'ss = K (32 B)', 'hot');
+          setBox(eveBox, 'ss = ? (32 B)', 'bad');
+        }
+      }
+
+      function stopKem() {
+        if (kemTimer) {
+          clearInterval(kemTimer);
+          kemTimer = null;
+        }
+        kemPlay.textContent = '播放';
+      }
+
+      function playKem() {
+        if (kemTimer) {
+          stopKem();
+          return;
+        }
+        if (kemIndex >= kemSteps.length - 1) renderKem(0);
+        kemPlay.textContent = '暂停';
+        kemTimer = setInterval(() => {
+          if (kemIndex >= kemSteps.length - 1) {
+            stopKem();
+            kemPlay.textContent = '重新播放';
+            return;
+          }
+          renderKem(kemIndex + 1);
+        }, 1900);
+      }
+
+      kemSteps.forEach((step) => {
+        step.addEventListener('click', () => {
+          stopKem();
+          renderKem(Number(step.dataset.kemStep));
+        });
+      });
+      kemPrev.addEventListener('click', () => { stopKem(); renderKem(kemIndex - 1); });
+      kemNext.addEventListener('click', () => { stopKem(); renderKem(kemIndex + 1); });
+      kemPlay.addEventListener('click', playKem);
+      document.querySelectorAll('[data-play-kem]').forEach((btn) => {
+        btn.addEventListener('click', () => {
+          document.getElementById('mlkem').scrollIntoView({ behavior: 'smooth', block: 'start' });
+          if (!kemTimer) playKem();
+        });
+      });
+      renderKem(0);
+
+      // Corrupted ciphertext toggle
+      const corruptToggle = document.getElementById('corruptToggle');
+      const decapsBox = document.getElementById('decapsBox');
+      const decapsNote = document.getElementById('decapsNote');
+      if (corruptToggle) {
+        corruptToggle.addEventListener('click', () => {
+          const on = corruptToggle.getAttribute('aria-pressed') === 'true';
+          corruptToggle.setAttribute('aria-pressed', String(!on));
+          if (!on) {
+            decapsBox.textContent = "c != c'：ss = PRF(z‖c)，err = nil";
+            decapsBox.classList.add('bad');
+            decapsBox.classList.remove('hot');
+            decapsNote.textContent = '密文被篡改，但 API 仍返回 32 字节；只是密钥变成伪随机值。';
+          } else {
+            decapsBox.textContent = "c == c'：ss = K''，err = nil";
+            decapsBox.classList.remove('bad');
+            decapsBox.classList.add('hot');
+            decapsNote.textContent = '正常路径：重加密结果与收到的密文一致。';
+          }
+        });
+      }
+    })();
+  </script>
+</body>
+</html>
