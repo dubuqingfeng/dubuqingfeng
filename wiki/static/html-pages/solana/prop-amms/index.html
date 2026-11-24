@@ -1,0 +1,1460 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>PropAMMs · 主动做市商如何把报价搬上链</title>
+  <meta name="description" content="从 Solana Prop AMM 的市场结构、报价生命周期，到 PropAMM Forge、HumidiFi、pmm-sim 与 Obric 曲线的源码级分析，附可交互报价台。">
+  <script src="../../theme.js"></script>
+  <link rel="stylesheet" href="./style.css">
+  <script>document.documentElement.classList.add('js');</script>
+</head>
+<body>
+  <div class="progress" aria-hidden="true"><span id="progressBar"></span></div>
+  <a class="skip-link" href="#main">跳到正文</a>
+
+  <header class="site-header">
+    <a class="brand" href="./index.html">
+      <span class="brand-mark">◈</span>
+      <span>PropAMMs</span>
+    </a>
+    <nav class="site-nav" aria-label="章节导航">
+      <a href="#model">心智模型</a>
+      <a href="#why">为什么是 Solana</a>
+      <a href="#lifecycle">报价生命周期</a>
+      <a href="#math">数学</a>
+      <a href="#vault">链上程序</a>
+      <a href="#humidifi">HumidiFi</a>
+      <a href="#curve">曲线</a>
+      <a href="#abi">ABI</a>
+      <a href="#simulator">报价台</a>
+      <a href="#risk">风险</a>
+      <a href="#matrix">对比</a>
+    </nav>
+    <div class="header-actions">
+      <a class="back-link" href="../../index.html#prop-amms">HTML 索引</a>
+      <button class="theme-toggle" type="button" data-theme-toggle aria-label="切换日间/夜间模式">
+        <span data-theme-icon aria-hidden="true">☾</span>
+      </button>
+    </div>
+  </header>
+
+  <main id="main">
+    <section class="hero">
+      <div class="hero-copy reveal">
+        <p class="eyebrow">PropAMMs · Market Structure &amp; Source Walkthrough</p>
+        <h1>流动性不再躺着，<br><span>它开始报价。</span></h1>
+        <p class="lede">
+          PropAMM（Proprietary AMM）不是一条新公式，而是一种新的做市组织方式：
+          做市商用<strong>自有资金</strong>，在链上部署一个<strong>只属于自己</strong>的交易程序；
+          价格在链下算，承诺在链上验。它把 CEX 的报价频率和 AMM 的原子结算拼在了一起。
+        </p>
+        <div class="hero-actions">
+          <a class="button primary" href="#simulator">打开报价台</a>
+          <a class="button" href="#vault">直接读链上代码</a>
+        </div>
+        <div class="hero-meta">
+          <span>覆盖：PropAMM Forge · HumidiFi 逆向 · pmm-sim · Obric</span>
+          <span>代码快照：2026-03 / 2026-11</span>
+        </div>
+      </div>
+
+      <div class="hero-visual reveal" aria-label="PropAMM 的报价与结算流程">
+        <svg viewBox="0 0 760 460" role="img" aria-labelledby="heroTitle heroDesc">
+          <title id="heroTitle">PropAMM 的报价与结算流程</title>
+          <desc id="heroDesc">链下定价引擎根据 CEX 与预言机价格计算报价，通过一笔轻量交易把 mid、spread、skew 和最大单笔写入链上 Vault；聚合器读取报价后把交易者路由到 Vault，由链上程序校验有效期、库存与数量后完成结算。</desc>
+          <defs>
+            <marker id="arrow" markerWidth="9" markerHeight="9" refX="8" refY="4.5" orient="auto">
+              <path d="M0 0L9 4.5L0 9Z" fill="currentColor"/>
+            </marker>
+            <marker id="arrowHot" markerWidth="9" markerHeight="9" refX="8" refY="4.5" orient="auto">
+              <path d="M0 0L9 4.5L0 9Z" fill="#0f766e"/>
+            </marker>
+            <marker id="arrowGold" markerWidth="9" markerHeight="9" refX="8" refY="4.5" orient="auto">
+              <path d="M0 0L9 4.5L0 9Z" fill="#b45309"/>
+            </marker>
+          </defs>
+
+          <text x="380" y="28" text-anchor="middle" class="svg-note">链下决定“报什么价”，链上决定“这笔能不能成交”</text>
+
+          <g class="svg-node gold">
+            <rect x="24" y="58" width="200" height="86" rx="14"/>
+            <text x="124" y="86" text-anchor="middle" class="svg-title">链下定价引擎</text>
+            <text x="124" y="106" text-anchor="middle" class="svg-sub">CEX / Pyth / 自有模型</text>
+            <text x="124" y="124" text-anchor="middle" class="svg-sub">fair value · spread · skew</text>
+          </g>
+
+          <g class="svg-node">
+            <rect x="280" y="58" width="200" height="86" rx="14"/>
+            <text x="380" y="86" text-anchor="middle" class="svg-title">报价更新交易</text>
+            <text x="380" y="106" text-anchor="middle" class="svg-sub">mid · half-spread · skew</text>
+            <text x="380" y="124" text-anchor="middle" class="svg-sub">max size · quote slot</text>
+          </g>
+
+          <g class="svg-node hot">
+            <rect x="536" y="58" width="200" height="86" rx="14"/>
+            <text x="636" y="86" text-anchor="middle" class="svg-title">链上 Vault</text>
+            <text x="636" y="106" text-anchor="middle" class="svg-sub">自营库存 · 权限 · 护栏</text>
+            <text x="636" y="124" text-anchor="middle" class="svg-sub">freshness · bounds</text>
+          </g>
+
+          <path class="svg-edge gold" d="M224 101H272" marker-end="url(#arrowGold)"/>
+          <path class="svg-edge hot" d="M480 101H528" marker-end="url(#arrowHot)"/>
+
+          <g class="svg-node">
+            <rect x="24" y="220" width="200" height="78" rx="14"/>
+            <text x="124" y="246" text-anchor="middle" class="svg-title">聚合器 / 路由器</text>
+            <text x="124" y="265" text-anchor="middle" class="svg-sub">Jupiter · DFlow · Titan</text>
+            <text x="124" y="283" text-anchor="middle" class="svg-sub">比价后选择 venue</text>
+          </g>
+
+          <g class="svg-node gold">
+            <rect x="280" y="220" width="200" height="78" rx="14"/>
+            <text x="380" y="246" text-anchor="middle" class="svg-title">交易者 swap</text>
+            <text x="380" y="265" text-anchor="middle" class="svg-sub">CPI 调用 Vault</text>
+            <text x="380" y="283" text-anchor="middle" class="svg-sub">amount_in · min_out</text>
+          </g>
+
+          <g class="svg-node hot">
+            <rect x="536" y="220" width="200" height="78" rx="14"/>
+            <text x="636" y="246" text-anchor="middle" class="svg-title">链上校验 + 结算</text>
+            <text x="636" y="265" text-anchor="middle" class="svg-sub">有效期 / 数量 / 库存</text>
+            <text x="636" y="283" text-anchor="middle" class="svg-sub">先收后付 · 事件</text>
+          </g>
+
+          <path class="svg-edge hot" d="M600 144C600 190 170 178 124 220" marker-end="url(#arrowHot)"/>
+          <text x="352" y="190" text-anchor="middle" class="svg-note">Vault 的报价被聚合器读取</text>
+          <path class="svg-edge gold" d="M224 259H272" marker-end="url(#arrowGold)"/>
+          <path class="svg-edge hot" d="M480 259H528" marker-end="url(#arrowHot)"/>
+
+          <g transform="translate(64 340)">
+            <text x="0" y="0" class="svg-note">报价阶梯（示意）</text>
+            <rect x="0" y="18" width="632" height="1" fill="currentColor" opacity=".3"/>
+            <rect x="70" y="8" width="2" height="22" fill="#15803d"/>
+            <text x="70" y="52" text-anchor="middle" class="svg-note">bid</text>
+            <rect x="316" y="2" width="2" height="34" fill="currentColor"/>
+            <text x="316" y="56" text-anchor="middle" class="svg-note">mid</text>
+            <rect x="562" y="8" width="2" height="22" fill="#b91c1c"/>
+            <text x="562" y="52" text-anchor="middle" class="svg-note">ask</text>
+            <text x="316" y="80" text-anchor="middle" class="svg-note">价格越靠近 mid，成交越像“批发”；越远离，越是在为库存和风险付费</text>
+          </g>
+        </svg>
+      </div>
+    </section>
+
+    <section id="model" class="section">
+      <div class="section-head reveal">
+        <p class="eyebrow">01 · 心智模型</p>
+        <h2>先有资产负债表，再有 AMM</h2>
+        <p class="section-lede">
+          传统 AMM 先有一池被动流动性，价格由交易把它推着走；PropAMM 先有一个做市商，
+          再由做市商持续告诉链上“我现在愿意在什么价格、接多大的单”。曲线只是报价的载体，不是商业模式的起点。
+        </p>
+      </div>
+
+      <div class="card-grid four">
+        <article class="info-card reveal">
+          <span class="card-index">A</span>
+          <h3>公允价</h3>
+          <p>
+            价格发现主要发生在 CEX 和跨市场套利里。PropAMM 的链下引擎把 CEX 中间价、
+            Pyth、成交与库存信号揉成一个 fair value。
+          </p>
+        </article>
+        <article class="info-card reveal">
+          <span class="card-index">B</span>
+          <h3>报价函数</h3>
+          <p>
+            把 fair value 翻译成 bid / ask：一半是 spread（风险补偿），
+            一半是 skew（库存引导），再叠加单笔上限、报价有效期和库存硬边界。
+          </p>
+        </article>
+        <article class="info-card reveal">
+          <span class="card-index">C</span>
+          <h3>自营库存</h3>
+          <p>
+            没有 LP 份额，没有存款人。Vault 里的资产属于做市商自己，
+            盈亏、库存风险和资金效率都由这一张资产负债表承担。
+          </p>
+        </article>
+        <article class="info-card reveal">
+          <span class="card-index">D</span>
+          <h3>链上护栏</h3>
+          <p>
+            链上程序不负责“发现价格”，它负责“兑现承诺”：
+            报价有没有过期、单子有没有超限、库存会不会越界、钱够不够付。
+          </p>
+        </article>
+      </div>
+
+      <div class="quote-card reveal">
+        <p>PropAMM 的核心不是「用什么曲线」，而是「谁有资格改价格、改完多久有效、改错了谁承担」。</p>
+        <small>曲线决定报价形状；权限、时效和库存边界决定它能不能在有毒流量里活下来。</small>
+      </div>
+
+      <div class="table-wrap reveal">
+        <table class="source-table">
+          <thead>
+            <tr><th>形态</th><th>定价来源</th><th>流动性来源</th><th>更新方式</th><th>谁承担库存风险</th></tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td>恒定乘积 AMM</td>
+              <td>x·y = k，交易驱动</td>
+              <td>任何人都能加池</td>
+              <td>每次 swap 自动移动价格</td>
+              <td>LP 共同承担</td>
+            </tr>
+            <tr>
+              <td>集中流动性 CLMM</td>
+              <td>区间内的 x·y = k</td>
+              <td>LP 提供区间头寸</td>
+              <td>swap 移动价格，LP 主动调区间</td>
+              <td>LP 共同承担</td>
+            </tr>
+            <tr>
+              <td>链上订单簿</td>
+              <td>逐笔限价单</td>
+              <td>做市商与用户挂单</td>
+              <td>每笔下单 / 撤单</td>
+              <td>挂单方</td>
+            </tr>
+            <tr class="highlight">
+              <td>PropAMM</td>
+              <td>链下公允价 + 链上报价函数</td>
+              <td>做市商自营库存</td>
+              <td>轻量参数更新，可每秒多次</td>
+              <td>做市商自己</td>
+            </tr>
+            <tr>
+              <td>RFQ</td>
+              <td>做市商逐笔报价</td>
+              <td>做市商库存</td>
+              <td>每笔询价 / 报价</td>
+              <td>做市商自己</td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+
+      <div class="callout warn reveal">
+        <strong>名字先别混：DODO 的 PMM ≠ Solana 的 Prop AMM。</strong>
+        DODO 的 PMM 是 “Proactive Market Maker”，指的是一条围绕预言机价格调整的<em>曲线</em>，流动性仍然对 LP 开放；
+        Solana 语境里的 Prop AMM 是 “Proprietary AMM”，指的是一种<em>运营结构</em>：做市商自有资金、自建程序、自己定价。
+        两者可能都用到“主动做市”的思想，但不是同一个东西。本页讨论后者。
+      </div>
+
+      <div class="callout reveal">
+        <strong>也不是传统意义上的“暗池”。</strong>
+        暗池隐藏的是订单流和交易意图；PropAMM 的交易、账户和资金流都在链上可见。
+        它隐藏的是<em>定价逻辑和库存策略</em>——这让有毒交易者更难精确地挑价，但也让普通用户更难审计它到底公不公平。
+      </div>
+    </section>
+
+    <section id="why" class="section">
+      <div class="section-head reveal">
+        <p class="eyebrow">02 · 为什么偏偏是 Solana</p>
+        <h2>因为“撤单”可以便宜到按 CU 卖</h2>
+        <p class="section-lede">
+          PropAMM 需要高频改价。改价本身不产生收益，所以每次改价的成本必须低到可以忽略；
+          同时改价交易还要能在排序里抢到 taker 前面。Solana 的低费用、高吞吐和按 CU 计价的拍卖机制，
+          恰好把这两件事同时变得可行。
+        </p>
+      </div>
+
+      <div class="card-grid two">
+        <article class="feature-card reveal">
+          <span class="card-index">01</span>
+          <h3>报价更新极便宜</h3>
+          <p>
+            据 Helius 2025-08 的拆解，HumidiFi 的一次预言机更新只需要约 <strong>143 CU</strong>，
+            而一笔典型的 Jupiter 聚合 swap 大约要 <strong>150,000 CU</strong>。前者不到后者的千分之一。
+          </p>
+          <p>
+            更新越便宜，做市商越敢把 spread 压窄；spread 越窄，聚合器越愿意路由；路由越多，
+            库存周转越快。这是一个正反馈。
+          </p>
+        </article>
+        <article class="feature-card reveal">
+          <span class="card-index">02</span>
+          <h3>CU 就是新的排队货币</h3>
+          <p>
+            Jito 一类拍卖按 <strong>tip per CU</strong> 排序，而不是只看绝对 tip。
+            一笔 143 CU 的更新，只要很小的 tip 就能排到很前面；这相当于给做市商一个便宜的“撤单优先权”。
+          </p>
+          <p>
+            它不能消除逆向选择，但能把“价格已经动了、报价还没更新”的窗口压到更短。
+          </p>
+        </article>
+        <article class="feature-card reveal">
+          <span class="card-index">03</span>
+          <h3>聚合器是现成的分销</h3>
+          <p>
+            Jupiter 在 Solana 聚合器里占绝对主导。新 PropAMM 只要接一次聚合器，
+            就能拿到原本分散在钱包、前端和机器人里的零售订单流。
+          </p>
+          <p>
+            代价是：聚合器成了事实上的“券商”，谁被接入、谁被排在前面，会直接影响做市商的生存。
+          </p>
+        </article>
+        <article class="feature-card reveal">
+          <span class="card-index">04</span>
+          <h3>零售流量 + 可组合结算</h3>
+          <p>
+            Solana 的零售交易占比高，订单流相对“干净”；同时交易可以在一笔原子交易里完成，
+            做市商不需要承担跨链或链下结算的对手方风险。
+          </p>
+          <p>
+            这让 PropAMM 可以专注在流动性的“最后一公里”，而不是自己去做一条链或一个撮合引擎。
+          </p>
+        </article>
+      </div>
+
+      <div class="metric-cards reveal">
+        <div class="metric-card">
+          <strong>143 CU</strong>
+          <span>HumidiFi 单次预言机更新（Helius，2025-08）</span>
+        </div>
+        <div class="metric-card">
+          <strong>≈150k CU</strong>
+          <span>一笔典型聚合器 swap（同一来源）</span>
+        </div>
+        <div class="metric-card">
+          <strong>&gt;60%</strong>
+          <span>PropAMM 在 SOL/USDC 成交量中的占比（2025 年数据，峰值约 86%）</span>
+        </div>
+      </div>
+
+      <div class="callout warn reveal">
+        <strong>这些数字是市场快照，不是永久常数。</strong>
+        份额、费用和更新成本都随竞争快速变化；把它们当成“结构性优势的量级”，不要当成今天的精确行情。
+        页面里的代码与机制分析，比任何单一时点的 TVL / volume 排名更耐久。
+      </div>
+
+      <div class="split-layout" style="margin-top: 20px;">
+        <article class="code-card reveal">
+          <div class="code-head"><span>为什么“便宜改价”会改变做市行为</span><span class="tag">机制推导</span></div>
+<pre><code>传统订单簿：
+  改一次价 ≈ 撤单 + 下单 + 签名 + 付 gas
+  → 改价有固定成本
+  → 只能围绕一个较宽的价差做
+
+PropAMM：
+  改一次价 ≈ 写 4 个参数（mid / spread / skew / size）
+  → 改价近乎免费
+  → 可以把价差压到“只覆盖真实风险”
+  → 但一旦更新没落地，旧报价会立刻变成别人的套利机会</code></pre>
+          <p class="code-note">低成本不是免费午餐：它把竞争从“谁能挂单”变成了“谁能在正确的时间改对参数”。</p>
+        </article>
+
+        <article class="info-card reveal">
+          <h3>所以它天然是“专业选手”的游戏</h3>
+          <p>
+            你需要同时具备：低延迟价格源、库存与对冲模型、Solana 程序优化能力、聚合器接入能力，
+            以及 24/7 的风控值班。缺一项，报价就会在某个时刻变成别人的提款机。
+          </p>
+          <p>
+            这也是为什么主流 PropAMM 大多由成熟做市团队运营，而不是由一个开放的 LP 社区投票决定参数。
+          </p>
+        </article>
+      </div>
+    </section>
+
+    <section id="lifecycle" class="section">
+      <div class="section-head reveal">
+        <p class="eyebrow">03 · 报价生命周期</p>
+        <h2>一笔 swap 背后，至少有三只看不见的钟</h2>
+        <p class="section-lede">
+          PropAMM 的难点不在“算出一个价格”，而在“让这个价格在正确的时间、以正确的数量、被正确的人拿到”。
+          把生命周期拆开，会看到链下、排序层和链上各自在管一段。
+        </p>
+      </div>
+
+      <div class="timeline reveal">
+        <div class="tl-row">
+          <div class="tl-time">t−2 · 链下</div>
+          <div class="tl-body">
+            <b>价格发现</b>
+            <span>CEX 中间价、Pyth 推送、跨所基差、近期成交与波动率进入模型，形成 fair value 与风险预算。</span>
+          </div>
+        </div>
+        <div class="tl-row">
+          <div class="tl-time">t−1 · 链下</div>
+          <div class="tl-body">
+            <b>报价决策</b>
+            <span>在 fair value 上叠加 half-spread、库存 skew、单笔上限和方向性限制；决定这一轮要不要更新。</span>
+          </div>
+        </div>
+        <div class="tl-row hot">
+          <div class="tl-time">t0 · Solana</div>
+          <div class="tl-body">
+            <b>报价上链</b>
+            <span>一笔轻量交易写入 mid、spread、skew、max size 和 quote slot。链上只信任自己读到的 slot，不信任客户端传的时间。</span>
+          </div>
+        </div>
+        <div class="tl-row">
+          <div class="tl-time">t1 · 聚合器</div>
+          <div class="tl-body">
+            <b>路由比价</b>
+            <span>聚合器读取各 venue 的报价（或链下缓存的报价），把订单拆到最便宜的一条或几条路径上。</span>
+          </div>
+        </div>
+        <div class="tl-row hot">
+          <div class="tl-time">t2 · 交易者</div>
+          <div class="tl-body">
+            <b>CPI 调用</b>
+            <span>交易者的 swap 通过 CPI 进入 Vault。此时链上会重新检查报价是否还有效，而不是相信聚合器看到的旧价格。</span>
+          </div>
+        </div>
+        <div class="tl-row">
+          <div class="tl-time">t3 · Vault</div>
+          <div class="tl-body">
+            <b>护栏与结算</b>
+            <span>检查 halt、freshness、max size、库存边界、token account 归属；通过后先收 input，再付 output，最后发事件。</span>
+          </div>
+        </div>
+        <div class="tl-row">
+          <div class="tl-time">t4 · 链下</div>
+          <div class="tl-body">
+            <b>库存回写与对冲</b>
+            <span>引擎读事件 / 余额，更新库存与 skew；必要时在 CEX 或别的 venue 对冲，再进入下一轮报价。</span>
+          </div>
+        </div>
+      </div>
+
+      <div class="card-grid three reveal">
+        <article class="info-card">
+          <span class="card-index">CEX</span>
+          <h3>毫秒级</h3>
+          <p>真实价格发现的速度。PropAMM 的 fair value 在这里被推着走，做市商无法控制它，只能跟。</p>
+        </article>
+        <article class="info-card">
+          <span class="card-index">Slot</span>
+          <h3>约 400ms</h3>
+          <p>Solana 的出块节奏。报价的有效期通常用 slot 表示；它是链上唯一可信的时间来源。</p>
+        </article>
+        <article class="info-card">
+          <span class="card-index">TTL</span>
+          <h3>几个 slot</h3>
+          <p>报价的存活时间。太短会被聚合器判为不可用，太长会在行情跳动时被逆向选择。</p>
+        </article>
+      </div>
+
+      <div class="callout bad reveal">
+        <strong>最危险的窗口：CEX 已经动了，链上还没动。</strong>
+        假设报价在 slot N 写的是 150.00，slot N+1 外部价格跳到 151.00（+67 bps），
+        而更新交易在 slot N+2 才落地。此时任何能在 N+1 成交的 taker，都可以按 150.00 买走，
+        做市商瞬间承担约 67 bps 的 markout 损失。报价越便宜、更新越慢，这个窗口越值钱。
+      </div>
+
+      <div class="quote-card reveal">
+        <p>PropAMM 的竞争，本质上是「把报价的有效窗口压到比别人的套利反应更短」。</p>
+        <small>低成本更新、CU 拍卖、私有 mempool、预言机推送延迟，都是围绕这个窗口做文章。</small>
+      </div>
+    </section>
+
+    <section id="math" class="section">
+      <div class="section-head reveal">
+        <p class="eyebrow">04 · 报价数学</p>
+        <h2>四个参数，撑起一张双边报价</h2>
+        <p class="section-lede">
+          一个最小可用的 PropAMM 不需要复杂的曲线：给定 mid、half-spread 和 skew，
+          就能推出 bid / ask；再给定库存和单笔上限，就能决定“接不接、接多少”。
+          下面用开源实现 PropAMM Forge 的代码走一遍。
+        </p>
+      </div>
+
+      <div class="formula reveal">
+        <div><span class="muted">// 价格都用定点整数，链上没有浮点数</span></div>
+        <div>factor(side) <span class="op">=</span> (10000 + skew_bps) × (10000 ∓ spread_bps) / 10000²</div>
+        <div>bid <span class="op">=</span> floor(mid_e9 × factor(bid)) <span class="muted">// 做市商买 base，向下取整</span></div>
+        <div>ask <span class="op">=</span> ceil (mid_e9 × factor(ask)) <span class="muted">// 做市商卖 base，向上取整</span></div>
+        <div>out(base→quote) <span class="op">=</span> floor(amount_in × bid_e9 / 1e9)</div>
+        <div>out(quote→base) <span class="op">=</span> floor(amount_in × 1e9 / ask_e9)</div>
+      </div>
+
+      <div class="split-layout">
+        <article class="info-card reveal">
+          <h3>一个具体例子</h3>
+          <p><strong>mid = 150.00 USDC/SOL，half-spread = 10 bps，skew = −20 bps。</strong></p>
+          <p>先移动 mid：150.00 × (1 − 0.002) = 149.70。</p>
+          <p>再向两边展开：bid = 149.70 × (1 − 0.001) = <strong>149.5503</strong>；ask = 149.70 × (1 + 0.001) = <strong>149.8497</strong>。</p>
+          <p>报价宽度约 0.2994 USDC，等于 20 bps；但整张报价被 skew 向下压了 20 bps。</p>
+        </article>
+
+        <article class="code-card reveal">
+          <div class="code-head"><span>crates/propamm-quote/src/lib.rs</span><span class="tag">L177 · side_price_e9</span></div>
+<pre><code>pub fn side_price_e9(
+    params: &amp;QuoteParams,
+    side: Side,
+) -&gt; Result&lt;u128, QuoteError&gt; {
+    if params.mid_e9 == 0 {
+        return Err(QuoteError::QuoteNotSet);
+    }
+    let factor = side_factor(params, side)?;
+    match side {
+        Side::BaseToQuote =&gt;
+            mul_div_floor(params.mid_e9, factor, FACTOR_DENOM),
+        Side::QuoteToBase =&gt;
+            mul_div_ceil(params.mid_e9, factor, FACTOR_DENOM),
+    }
+}</code></pre>
+          <p class="code-note">bid 向下、ask 向上：两边都朝做市商有利的方向取整。这个不对称是故意的。</p>
+        </article>
+      </div>
+
+      <div class="split-layout" style="margin-top: 18px;">
+        <article class="code-card reveal">
+          <div class="code-head"><span>side_factor · 同一个因子同时管 skew 和 spread</span><span class="tag">L325</span></div>
+<pre><code>fn side_factor(params: &amp;QuoteParams, side: Side)
+    -&gt; Result&lt;u128, QuoteError&gt;
+{
+    let denom = i32::from(BPS_DENOM);
+
+    let skewed = denom
+        .checked_add(i32::from(params.skew_bps))
+        .ok_or(QuoteError::Overflow)?;
+    if skewed &lt;= 0 {
+        return Err(QuoteError::InvalidParams);
+    }
+
+    let spread = i32::from(params.spread_bps);
+    if spread &gt;= denom {
+        return Err(QuoteError::InvalidParams);
+    }
+    let sided = match side {
+        Side::BaseToQuote =&gt; denom.checked_sub(spread),
+        Side::QuoteToBase =&gt; denom.checked_add(spread),
+    }.ok_or(QuoteError::Overflow)?;
+
+    let skewed = u128::try_from(skewed)
+        .map_err(|_| QuoteError::Overflow)?;
+    let sided = u128::try_from(sided)
+        .map_err(|_| QuoteError::Overflow)?;
+    skewed.checked_mul(sided).ok_or(QuoteError::Overflow)
+}</code></pre>
+          <p class="code-note">skew 移动整张报价，spread 把两边推开。两者相乘，而不是相加；这样 skew 不会改变报价宽度。</p>
+        </article>
+
+        <article class="info-card reveal">
+          <h3>为什么要用乘法？</h3>
+          <p>
+            如果 skew 和 spread 相加，skew 越大，实际点差会被“吃掉”或“撑大”。
+            乘法把两个语义分开：<strong>skew 管中心，spread 管宽度</strong>。
+          </p>
+          <p>
+            这也让参数有清晰的边界：spread 必须小于 10000 bps，skew 不能把 mid 乘成非正数。
+            链上程序在写入报价时会把两边都算一遍，任何一边越界都直接拒绝。
+          </p>
+        </article>
+      </div>
+
+      <h3 class="sub-head reveal">库存 skew：让报价替你“劝退”不想要的库存</h3>
+      <div class="split-layout">
+        <article class="code-card reveal">
+          <div class="code-head"><span>inventory_skew_bps</span><span class="tag">L194 · 节选/改写</span></div>
+<pre><code>pub fn inventory_skew_bps(
+    inventory: &amp;Inventory,
+    mid_e9: u128,
+) -&gt; Result&lt;i32, QuoteError&gt; {
+    let base_value = u128::from(inventory.base_amount)
+        .checked_mul(mid_e9)?;
+    let quote_value = u128::from(inventory.quote_amount)
+        .checked_mul(PRICE_SCALE)?;
+    let total = base_value.checked_add(quote_value)?;
+    if total == 0 { return Ok(0); }
+
+    // (base 价值 − quote 价值) / 总价值，单位 bps
+    let skew = (i128::try_from(base_value)? -
+                i128::try_from(quote_value)?)
+        .checked_mul(10000)?
+        .checked_div(i128::try_from(total)?)?;
+    i32::try_from(skew).map_err(|_| QuoteError::Overflow)
+}</code></pre>
+          <p class="code-note">正值 = base 太多；负值 = quote 太多。两条腿都用 mid 估值，避免同一库存因报价方向不同而算出不同 skew。</p>
+        </article>
+
+        <article class="info-card reveal">
+          <h3>引擎怎么把 skew 变成报价</h3>
+          <p>
+            PropAMM Forge 的内置模型先算库存 skew，再按“离硬边界还有多远”线性放大 spread 和 shift：
+          </p>
+          <p>
+            <code>load = |skew| / max_skew_bps</code>，spread 从基准值扩到最大值，
+            shift 从 0 扩到最大偏移；如果 base 太多，就把整张报价往下压，让 vault 变成“买 base 更便宜”的地方。
+          </p>
+          <p>
+            这解释了一个反直觉的设计：<strong>库存越偏，报价越宽，但同时越偏向于吸引能修正库存的流量</strong>。
+            如果只看“越偏越宽”，会以为它在劝退所有交易；实际上它是在用价格挑交易。
+          </p>
+        </article>
+      </div>
+
+      <div class="callout warn reveal">
+        <strong>库存边界只约束“换”，不约束“状态”。</strong>
+        行情跳动本身就能让库存 skew 越界；如果规则写成“swap 后必须在边界内”，
+        一个已经越界的 vault 会连“把库存换回来”的交易都拒绝，反而把自己锁死。
+        所以代码只在“这笔交易让它更远”时才拒绝：<code>after &gt; bound &amp;&amp; after &gt; before</code>。
+      </div>
+
+      <div class="split-layout" style="margin-top: 18px;">
+        <article class="code-card reveal">
+          <div class="code-head"><span>compute_swap · 检查顺序就是风控顺序</span><span class="tag">L231 · 节选</span></div>
+<pre><code>let price_e9 = side_price_e9(params, request.side)?;
+
+if !is_fresh(params, current_slot) {
+    return Err(QuoteError::QuoteStale);
+}
+if request.amount_in == 0 {
+    return Err(QuoteError::AmountTooSmall);
+}
+
+let amount_out = match request.side {
+    Side::BaseToQuote =&gt;
+        mul_div_floor(amount_in, price_e9, PRICE_SCALE)?,
+    Side::QuoteToBase =&gt;
+        mul_div_floor(amount_in, PRICE_SCALE, price_e9)?,
+};
+
+// 单笔上限按 base 腿算，不按 input 算
+let base_leg = match request.side {
+    Side::BaseToQuote =&gt; request.amount_in,
+    Side::QuoteToBase =&gt; amount_out,
+};
+if base_leg &gt; params.max_size_base {
+    return Err(QuoteError::SizeExceeded);
+}
+
+// 输出为 0 等于“白拿 input”
+if amount_out == 0 {
+    return Err(QuoteError::AmountTooSmall);
+}
+
+// 库存、滑点、边界……
+</code></pre>
+          <p class="code-note">先校验价格与有效期，再算输出，再查数量与库存。顺序不是随意的：越便宜的检查越早做。</p>
+        </article>
+
+        <article class="info-card reveal">
+          <h3>三个容易写错的细节</h3>
+          <p><strong>1. 单笔上限用 base 腿。</strong>否则同一个 <code>max_size_base</code> 在两个方向上代表不同的经济规模。</p>
+          <p><strong>2. 零输出必须拒绝。</strong>否则用户可以“付一点 input，拿走 0”，或者反过来被协议白嫖。</p>
+          <p><strong>3. 报价和成交必须共用同一份数学。</strong>PropAMM Forge 把 <code>compute_swap</code> 同时编译进链上程序、路由器适配器和测试；否则链下算出的 quote 与链上执行会在某个舍入边界上分叉。</p>
+        </article>
+      </div>
+    </section>
+
+    <section id="vault" class="section">
+      <div class="section-head reveal">
+        <p class="eyebrow">05 · 链上程序</p>
+        <h2>Vault 不存余额，只存“现在的报价”</h2>
+        <p class="section-lede">
+          一个 PropAMM 的链上状态可以很小：权限、交易对、报价参数、有效期和库存边界。
+          真正的库存放在 token account 里，链上每次 swap 现读现算。这样少一次状态同步，就少一处可能对不上的账。
+        </p>
+      </div>
+
+      <div class="table-wrap reveal">
+        <table class="source-table">
+          <thead>
+            <tr><th>字段</th><th>字节</th><th>作用</th><th>为什么重要</th></tr>
+          </thead>
+          <tbody>
+            <tr><td>owner / pricing_authority / halt_authority</td><td>3 × 32</td><td>资金所有者、报价签名者、紧急停机者</td><td>热钱包只拿报价权，不拿资金权</td></tr>
+            <tr><td>base_mint / quote_mint</td><td>2 × 32</td><td>交易对</td><td>方向也是 PDA 种子的一部分</td></tr>
+            <tr><td>base_vault / quote_vault</td><td>2 × 32</td><td>两个 token account</td><td>swap 时强校验，防止被换账户</td></tr>
+            <tr><td>mid_e9</td><td>16</td><td>中间价，1e9 定点</td><td>0 表示“没有报价”，不是“价格为 0”</td></tr>
+            <tr><td>max_size_base / quote_slot</td><td>2 × 8</td><td>单笔上限、报价所在 slot</td><td>上限和价格绑定，过期即失效</td></tr>
+            <tr><td>max_quote_age_slots</td><td>4</td><td>报价有效期</td><td>链上唯一可信的时间边界</td></tr>
+            <tr><td>spread_bps / skew_bps / max_skew_bps</td><td>3 × 2</td><td>点差、库存偏移、库存硬边界</td><td>三个参数决定报价形状与风险</td></tr>
+            <tr><td>halted / bump</td><td>2 × 1</td><td>停机标志、PDA bump</td><td>停机是链上最后一道闸</td></tr>
+          </tbody>
+        </table>
+      </div>
+
+      <div class="split-layout" style="margin-top: 20px;">
+        <article class="code-card reveal">
+          <div class="code-head"><span>programs/propamm-vault/src/state.rs</span><span class="tag">L50 · Vault</span></div>
+<pre><code>#[account]
+#[derive(InitSpace)]
+pub struct Vault {
+    pub owner: Pubkey,
+    pub pricing_authority: Pubkey,
+    pub halt_authority: Pubkey,
+    pub base_mint: Pubkey,
+    pub quote_mint: Pubkey,
+    pub base_vault: Pubkey,
+    pub quote_vault: Pubkey,
+    pub mid_e9: u128,
+    pub max_size_base: u64,
+    pub quote_slot: u64,
+    pub max_quote_age_slots: u32,
+    pub spread_bps: u16,
+    pub skew_bps: i16,
+    pub max_skew_bps: u16,
+    pub halted: bool,
+    pub bump: u8,
+}</code></pre>
+          <p class="code-note">账户总大小 276 字节（含 8 字节 discriminator）。没有留“未来字段”的 reserve：真加字段时，旧账户没有对应字节，照样要迁移。</p>
+        </article>
+
+        <article class="info-card reveal">
+          <h3>三个角色，三把钥匙</h3>
+          <p><strong>owner：</strong>资金所有者。可以改报价签名者、提款、停机，但不参与日常报价。</p>
+          <p><strong>pricing_authority：</strong>热钱包，只负责写报价。被攻破时，攻击者不能直接转走资金，只能报错价或撤掉报价——而错误报价仍受库存边界和单笔上限约束。</p>
+          <p><strong>halt_authority：</strong>可以单独停机，但拿不到资金。适合放在更安全的冷环境或监控服务里。</p>
+        </article>
+      </div>
+
+      <h3 class="sub-head reveal">update_quote：时间必须来自链上</h3>
+      <div class="split-layout">
+        <article class="code-card reveal">
+          <div class="code-head"><span>instructions/update_quote.rs</span><span class="tag">L74 · 节选/改写</span></div>
+<pre><code>require!(!ctx.accounts.vault.halted, VaultError::VaultHalted);
+require!(quote.mid_e9 &gt; 0, VaultError::InvalidQuote);
+require!(quote.max_size_base &gt; 0, VaultError::InvalidQuote);
+
+// 关键：slot 由链上 Clock 提供，不由客户端传入
+let slot = Clock::get()?.slot;
+
+let candidate = QuoteParams { quote_slot: slot, .. };
+for side in [Side::BaseToQuote, Side::QuoteToBase] {
+    if let Err(err) = side_price_e9(&amp;candidate, side) {
+        return Err(VaultError::InvalidQuote.into());
+    }
+}
+
+vault.mid_e9 = quote.mid_e9;
+vault.spread_bps = quote.spread_bps;
+vault.skew_bps = quote.skew_bps;
+vault.max_size_base = quote.max_size_base;
+vault.quote_slot = slot;</code></pre>
+          <p class="code-note">如果 slot 由客户端传，过期报价就能被“写成新鲜的”。报价有效期检查会形同虚设。</p>
+        </article>
+
+        <article class="info-card reveal">
+          <h3>为什么 clear_quote 是单独指令</h3>
+          <p>
+            Anchor 的编码器会把缺失字段写成 0。如果 <code>mid_e9 = 0</code> 同时表示“清空报价”，
+            一个漏传参数的构建脚本就会静默地把价格撤掉，而不是报错。
+          </p>
+          <p>
+            所以 <code>update_quote</code> 明确拒绝 0，清空则走一条没有参数可忘的独立指令。
+            这是很小的 API 设计，但它决定了故障时是“响亮地失败”还是“安静地出错”。
+          </p>
+          <p>
+            停机的 vault 不允许再报价；但允许清空报价——移除价格永远是安全动作。
+          </p>
+        </article>
+      </div>
+
+      <h3 class="sub-head reveal">swap：先收钱，再付钱，库存从余额读</h3>
+      <div class="split-layout">
+        <article class="code-card reveal">
+          <div class="code-head"><span>instructions/swap.rs</span><span class="tag">L129 · 节选</span></div>
+<pre><code>require!(!vault.halted, VaultError::VaultHalted);
+
+// 库存不是从 Vault 字段读，而是从两个 token account 现读
+let inventory = Inventory {
+    base_amount: ctx.accounts.base_treasury.amount,
+    quote_amount: ctx.accounts.quote_treasury.amount,
+};
+
+let slot = Clock::get()?.slot;
+let result = compute_swap(
+    &amp;vault.quote_params(),
+    &amp;inventory,
+    &amp;request,
+    slot,
+)?;
+
+// 先收 input：如果交易者转账失败，vault 还没付出任何东西
+transfer_checked(/* trader → vault */ result.amount_in)?;
+
+// 再用 PDA 签名付 output
+transfer_checked(/* vault → trader */ result.amount_out)?;
+
+emit!(Swapped { /* amount_in, amount_out, price_e9, quote_slot */ });</code></pre>
+          <p class="code-note">输出金额直接来自 <code>compute_swap</code> 的结果，不再读一次余额。少两次 reload，也避免“读到的余额”和“算出的余额”不一致。</p>
+        </article>
+
+        <article class="info-card reveal">
+          <h3>几个不显眼但关键的工程点</h3>
+          <p><strong>Account 约束：</strong><code>base_treasury.key() == vault.base_vault</code>、mint 必须匹配。否则攻击者可以塞入自己的 token account 把 vault 掏空。</p>
+          <p><strong>Box 两个 Mint：</strong>Anchor 的 <code>try_accounts</code> 把十个账户的反序列化状态放在 4 KiB 栈帧里；四个 TokenAccount 加两个 Mint 会到 4104 字节，超过 4 KiB。<code>Box</code> 不是风格问题，是能不能编译过的问题。</p>
+          <p><strong>没有 partial fill：</strong>要么整单成交，要么报错。这让路由器的模拟结果与链上执行更容易一致。</p>
+          <p><strong>没有 msg! 成功日志：</strong>成功路径不打日志，格式化字符串在 CU 预算里很贵；事件足够做链下索引。</p>
+        </article>
+      </div>
+
+      <div class="callout reveal">
+        <strong>这套程序的“信任边界”很清晰：</strong>
+        链下负责“价格可能是多少”，链上负责“这笔交易在数学和会计上是否成立”。
+        它不试图在链上重新发现价格，也不假装自己能防住所有有毒流量；它只是把做市商的承诺变成一个可组合、可审计的接口。
+      </div>
+
+      <div class="src-links">
+        <a href="https://github.com/PropAMMForge/PropAMM-Forge/blob/deadddfebff6c33d85f5eda6c633357ac30364a4/crates/propamm-quote/src/lib.rs#L177" target="_blank" rel="noreferrer">propamm-quote · side_price_e9</a>
+        <a href="https://github.com/PropAMMForge/PropAMM-Forge/blob/deadddfebff6c33d85f5eda6c633357ac30364a4/programs/propamm-vault/src/instructions/swap.rs#L129" target="_blank" rel="noreferrer">vault · swap.rs</a>
+        <a href="https://github.com/PropAMMForge/PropAMM-Forge/blob/deadddfebff6c33d85f5eda6c633357ac30364a4/programs/propamm-vault/src/state.rs#L50" target="_blank" rel="noreferrer">vault · state.rs</a>
+        <a href="https://github.com/PropAMMForge/PropAMM-Forge/blob/deadddfebff6c33d85f5eda6c633357ac30364a4/programs/propamm-vault/src/instructions/update_quote.rs#L74" target="_blank" rel="noreferrer">vault · update_quote.rs</a>
+      </div>
+    </section>
+
+    <section id="humidifi" class="section">
+      <div class="section-head reveal">
+        <p class="eyebrow">06 · 生产环境逆向</p>
+        <h2>HumidiFi：链上不是定价器，是“承诺验证器”</h2>
+        <p class="section-lede">
+          大多数头部 PropAMM 不开源、不发 IDL。研究者只能下载链上程序、反编译、猜指令。
+          HumidiFi 是目前被拆得最细的一个样本：它展示了生产级 PropAMM 如何把“价格”做成一份链下承诺，
+          再让链上程序只做验证和记账。
+        </p>
+      </div>
+
+      <div class="callout warn reveal">
+        <strong>先划边界：</strong>下面内容来自第三方对 2026-03 下载的 <code>humidifi.so</code> 的反编译与标注，
+        不是官方源码，也不保证与今天链上字节一致。它适合用来理解<em>可能的设计空间</em>，不适合当作审计结论。
+      </div>
+
+      <div class="split-layout">
+        <article class="info-card reveal">
+          <h3>它为什么不走 Anchor</h3>
+          <p>
+            Anchor 会暴露 8 字节 discriminator、公开 IDL 和标准错误码，接入成本低，但也会把指令布局暴露给所有人。
+            HumidiFi 用了自定义分发：从指令数据<strong>最后一个字节</strong>读出 selector，再和长度做异或：
+          </p>
+          <p><code>disc = (last_byte ^ ((len-1) &gt;&gt; 3) ^ 0x3a) &amp; 0xff</code>，大于 0x17 就 clamp 到 0x18。</p>
+          <p>
+            这不是密码学安全，只是把“猜指令”从读 IDL 变成读二进制。它提高了集成门槛，也降低了被自动化工具有针对性地挑价的速度。
+          </p>
+        </article>
+
+        <article class="code-card reveal">
+          <div class="code-head"><span>docs/archaeology.md · 指令分发</span><span class="tag">第三方逆向</span></div>
+<pre><code>// entrypoint 里的 selector 计算
+uVar11 = (last_byte ^ ((len - 1) &gt;&gt; 3) ^ 0x3a) &amp; 0xff;
+if (0x17 &lt; uVar11) uVar11 = 0x18;   // clamp to 24
+
+// 大部分指令的 payload 还会原地 XOR 解密
+key = 0xc3ebbae2ff2fff3a;
+counter = 0;
+for each 8-byte chunk i:
+    chunk[i] ^= counter ^ key;
+    counter += 0x0001000100010001;
+
+// 例外：0x00、0x06、0x0d、0x0e 不解密
+// 其中 0x00 用最后 32 字节校验 program id，防跨程序重放</code></pre>
+          <p class="code-note">XOR 不是加密，只是混淆；真正的安全来自权限检查、PDA 校验和价格承诺的哈希绑定。</p>
+        </article>
+      </div>
+
+      <h3 class="sub-head reveal">价格承诺：一份 512 字节的“成交意图”</h3>
+      <div class="split-layout">
+        <article class="code-card reveal">
+          <div class="code-head"><span>docs/fill_price.md · 价格验证链</span><span class="tag">L54 · 节选</span></div>
+<pre><code>// disc 0x00：512 字节承诺，最后 32 字节必须等于 HumidiFi program id
+ix_data[len-32 .. len] == 0xe959f7272b74fd7a
+                          0x7a819dd33c7070c6
+                          0x6dd2523bce0a93a0
+                          0xd3bb8723dd54a054
+
+// disc 0x04 / 0x10 / 0x0f：SHA-256 把 payload 绑到当前 pool state
+hash = sha256(pool_state_data, ix_data + 8);
+if (hash != ix_data[0..32]) {
+    hash = sha256_alt(pool_state_data, ix_data + 8);
+    if (hash != ix_data[0..32]) {
+        valid = false;   // 价格无效
+    }
+}</code></pre>
+          <p class="code-note">同一个 payload 换一个 pool、换一个程序、换一个状态，哈希就对不上。这让“重放昨天的好价格”变得困难。</p>
+        </article>
+
+        <article class="info-card reveal">
+          <h3>三层价格结构</h3>
+          <p><strong>1. 预言机基准价：</strong>链下引擎签名提交，链上只验证它是不是最新的、是否绑定当前状态。</p>
+          <p><strong>2. 价格阶梯：</strong>18 个 u64 定义 3 档 bid / 3 档 ask 的边界和权重；交易规模落在哪一档，就用哪一档的价格。这些字段在 state 里也按字段 XOR-masked，直接读账户并不能还原参数。</p>
+          <p><strong>3. 成交价：</strong>在选中的档位内插值，再做手续费和方向调整。最终成交价写回 state，并以 XOR 混淆后发事件。</p>
+          <p>
+            这意味着链上并没有跑一条 <code>x·y = k</code>；它跑的是一棵“价格 → 档位 → 插值”的查表机。
+            曲线可以很复杂，但链上只需要验证结果落在承诺范围内。
+          </p>
+        </article>
+      </div>
+
+      <div class="card-grid three reveal" style="margin-top: 20px;">
+        <article class="info-card">
+          <span class="card-index">143</span>
+          <h3>CU 的更新</h3>
+          <p>预言机更新被压到约 143 CU，更新交易成本约 9,998 lamports。低价更新是高频报价的前提。</p>
+        </article>
+        <article class="info-card">
+          <span class="card-index">512B</span>
+          <h3>的承诺</h3>
+          <p>主交易指令携带 512 字节的签名负载；链上验证 program id、PDA、哈希和账户归属后，再执行两笔 token CPI。</p>
+        </article>
+        <article class="info-card">
+          <span class="card-index">0x0c</span>
+          <h3>的 kill switch</h3>
+          <p>反编译里能看到 “disabled ixn” 的运行时开关，而这个二进制里的 0x0c 被标成永久关闭。它说明程序保留了“按版本关掉某条指令”的能力，是风控也是中心化。</p>
+        </article>
+      </div>
+
+      <div class="callout reveal">
+        <strong>这个样本真正说明的是“分工”：</strong>
+        价格发现留在链下，链上只保留<em>可验证的承诺、库存状态和转账</em>。
+        这样既能把更新成本压到极低，又能让聚合器和用户在没有 IDL 的情况下完成原子结算。
+        代价是策略不透明、升级权集中、外部只能通过行为反推。
+      </div>
+
+      <div class="src-links">
+        <a href="https://github.com/vitorpy/humidifi-explained/blob/0265237e46818ca63b27417bd3c9264ff2c207fd/docs/archaeology.md" target="_blank" rel="noreferrer">humidifi-explained · archaeology</a>
+        <a href="https://github.com/vitorpy/humidifi-explained/blob/0265237e46818ca63b27417bd3c9264ff2c207fd/docs/fill_price.md" target="_blank" rel="noreferrer">humidifi-explained · fill price</a>
+        <a href="https://github.com/vitorpy/humidifi-explained/blob/0265237e46818ca63b27417bd3c9264ff2c207fd/docs/swap_instructions.md" target="_blank" rel="noreferrer">humidifi-explained · swap instructions</a>
+      </div>
+    </section>
+
+    <section id="curve" class="section">
+      <div class="section-head reveal">
+        <p class="eyebrow">07 · 曲线的变体</p>
+        <h2>还是 x·y = k，只是把坐标平移了</h2>
+        <p class="section-lede">
+          不是所有 PropAMM 都用“报价表”。Obric 这类 “proactive AMM” 仍然用一条曲线，
+          但它把曲线围绕目标库存和预言机价格做平移、缩放。参数很少，效果却很像“链上版做市商报价”。
+        </p>
+      </div>
+
+      <div class="formula reveal">
+        <div><span class="muted">// 以 Obric 的 Sui 结构为线索；下面是教育性复刻中的等价形式（非官方源码）</span></div>
+        <div>v₀ <span class="op">=</span> targetX × concentration</div>
+        <div>K  <span class="op">=</span> v₀² × multX / multY</div>
+        <div>base <span class="op">=</span> v₀ + reserveX − targetX</div>
+        <div>out(x→y) <span class="op">=</span> K / base − K / (base + amountIn)</div>
+      </div>
+
+      <div class="split-layout">
+        <article class="info-card reveal">
+          <h3>三个参数分别在做什么</h3>
+          <p><strong>targetX：</strong>做市商希望的 base 库存目标。reserve 偏离 target 时，曲线自动把价格推向“把库存拉回来”的方向。</p>
+          <p><strong>concentration：</strong>虚拟深度倍数。v₀ = targetX × concentration；concentration 越大，曲线在目标价附近的深度越深、滑点越小。</p>
+          <p><strong>multX / multY：</strong>预言机乘数。当 reserve = target 时，边际价格正好是 <code>multX / multY</code>；改这两个数，就相当于把整条曲线搬到新的公允价。</p>
+        </article>
+
+        <article class="code-card reveal">
+          <div class="code-head"><span>PropAMM.sol · Obric 风格的报价</span><span class="tag">教育性复刻 · L436</span></div>
+<pre><code>function _quoteXtoY(
+    bytes32 pairId,
+    uint256 amountXIn,
+    PairParameters memory params
+) internal view returns (uint256 amountOut) {
+    TradingPair storage pair = pairs[pairId];
+
+    uint256 v0 = pair.targetX * params.concentration;
+    uint256 K = (v0 * v0 * params.multX) / params.multY;
+
+    uint256 base = v0 + pair.reserveX - pair.targetX;
+
+    amountOut = K / base - K / (base + amountXIn);
+}</code></pre>
+          <p class="code-note">当 <code>reserveX = targetX</code> 时，<code>base = v₀</code>，边际价格 <code>K/base² = multX/multY</code>。这就是“围绕预言机价做市”的数学表达。</p>
+        </article>
+      </div>
+
+      <div class="callout warn reveal">
+        <strong>“Proactive” 不等于 “没有曲线”。</strong>
+        这类设计的精髓是：曲线本身不变，变的是曲线的<em>锚</em>（mult）和<em>深度</em>（concentration）。
+        做市商不需要每笔都报价，只需要持续把锚搬到最新公允价附近；链上成交仍然由一条确定性的公式完成。
+        这比“每笔都签名报价”更便宜，但也更依赖参数更新的时效。
+      </div>
+
+      <h3 class="sub-head reveal">公开资料里能确认的几条线索</h3>
+      <div class="table-wrap reveal">
+        <table class="source-table">
+          <thead>
+            <tr><th>Venue</th><th>可确认的线索</th><th>定价风格（推断）</th><th>公开程度</th></tr>
+          </thead>
+          <tbody>
+            <tr><td>Lifinity</td><td>2022 年上线，最早自称 “oracle-based AMM”，协议自有流动性，有 LFNTY</td><td>预言机锚定 + 主动曲线</td><td>有前端，策略不公开</td></tr>
+            <tr><td>SolFi</td><td>Ellipsis Labs（Phoenix 团队），2024-11 上线，聚合器依赖高</td><td>订单簿经验的链上做市曲线</td><td>无 IDL / 无源码</td></tr>
+            <tr><td>Obric V2</td><td>多链（Aptos / Sui / Solana / Berachain），Sui 端结构可反编译</td><td>target + concentration + oracle multiplier</td><td>部分结构可读</td></tr>
+            <tr><td>Tessera V</td><td>Wintermute 运营，2025-06 接入 Jupiter</td><td>专业做市商的报价曲线</td><td>无公开 IDL</td></tr>
+            <tr><td>HumidiFi</td><td>2025 年中上线，随后成为头部；二进制可反编译</td><td>链下价格承诺 + 链上价格阶梯</td><td>逆向材料较多</td></tr>
+            <tr><td>GoonFi / ZeroFi / BisonFi</td><td>pmm-sim 已接入，指令布局与账户顺序各不同</td><td>自定义报价 / vault</td><td>无公开 IDL</td></tr>
+          </tbody>
+        </table>
+      </div>
+      <p class="reveal" style="color: var(--muted); font-size: 0.86rem; margin-top: 10px;">
+        表中的“定价风格”是根据公开访谈、反编译和链上行为做的归纳，不是官方披露。市场排名变化很快，别把这张表当成今日份额。
+      </p>
+    </section>
+
+    <section id="abi" class="section">
+      <div class="section-head reveal">
+        <p class="eyebrow">08 · 集成与 ABI</p>
+        <h2>没有标准 IDL，每个 PropAMM 都是一门方言</h2>
+        <p class="section-lede">
+          传统 DEX 有相对稳定的 AMM 接口；PropAMM 为了隐藏策略、优化 CU，往往连指令格式都自定义。
+          结果是：聚合器每接一家，就要写一套账户顺序、选择器和参数编码。pmm-sim 把这种“方言”摊开在了代码里。
+        </p>
+      </div>
+
+      <div class="split-layout">
+        <article class="code-card reveal">
+          <div class="code-head"><span>pmm-sim/src/cfg.rs · HumidiFi 指令编码</span><span class="tag">L157 · 节选</span></div>
+<pre><code>fn humidifi_instruction_data(
+    selector: &amp;[u8], amount_in: u64, direction: u8
+) -&gt; Vec&lt;u8&gt; {
+    let swap_id: u64 = 1500;
+    let mut data = Vec::with_capacity(25);
+    data.extend_from_slice(&amp;swap_id.to_le_bytes());
+    data.extend_from_slice(&amp;amount_in.to_le_bytes());
+    data.push(direction);
+    data.extend_from_slice(&amp;[0u8; 7]);   // padding
+    data.extend_from_slice(selector);
+
+    // 和 HumidiFi 二进制一致的 XOR 混淆
+    let key = u64::from_le_bytes(
+        [58, 255, 47, 255, 226, 186, 235, 195]
+    );
+    for (i, chunk) in data.chunks_exact_mut(8).enumerate() {
+        let qword = u64::from_le_bytes(chunk.try_into().unwrap());
+        let pos_mask = 0x0001_0001_0001_0001u64
+            .wrapping_mul(i as u64);
+        let obfuscated = qword ^ key ^ pos_mask;
+        chunk.copy_from_slice(&amp;obfuscated.to_le_bytes());
+    }
+    data
+}</code></pre>
+          <p class="code-note">连“选择器放最后”这种细节都要单独实现；这不是标准 ABI 能覆盖的。</p>
+        </article>
+
+        <article class="info-card reveal">
+          <h3>账户顺序也不一样</h3>
+          <p><strong>HumidiFi v1：</strong>9 个账户，payer 在 0，market 在 1，vault 的 base/quote token account 在 2/3。</p>
+          <p><strong>Tessera：</strong>12 个账户，global_state 在 0，market 在 1，payer 在 2。</p>
+          <p><strong>ZeroFi：</strong>10 个账户，market 在 0，payer 反而在 7。</p>
+          <p><strong>Obric V2：</strong>12 个账户，带三个 oracle / price feed 账户，market 在 0。</p>
+          <p>同一笔“买 SOL”，在不同 venue 上要拼出完全不同的 AccountMeta 列表。</p>
+        </article>
+      </div>
+
+      <div class="table-wrap reveal" style="margin-top: 20px;">
+        <table class="source-table">
+          <thead>
+            <tr><th>Venue（pmm-sim 支持）</th><th>swap 账户数</th><th>指令数据形态</th><th>备注</th></tr>
+          </thead>
+          <tbody>
+            <tr><td>HumidiFi v1 / v2 / v3</td><td>9 / 14 / 14</td><td>25 字节 + 尾部 selector + XOR</td><td>swap id 1500，direction 单字节</td></tr>
+            <tr><td>Tessera V</td><td>12</td><td>18 字节</td><td>selector + direction + amount + 1u64</td></tr>
+            <tr><td>GoonFi</td><td>9</td><td>19 字节</td><td>is_bid + bump + amount + 1u64，带 blacklist 账户</td></tr>
+            <tr><td>SolFi V2</td><td>13</td><td>18 字节</td><td>amount + 1u64 + direction，带 cfg / oracle</td></tr>
+            <tr><td>Obric V2</td><td>12</td><td>18 字节</td><td>direction + amount + 1u64，带多个 oracle</td></tr>
+            <tr><td>BisonFi</td><td>9</td><td>18 字节</td><td>amount + 0u64 + direction</td></tr>
+            <tr><td>ZeroFi</td><td>10</td><td>—</td><td>pmm-sim 的直接调用尚未实现</td></tr>
+          </tbody>
+        </table>
+      </div>
+
+      <div class="callout warn reveal">
+        <strong>“同一个价格，不同调用者”是真实存在的。</strong>
+        pmm-sim 提供 <code>--spoof=jupiter|okx|dflow|titan</code>：把 CPI 调用者的身份伪装成某个聚合器。
+        一些 PropAMM 会给白名单聚合器更优的费率或更大的额度；这不是漏洞，而是订单流分层。
+        它同时意味着：<strong>报价不是全局统一的，取决于“谁在问”</strong>。普通用户看到的聚合器报价，和做市商给某个路由的报价，可能不是同一张表。
+      </div>
+
+      <div class="split-layout" style="margin-top: 18px;">
+        <article class="info-card reveal">
+          <h3>pmm-sim 做了什么</h3>
+          <p>
+            它把 HumidiFi、SolFi V2、Obric V2、ZeroFi、Tessera、GoonFi、BisonFi 的真实程序与账户快照放进 LiteSVM，
+            在本地复现 swap、拆分路由、benchmark CU / 汇率，并支持伪装 CPI 来源。
+          </p>
+          <p>
+            这对研究者很有用：不用连主网就能比较“同一 slot、同一金额”下各家的报价和计算成本。
+            但它仍然是<strong>模拟</strong>，不等于主网真实成交，也不覆盖聚合器的完整路由逻辑。
+          </p>
+        </article>
+        <article class="info-card reveal">
+          <h3>“集成税”的后果</h3>
+          <p>
+            对聚合器：每接一家都要写适配器、做审计、维护账户顺序；谁能被接入，本身就是一种稀缺资源。</p>
+          <p>
+            对做市商：没有标准接口意味着更高的护城河，但也更难被多路由发现；只接一家聚合器时，流量会高度集中。</p>
+          <p>
+            对研究者：没有 IDL 就只能靠反编译和链上行为；可验证性下降，但也不是完全黑箱——资金流、事件和账户变化仍然公开。</p>
+        </article>
+      </div>
+
+      <div class="src-links">
+        <a href="https://github.com/LimeChain/pmm-sim/blob/cc4ae891a2a765d92c89d4381f96dce4afd446bb/src/cfg.rs#L157" target="_blank" rel="noreferrer">pmm-sim · cfg.rs</a>
+        <a href="https://github.com/LimeChain/pmm-sim" target="_blank" rel="noreferrer">pmm-sim README</a>
+        <a href="https://github.com/jup-ag/jupiter-amm-interface" target="_blank" rel="noreferrer">Jupiter AMM Interface</a>
+        <a href="https://github.com/captorix/awesome-solana-prop-amms" target="_blank" rel="noreferrer">awesome-solana-prop-amms</a>
+      </div>
+    </section>
+
+    <section id="simulator" class="section">
+      <div class="section-head reveal">
+        <p class="eyebrow">09 · 报价台</p>
+        <h2>把参数推到边界，看看哪一条护栏先响</h2>
+        <p class="section-lede">
+          下面这个模拟器复刻了 PropAMM Forge 的核心计算：mid → skew/spread → bid/ask → 成交 → 库存。
+          预设按钮分别演示“均衡库存”“库存偏多”“报价过期”“大单越界”。为了控制变量，库存硬边界固定为 ±2000 bps；
+          这是教学模型，不是主网报价。
+        </p>
+      </div>
+
+      <div class="sim reveal" data-quote-sim>
+        <div class="sim-toolbar">
+          <div class="preset-group">
+            <button class="button small" type="button" data-preset="balanced">均衡库存</button>
+            <button class="button small" type="button" data-preset="long">库存偏多</button>
+            <button class="button small" type="button" data-preset="stale">报价过期</button>
+            <button class="button small" type="button" data-preset="large">大单越界</button>
+          </div>
+          <span class="sim-status" data-sim-status role="status" aria-live="polite">可成交</span>
+        </div>
+
+        <div class="sim-grid">
+          <div class="sim-controls">
+            <label class="control">
+              <span class="control-head">中间价 mid <b data-out="mid">150.00</b></span>
+              <input type="range" data-k="mid" min="80" max="250" step="0.1" value="150">
+            </label>
+            <label class="control">
+              <span class="control-head">半边点差 half-spread <b data-out="spread">10 bps</b></span>
+              <input type="range" data-k="spread" min="0" max="100" step="1" value="10">
+            </label>
+            <label class="control">
+              <span class="control-head">库存偏移 skew <b data-out="skew">0 bps</b></span>
+              <input type="range" data-k="skew" min="-1000" max="1000" step="10" value="0">
+            </label>
+            <label class="control">
+              <span class="control-head">Vault 的 SOL 库存 <b data-out="base">1000 SOL</b></span>
+              <input type="range" data-k="base" min="0" max="3000" step="10" value="1000">
+            </label>
+            <label class="control">
+              <span class="control-head">Vault 的 USDC 库存 <b data-out="quote">150000 USDC</b></span>
+              <input type="range" data-k="quote" min="0" max="600000" step="1000" value="150000">
+            </label>
+            <label class="control">
+              <span class="control-head">单笔上限 max size <b data-out="maxsize">50 SOL</b></span>
+              <input type="range" data-k="maxsize" min="0" max="200" step="1" value="50">
+            </label>
+            <label class="control">
+              <span class="control-head">报价年龄 quote age <b data-out="age">2 slots</b></span>
+              <input type="range" data-k="age" min="0" max="30" step="1" value="2">
+            </label>
+            <label class="control">
+              <span class="control-head">最大有效期 max age <b data-out="maxage">12 slots</b></span>
+              <input type="range" data-k="maxage" min="1" max="30" step="1" value="12">
+            </label>
+            <label class="control">
+              <span class="control-head">方向 <b data-out="sideLabel">买入 SOL</b></span>
+              <select data-k="side">
+                <option value="buy" selected>买入 SOL（付 USDC）</option>
+                <option value="sell">卖出 SOL（收 USDC）</option>
+              </select>
+            </label>
+            <label class="control">
+              <span class="control-head">订单名义（SOL） <b data-out="amount">10 SOL</b></span>
+              <input type="range" data-k="amount" min="0" max="300" step="1" value="10">
+            </label>
+          </div>
+
+          <div class="sim-readout">
+            <div class="quote-panel">
+              <h4>当前双边报价</h4>
+              <div class="quote-sides">
+                <div class="side-box bid">
+                  <small>BID · 做市商买 SOL</small>
+                  <b data-out="bid">—</b>
+                  <em>USDC / SOL</em>
+                </div>
+                <span class="spread-badge" data-out="width">—</span>
+                <div class="side-box ask">
+                  <small>ASK · 做市商卖 SOL</small>
+                  <b data-out="ask">—</b>
+                  <em>USDC / SOL</em>
+                </div>
+              </div>
+            </div>
+
+            <div class="metric-grid">
+              <div class="metric">
+                <small>成交均价</small>
+                <b data-out="effective">—</b>
+              </div>
+              <div class="metric">
+                <small>相对 mid 的滑点</small>
+                <b data-out="impact">—</b>
+              </div>
+              <div class="metric">
+                <small>你付出 / 得到</small>
+                <b data-out="flow">—</b>
+              </div>
+              <div class="metric">
+                <small>成交后库存 skew</small>
+                <b data-out="skewAfter">—</b>
+              </div>
+            </div>
+
+            <div class="quote-panel">
+              <h4>库存偏离</h4>
+              <div class="balance-bar"><i data-out="balanceMarker" style="left:50%"></i></div>
+              <div class="balance-labels"><span>base 过多</span><span>均衡</span><span>quote 过多</span></div>
+              <div class="metric-grid" style="margin-top: 10px;">
+                <div class="metric">
+                  <small>当前 skew</small>
+                  <b data-out="skewNow">—</b>
+                </div>
+                <div class="metric">
+                  <small>库存硬边界</small>
+                  <b data-out="skewBound">±2000 bps</b>
+                </div>
+              </div>
+            </div>
+
+            <p class="sim-explain" data-sim-explain>
+              调一调参数。状态栏会告诉你：这笔单是被价格、有效期、数量还是库存挡住的。
+            </p>
+          </div>
+        </div>
+      </div>
+
+      <div class="callout reveal">
+        <strong>读法：</strong>先把 mid 和 spread 调小，看报价如何贴近中间价；再把库存拉偏，
+        看 skew 如何把整张报价推走；最后把 quote age 调过 max age，或把订单量调到 max size 以上，
+        观察“报价还在，但链上已经不肯成交”的状态。PropAMM 的风控，很多时候就是这几条线同时生效。
+      </div>
+    </section>
+
+    <section id="risk" class="section">
+      <div class="section-head reveal">
+        <p class="eyebrow">10 · 风险与边界</p>
+        <h2>它优化了价格，也集中了风险</h2>
+        <p class="section-lede">
+          PropAMM 让零售用户拿到更窄的价差，但它把“谁承担库存风险、谁有权改价格、谁决定谁能接入”
+          这些问题从 LP 社区转移到了少数做市商和聚合器身上。理解收益，也要理解这些结构性代价。
+        </p>
+      </div>
+
+      <div class="risk-grid">
+        <article class="risk-card reveal">
+          <h3><span>01</span>逆向选择 / 有毒流量</h3>
+          <p><b>机制：</b>外部价格先动，链上报价还没更新；能更快成交的人按旧价买走。</p>
+          <p><b>缓解：</b>低成本高频更新、CU 拍卖、私有订单流、报价有效期、按规模分层定价。</p>
+          <p><b>残留：</b>只要更新不是原子跟随 CEX，窗口就存在；越窄的价差越依赖更新速度。</p>
+        </article>
+        <article class="risk-card reveal">
+          <h3><span>02</span>报价密钥与重放</h3>
+          <p><b>机制：</b>报价签名者被攻破，攻击者可以报出偏离公允价的价格；或者重放旧签名。</p>
+          <p><b>缓解：</b>热钱包只拿报价权、程序 id 绑定、pool state 哈希绑定、slot 有效期、库存硬边界。</p>
+          <p><b>残留：</b>密钥泄露后，攻击者仍能在边界内持续“慢速抽血”；监控与停机权很关键。</p>
+        </article>
+        <article class="risk-card reveal">
+          <h3><span>03</span>库存与对冲风险</h3>
+          <p><b>机制：</b>单边行情让库存迅速偏向一侧；链上边界能阻止继续恶化，但不能阻止已经发生的亏损。</p>
+          <p><b>缓解：</b>skew、spread 扩张、单笔上限、CEX 对冲、跨 venue 调仓。</p>
+          <p><b>残留：</b>对冲本身有基差、资金费率和执行风险；极端行情下流动性可能同时消失。</p>
+        </article>
+        <article class="risk-card reveal">
+          <h3><span>04</span>闭源与升级权</h3>
+          <p><b>机制：</b>没有 IDL、没有源码，策略和升级内容都不可审计；程序升级可以随时改变规则。</p>
+          <p><b>缓解：</b>链上资金流与事件可观测、第三方反编译、聚合器审计、社区监控。</p>
+          <p><b>残留：</b>“可观测”不等于“可验证”；用户无法独立证明报价函数没有被临时改动。</p>
+        </article>
+        <article class="risk-card reveal">
+          <h3><span>05</span>聚合器依赖与准入</h3>
+          <p><b>机制：</b>PropAMM 的流量高度依赖少数聚合器；接入、排序和报价缓存都由聚合器决定。</p>
+          <p><b>缓解：</b>多聚合器接入、直接前端、API / RFQ、做市商自有流量。</p>
+          <p><b>残留：</b>新 venue 很难冷启动；聚合器成为事实上的准入者，可能强化中心化。</p>
+        </article>
+        <article class="risk-card reveal">
+          <h3><span>06</span>报价分层与“看人下菜”</h3>
+          <p><b>机制：</b>部分 venue 对白名单聚合器给更优价格或更大额度；同一笔 swap 换个调用者，价格可能不同。</p>
+          <p><b>缓解：</b>透明披露、聚合器比价、独立模拟（如 pmm-sim）。</p>
+          <p><b>残留：</b>普通用户很难知道自己拿到的是不是“最优那张表”；路由层的权力进一步集中。</p>
+        </article>
+        <article class="risk-card reveal">
+          <h3><span>07</span>资本与长尾资产</h3>
+          <p><b>机制：</b>做市商用自己的钱承担库存风险，因此只愿意做流动性好、可对冲的主流资产。</p>
+          <p><b>缓解：</b>多资产库存、跨链 / CEX 对冲、动态额度。</p>
+          <p><b>残留：</b>长尾资产仍然依赖公共 AMM；PropAMM 越成功，流动性越向头部资产集中。</p>
+        </article>
+        <article class="risk-card reveal">
+          <h3><span>08</span>没有 LP 收益，也没有 LP 保护</h3>
+          <p><b>机制：</b>没有 LP 份额，用户不能“存款吃手续费”；做市商的盈亏完全内部化。</p>
+          <p><b>缓解：</b>对交易者而言，更窄的价差就是收益；对做市商而言，专业风控是唯一护城河。</p>
+          <p><b>残留：</b>一旦做市商退出或停机，池子可能瞬间没有流动性；没有 LP 可以“接盘”。</p>
+        </article>
+      </div>
+
+      <h3 class="sub-head reveal">评估一个 PropAMM，先问这六个问题</h3>
+      <div class="split-layout">
+        <article class="info-card reveal">
+          <h3>产品与市场结构</h3>
+          <ul class="check-list">
+            <li>它的报价有效期是几个 slot？更新失败时会不会自动失效？</li>
+            <li>单笔上限、库存边界、停机权分别由谁控制？</li>
+            <li>它是否对不同聚合器 / 调用者给不同报价？</li>
+          </ul>
+        </article>
+        <article class="info-card reveal">
+          <h3>代码与信任</h3>
+          <ul class="check-list">
+            <li>程序是否可升级？升级权限在谁手里？有没有时间锁？</li>
+            <li>报价函数是否与链上执行共用同一份数学？舍入方向是否偏向 vault？</li>
+            <li>价格承诺是否绑定 pool state / program id / slot，能否重放？</li>
+          </ul>
+        </article>
+      </div>
+    </section>
+
+    <section id="matrix" class="section">
+      <div class="section-head reveal">
+        <p class="eyebrow">11 · 对比与指标</p>
+        <h2>不要只看 TVL，看“有效价差”和“报价存活率”</h2>
+        <p class="section-lede">
+          PropAMM 的资本效率很高，TVL 往往不能反映真实可交易深度；同样，成交量也可能被聚合器拆分和刷量放大。
+          评估它，应该看更接近交易体验的指标。
+        </p>
+      </div>
+
+      <div class="table-wrap reveal">
+        <table class="source-table">
+          <thead>
+            <tr><th>维度</th><th>公共 AMM / CLMM</th><th>链上订单簿</th><th>RFQ</th><th>PropAMM</th></tr>
+          </thead>
+          <tbody>
+            <tr><td>价格发现</td><td>链上交易驱动</td><td>链上逐笔订单</td><td>做市商逐笔报价</td><td>链下公允价 + 链上报价函数</td></tr>
+            <tr><td>流动性来源</td><td>LP 存款</td><td>做市商 / 用户挂单</td><td>做市商库存</td><td>做市商自营库存</td></tr>
+            <tr><td>更新成本</td><td>swap 时自动</td><td>每笔订单 gas</td><td>链下报价，链上结算</td><td>极低（可低至百级 CU）</td></tr>
+            <tr><td>价格透明度</td><td>高（曲线公开）</td><td>高（订单可见）</td><td>低（逐笔私有）</td><td>低（策略闭源）</td></tr>
+            <tr><td>资本效率</td><td>中</td><td>取决于深度</td><td>高</td><td>很高（围绕公允价集中）</td></tr>
+            <tr><td>主要风险</td><td>LP 无常损失</td><td>挂单被扫</td><td>报价失败 / 对手方</td><td>逆向选择、中心化、聚合器依赖</td></tr>
+            <tr><td>适合资产</td><td>长尾 + 主流</td><td>主流</td><td>主流 / 大额</td><td>高流动性主流资产</td></tr>
+          </tbody>
+        </table>
+      </div>
+
+      <div class="metric-cards reveal">
+        <div class="metric-card">
+          <strong>Effective spread</strong>
+          <span>成交价相对 mid 的实际偏离，比“挂单价差”更接近用户成本。</span>
+        </div>
+        <div class="metric-card">
+          <strong>Markout 1s / 10s</strong>
+          <span>成交后 1 秒 / 10 秒的价格变化。做市商是否被系统性逆向选择，看这个最直接。</span>
+        </div>
+        <div class="metric-card">
+          <strong>Quote uptime</strong>
+          <span>报价在多少比例的时间里是新鲜且可成交的。停机、过期、额度耗尽都会拉低它。</span>
+        </div>
+        <div class="metric-card">
+          <strong>Update CU</strong>
+          <span>一次报价更新的计算成本。它决定了做市商能承受多高的更新频率。</span>
+        </div>
+        <div class="metric-card">
+          <strong>Quote age p50 / p95</strong>
+          <span>成交时报价已经存活了多少 slot。越高，越依赖“更新能抢在 taker 前面”。</span>
+        </div>
+        <div class="metric-card">
+          <strong>Volume / TVL</strong>
+          <span>资金周转率。PropAMM 通常远高于公共池，但这不代表风险更低。</span>
+        </div>
+      </div>
+
+      <div class="callout warn reveal">
+        <strong>TVL 陷阱：</strong>PropAMM 的自营库存可以很少，却通过高频周转做出很大的成交量。
+        看到“TVL 只有几百万、日成交量几亿”不一定是数据错误；但它也意味着，一旦做市商撤资或停机，
+        深度会比 TVL 看起来更脆弱。
+      </div>
+
+      <div class="quote-card reveal">
+        <p>PropAMM 把 AMM 从“流动性池”变成了“流动性接口”。</p>
+        <small>接口背后是一个做市商、一张资产负债表和一套风控；曲线只是它对外说话的方式。</small>
+      </div>
+    </section>
+
+    <section id="source" class="section">
+      <div class="section-head reveal">
+        <p class="eyebrow">12 · 源码与延伸阅读</p>
+        <h2>把结论落回可以复查的材料</h2>
+        <p class="section-lede">
+          下面按“直接来源 → 机制解释 → 市场数据”排列。代码链接都固定到本文使用的提交或文件；
+          第三方逆向材料已标注，不要把它当成官方源码。
+        </p>
+      </div>
+
+      <div class="card-grid two">
+        <article class="info-card reveal">
+          <h3>开源实现</h3>
+          <p>
+            <a href="https://github.com/PropAMMForge/PropAMM-Forge" target="_blank" rel="noreferrer">PropAMM Forge</a>
+            （Apache-2.0，devnet / localnet）：可部署的 vault 程序、共享报价数学、CLI、引擎与测试。
+            本文的 <code>side_price_e9</code>、<code>compute_swap</code>、Vault 布局和 swap 流程都来自这里。
+          </p>
+          <p>
+            <a href="https://github.com/LimeChain/pmm-sim" target="_blank" rel="noreferrer">pmm-sim</a>
+            （MIT）：用 LiteSVM 模拟 7 家 Solana PropAMM，支持多路由、benchmark 与 CPI 来源伪装。
+          </p>
+        </article>
+        <article class="info-card reveal">
+          <h3>逆向与曲线</h3>
+          <p>
+            <a href="https://github.com/vitorpy/humidifi-explained" target="_blank" rel="noreferrer">humidifi-explained</a>：
+            对 HumidiFi 二进制的反编译、指令分发、价格承诺与事件格式分析。第三方材料，非官方。
+          </p>
+          <p>
+            <a href="https://github.com/fahimahmedx/prop-amm/blob/72be694880ce0c5864888b16a86f46f27589fcda/src/PropAMM.sol#L436" target="_blank" rel="noreferrer">fahimahmedx/prop-amm</a>：
+            Obric 风格曲线的 Solidity 教学复刻。用于理解 target / concentration / multiplier，不是生产代码。
+          </p>
+        </article>
+      </div>
+
+      <div class="table-wrap reveal" style="margin-top: 20px;">
+        <table class="source-table">
+          <thead>
+            <tr><th>材料</th><th>用途</th><th>边界</th></tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td><a href="https://www.helius.dev/blog/solanas-proprietary-amm-revolution" target="_blank" rel="noreferrer">Helius · Solana’s Proprietary AMM Revolution</a></td>
+              <td>市场结构、143 CU / 150k CU、聚合器份额、Obric Sui 结构</td>
+              <td>2025-08 左右的市场快照；数字会变化</td>
+            </tr>
+            <tr>
+              <td><a href="https://github.com/jup-ag/jupiter-amm-interface" target="_blank" rel="noreferrer">Jupiter AMM Interface</a></td>
+              <td>聚合器如何描述一个 AMM、报价与 swap 接口</td>
+              <td>接口层，不代表各 PropAMM 的内部策略</td>
+            </tr>
+            <tr>
+              <td><a href="https://github.com/captorix/awesome-solana-prop-amms" target="_blank" rel="noreferrer">awesome-solana-prop-amms</a></td>
+              <td>协议、路由器、预言机与工具索引</td>
+              <td>社区列表，收录不代表背书</td>
+            </tr>
+            <tr>
+              <td><a href="https://docs.dodoex.io/" target="_blank" rel="noreferrer">DODO Docs</a></td>
+              <td>理解 “Proactive Market Maker” 与 Prop AMM 的命名差异</td>
+              <td>DODO PMM 是曲线/产品名，不是 Solana Prop AMM</td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+
+      <div class="callout reveal" style="margin-top: 24px;">
+        <strong>最后一句：</strong>PropAMM 不是“更好的 AMM”，而是“把做市商接进 AMM 接口”的一种方式。
+        它用链下智能换链上可组合性，用自营库存换资本效率，用闭源换策略隐蔽。
+        值不值得，取决于你站在交易者、做市商、聚合器还是监管者的位置。
+      </div>
+
+      <div class="footer">
+        <p>页面为机制与源码分析，不构成投资建议。所有第三方逆向结论都以对应材料为准；市场数据是历史快照。</p>
+      </div>
+    </section>
+  </main>
+
+  <script src="./app.js"></script>
+</body>
+</html>
