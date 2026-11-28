@@ -17,6 +17,7 @@ description: 按实际问题选择 Solana、Uniswap、Aave、Drift、Hyperliquid
 | 抵押品看似足够，Aave 借款为何失败；利息和价格怎样改变风险？ | [智能合约](./ethereum/contract/contract.md)、[Aave 阅读路线](./defi/aave/README.md) | [V3 借款、利息与健康因子](./defi/aave/v3-borrow-health-factor.md) | [本地供借、风险失败与清算](./defi/aave/v3-borrow-health-factor.md#experiment) |
 | 永续合约成交、费用、资金费与保证金怎样影响仓位？ | [永续合约共用术语](./defi/perps/README.md)、[Solana 账户与程序](./solana/README.md) | [Drift 仓位生命周期](./defi/perps/drift-position-lifecycle.md) | [原生 Rust 函数与事件复算](./defi/perps/drift-position-lifecycle.md#reproduce) |
 | Hyperliquid 签名绑定什么，超时与重连后怎样核对订单？ | [概览](./hyperliquid/concepts/overview.md)、[REST](./hyperliquid/api/rest.md)、[账户查询](./hyperliquid/guides/query.md) | [签名、订单状态与重连对账](./hyperliquid/guides/orders.md) | [离线 SDK 与合成回放](./hyperliquid/guides/orders.md#reproduce) |
+| 一个协议谁付钱、谁承担债务、失败时谁兜底？ | [协议分析](./protocols/README.md) | [Polymarket](./protocols/polymarket.md)、[Aave](./protocols/aave.md)、[Morpho](./protocols/morpho.md)、[Jupiter](./protocols/jupiter.md) 等 14 篇 | 各篇“读数据与检查清单” |
 
 不必按表顺序读完。做链数据接入，可先读 Solana，再对照 Hyperliquid 的客户端对账；研究 DeFi 状态与资金路径，可从 Uniswap 的池结算进入 Aave 债务与风险，再阅读永续仓位。各组件的固定版本、提交和核查日见下方[源码分析基线](#baselines)。
 
@@ -66,6 +67,7 @@ Solana、Uniswap V3、Aave V3、Drift、Hyperliquid 五篇已完成作者以外�
 - [Solana：账户、程序、交易与数据路径](./solana/README.md)
 - [Lightning：承诺交易、违约惩罚、看门狗与恢复边界](./lightning/README.md)
 - [DeFi：交易结算、借贷与永续仓位](./defi/README.md)，包含 [Uniswap](./defi/uniswap/README.md)、[Aave](./defi/aave/README.md)、[永续合约](./defi/perps/README.md)
+- [协议分析：Polymarket、four.meme、Aave、PancakeSwap、Jupiter、Raydium、Morpho、Pendle、Chainlink 等](./protocols/README.md)
 - [Hyperliquid：概念、接口与订单对账](./hyperliquid/README.md)
 - 原有 [Uniswap 合约入口](./ethereum/contract/uniswap.md) 继续保留，指向同一篇 V3 主文。
 
@@ -79,6 +81,7 @@ Solana、Uniswap V3、Aave V3、Drift、Hyperliquid 五篇已完成作者以外�
 - [Hyperliquid](./hyperliquid/README.md)
 - [Lightning](./lightning/README.md)
 - [Solana](./solana/README.md)
+- [协议分析](./protocols/README.md)
 - [以太坊](./ethereum/README.md)
 - [其他公链](./coin/README.md)
 - [比特币](./bitcoin/README.md)
