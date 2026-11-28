@@ -126,6 +126,10 @@ const config = {
                 to: "/tools/urlparam",
               },
               {
+                label: "Mermaid Preview",
+                to: "/tools/mermaid",
+              },
+              {
                 label: "Compare Text",
                 to: "/tools/compare/text",
               },
@@ -146,6 +150,10 @@ const config = {
               {
                 label: "Decode Tx",
                 to: "/tools/blockchain/decodetx",
+              },
+              {
+                label: "Decode Calldata",
+                to: "/tools/blockchain/calldata",
               },
               {
                 label: "Publish Tx",

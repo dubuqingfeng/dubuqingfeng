@@ -4,6 +4,7 @@ const ToolsSidebarData = [
     type: "category",
     items: [
       { type: "link", href: "/tools/urlparam", label: "URL Parameter Tool" },
+      { type: "link", href: "/tools/mermaid", label: "Mermaid Preview" },
       { type: "link", href: "/tools/imageocr", label: "图片文字识别" },
     ],
   },
@@ -12,6 +13,11 @@ const ToolsSidebarData = [
     type: "category",
     items: [
       { type: "link", href: "/tools/blockchain/decodetx", label: "Decode Tx" },
+      {
+        type: "link",
+        href: "/tools/blockchain/calldata",
+        label: "Decode Calldata",
+      },
       {
         type: "link",
         href: "/tools/blockchain/publishtx",
