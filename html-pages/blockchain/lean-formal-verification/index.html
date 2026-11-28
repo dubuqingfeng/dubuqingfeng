@@ -1,0 +1,672 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Lean 形式化验证：从定理到链上字节码</title>
+  <meta name="description" content="用 Lean 4 的证明栈理解形式化验证：规格、模型、细化与信任边界，并看 LeanEVM、Jaune/Blanc、Solanalib、qedsvm 在以太坊与 Solana 上的实践。">
+  <script src="../../theme.js"></script>
+  <link rel="stylesheet" href="./style.css">
+  <script>document.documentElement.classList.add('js');</script>
+</head>
+<body>
+  <div class="progress" aria-hidden="true"><span id="progressBar"></span></div>
+  <a class="skip-link" href="#main">跳到正文</a>
+
+  <header class="site-header">
+    <a class="brand" href="./index.html">
+      <span class="brand-mark">⊢</span>
+      <span>Lean · Formal Verification</span>
+    </a>
+    <nav class="site-nav" aria-label="章节导航">
+      <a href="#why">为什么</a>
+      <a href="#lean">Lean</a>
+      <a href="#stack">验证栈</a>
+      <a href="#ethereum">以太坊</a>
+      <a href="#solana">Solana</a>
+      <a href="#tools">工具</a>
+      <a href="#pitfalls">边界</a>
+      <a href="#versions">版本</a>
+    </nav>
+    <div class="header-actions">
+      <a class="back-link" href="../../index.html">HTML 索引</a>
+      <button class="theme-toggle" type="button" data-theme-toggle aria-label="切换日间/夜间模式">
+        <span data-theme-icon aria-hidden="true">☾</span>
+      </button>
+    </div>
+  </header>
+
+  <main id="main">
+    <section class="hero">
+      <div class="hero-copy reveal">
+        <p class="eyebrow">Lean 4 · Proof Assistant · Ethereum / Solana</p>
+        <h1>测试只能说明你试过；<br><span>定理要说明所有输入。</span></h1>
+        <p class="lede">
+          形式化验证不是“再跑一遍测试”，而是把<strong>规格、程序模型和证明</strong>写成机器可检查的对象。
+          这篇从 Lean 4 的“命题即类型”讲到链上实践：以太坊的 EVM/字节码验证，和 Solana 的账户模型与 sBPF。
+        </p>
+        <div class="hero-actions">
+          <a class="button primary" href="#lean">看一个 Lean 证明</a>
+          <a class="button" href="#ethereum">跳到链上实践</a>
+        </div>
+        <div class="hero-meta">
+          <span>Lean 4.35</span>
+          <span>LeanEVM / Jaune / Blanc</span>
+          <span>Solanalib / qedsvm</span>
+        </div>
+      </div>
+
+      <div class="hero-visual reveal" aria-label="规格、模型、字节码与证明的关系">
+        <svg viewBox="0 0 760 380" role="img" aria-labelledby="heroTitle heroDesc">
+          <title id="heroTitle">从规格到字节码的证明链</title>
+          <desc id="heroDesc">左侧是规格，中间是 EVM/sBPF 模型与细化关系，右侧是字节码；底部是 Lean 内核检查。</desc>
+          <defs>
+            <marker id="arrow" markerWidth="9" markerHeight="9" refX="8" refY="4.5" orient="auto">
+              <path d="M0 0L9 4.5L0 9Z" fill="currentColor"/>
+            </marker>
+            <marker id="arrowIndigo" markerWidth="9" markerHeight="9" refX="8" refY="4.5" orient="auto">
+              <path d="M0 0L9 4.5L0 9Z" fill="#4338ca"/>
+            </marker>
+            <marker id="arrowGreen" markerWidth="9" markerHeight="9" refX="8" refY="4.5" orient="auto">
+              <path d="M0 0L9 4.5L0 9Z" fill="#047857"/>
+            </marker>
+            <linearGradient id="heroGlow" x1="0" x2="1">
+              <stop offset="0" stop-color="#4338ca" stop-opacity=".12"/>
+              <stop offset="1" stop-color="#b45309" stop-opacity=".04"/>
+            </linearGradient>
+          </defs>
+
+          <rect x="14" y="14" width="732" height="352" rx="24" fill="url(#heroGlow)"/>
+
+          <g class="svg-node">
+            <rect x="44" y="56" width="180" height="92" rx="14"/>
+            <text x="134" y="86" text-anchor="middle" class="svg-title">Spec</text>
+            <text x="134" y="108" text-anchor="middle" class="svg-sub">余额守恒 / 权限 / 不变量</text>
+            <text x="134" y="128" text-anchor="middle" class="svg-label">人写，必须被审阅</text>
+          </g>
+
+          <g class="svg-node">
+            <rect x="290" y="56" width="196" height="92" rx="14" stroke="var(--accent)"/>
+            <text x="388" y="86" text-anchor="middle" class="svg-title">Model</text>
+            <text x="388" y="108" text-anchor="middle" class="svg-sub">EVM / sBPF / 程序语义</text>
+            <text x="388" y="128" text-anchor="middle" class="svg-label">可执行，跑 conformance</text>
+          </g>
+
+          <g class="svg-node">
+            <rect x="552" y="56" width="164" height="92" rx="14" stroke="var(--green)"/>
+            <text x="634" y="86" text-anchor="middle" class="svg-title">Bytecode</text>
+            <text x="634" y="108" text-anchor="middle" class="svg-sub">部署的 .so / EVM code</text>
+            <text x="634" y="128" text-anchor="middle" class="svg-label">链上真正执行的字节</text>
+          </g>
+
+          <path d="M224 102 L290 102" class="svg-accent" marker-end="url(#arrowIndigo)"/>
+          <path d="M486 102 L552 102" class="svg-green" marker-end="url(#arrowGreen)"/>
+
+          <g class="svg-node">
+            <rect x="140" y="206" width="480" height="86" rx="14" stroke="var(--accent)"/>
+            <text x="380" y="236" text-anchor="middle" class="svg-title">Refinement / Hoare triple</text>
+            <text x="380" y="258" text-anchor="middle" class="svg-sub">“这段字节码”满足“这个规格”</text>
+            <text x="380" y="278" text-anchor="middle" class="svg-label">证明的对象是关系，不是某一次运行</text>
+          </g>
+
+          <path d="M134 148 L134 206" class="svg-line dash" marker-end="url(#arrow)"/>
+          <path d="M634 148 L634 206" class="svg-line dash" marker-end="url(#arrow)"/>
+
+          <path d="M380 292 L380 326" class="svg-green" marker-end="url(#arrowGreen)"/>
+          <text x="380" y="346" text-anchor="middle" class="svg-label">Lean kernel：检查证明项；信任边界由你显式列出</text>
+
+          <circle cx="388" cy="102" r="5" fill="var(--accent)" class="pulse"/>
+          <circle cx="634" cy="102" r="5" fill="var(--green)" class="pulse"/>
+        </svg>
+      </div>
+    </section>
+
+    <section class="section" id="why">
+      <div class="section-head reveal">
+        <div>
+          <p class="section-kicker">01 · Why Formal Verification</p>
+          <h2>测试、审计、定理，不是同一件事</h2>
+        </div>
+        <p class="section-note">
+          测试覆盖你想到的输入；审计依赖人的经验；定理要求“对所有输入、在给定模型下”成立。
+          代价和边界也完全不同。
+        </p>
+      </div>
+
+      <div class="table-wrap reveal">
+        <table>
+          <thead><tr><th>方法</th><th>能回答什么</th><th>不能回答什么</th><th>成本</th></tr></thead>
+          <tbody>
+            <tr><td>单元/集成测试</td><td>这些输入下行为正确</td><td>没测到的输入、组合爆炸</td><td>低</td></tr>
+            <tr><td>模糊测试</td><td>在一段时间/随机分布下没崩</td><td>不构成“对所有输入成立”</td><td>中</td></tr>
+            <tr><td>人工审计</td><td>已知模式、设计缺陷、经验判断</td><td>不穷尽状态空间，不可机器复核</td><td>中高</td></tr>
+            <tr><td>形式化验证</td><td>在 spec + model 下，定理对所有输入成立</td><td>spec 错了、模型不忠实、TCB 被攻破</td><td>高</td></tr>
+          </tbody>
+        </table>
+      </div>
+
+      <div class="callout warn reveal">
+        <span class="icon">!</span>
+        <p>
+          <strong>形式化验证不是“没有 bug”的同义词。</strong>
+          它证明的是：<em>在你看待世界的方式（模型）和你说想要的东西（规格）之下</em>，程序满足规格。
+          规格写错，证明越漂亮越危险。
+        </p>
+      </div>
+    </section>
+
+    <section class="section" id="lean">
+      <div class="section-head reveal">
+        <div>
+          <p class="section-kicker">02 · Lean in One Page</p>
+          <h2>命题即类型，证明即项</h2>
+        </div>
+        <p class="section-note">
+          Lean 4 是依赖类型论的证明助手：类型可以依赖值，命题是类型，证明是让该类型非空的项。
+          证明写完后由一个小内核检查，而不是“相信 tactic”。
+        </p>
+      </div>
+
+      <div class="grid-3">
+        <div class="card reveal">
+          <h3>依赖类型</h3>
+          <p class="svg-sub">类型可以带参数和值，例如 <code>Vector α n</code> 把长度放进类型；很多“数组越界”在类型层就消失。</p>
+        </div>
+        <div class="card reveal">
+          <h3>命题即类型</h3>
+          <p class="svg-sub"><code>P : Prop</code> 是一个类型；证明 <code>h : P</code> 是一个项。证明 <code>P → Q</code> 就是构造一个函数。</p>
+        </div>
+        <div class="card reveal">
+          <h3>可信内核</h3>
+          <p class="svg-sub"><code>simp</code>/<code>omega</code> 只是构造证明项的助手；最终由 Lean kernel 检查。TCB 比“整个 tactic 库”小得多。</p>
+        </div>
+      </div>
+
+      <div class="proof-panel reveal" style="margin-top:16px">
+        <div class="proof-steps">
+          <div class="proof-step active" data-proof-step="0">
+            <span class="n">1</span>
+            <div><strong>初始目标</strong><p>证明 transfer 保持总余额。</p></div>
+          </div>
+          <div class="proof-step" data-proof-step="1">
+            <span class="n">2</span>
+            <div><strong>展开定义</strong><p><code>simp [transfer]</code> 把函数展开成算术目标。</p></div>
+          </div>
+          <div class="proof-step" data-proof-step="2">
+            <span class="n">3</span>
+            <div><strong>算术收尾</strong><p><code>omega</code> 使用前提 <code>amt ≤ s.a</code> 关闭目标。</p></div>
+          </div>
+        </div>
+        <div class="goal" id="proofGoal"><span class="cm">-- 目标状态示意；真实项目由 lake build 检查</span>
+⊢ (transfer s amt).a + (transfer s amt).b = s.a + s.b</div>
+      </div>
+
+      <div class="code-block reveal">
+        <div class="code-head"><span>Transfer.lean · 结构示意（未在本地执行）</span><span>Lean 4</span></div>
+        <pre><code><span class="kw">import</span> Mathlib
+
+<span class="kw">structure</span> State <span class="kw">where</span>
+  a : Nat
+  b : Nat
+
+<span class="kw">def</span> transfer (s : State) (amt : Nat) : State :=
+  { s <span class="kw">with</span> a := s.a - amt, b := s.b + amt }
+
+<span class="kw">theorem</span> transfer_preserves_total
+    (s : State) (amt : Nat) (h : amt ≤ s.a) :
+    (transfer s amt).a + (transfer s amt).b = s.a + s.b := <span class="kw">by</span>
+  simp [transfer]
+  omega</code></pre>
+      </div>
+
+      <div class="callout reveal">
+        <span class="icon">⊢</span>
+        <p>
+          <strong>常见 tactic：</strong>
+          <code>simp</code> 化简、<code>omega</code> 线性算术、<code>induction</code> 归纳、<code>cases</code> 分类讨论、
+          <code>rw</code> 重写、<code>exact</code> 给出证明项。它们是“写证明”的工具，不是可信公理。
+        </p>
+      </div>
+    </section>
+
+    <section class="section" id="stack">
+      <div class="section-head reveal">
+        <div>
+          <p class="section-kicker">03 · The Verification Stack</p>
+          <h2>一条证明链，和一条信任链</h2>
+        </div>
+        <p class="section-note">
+          形式化验证从来不是“代码 → 定理”一步。中间有规格、模型、细化关系、证明检查器，
+          以及编译器/硬件等仍然被信任的东西。
+        </p>
+      </div>
+
+      <div class="trust-stack reveal">
+        <div class="trust-layer trusted">
+          <strong>1. 规格 Spec</strong>
+          <p>余额守恒、权限、状态机不变量、gas 上界。写错就证明错的东西。</p>
+          <span class="pill amber">人写 / 需审阅</span>
+        </div>
+        <div class="trust-layer trusted">
+          <strong>2. 模型 Model</strong>
+          <p>EVM / sBPF / 程序语义。模型不忠实，定理对真实链上行为没有意义。</p>
+          <span class="pill amber">可信 / 需 conformance</span>
+        </div>
+        <div class="trust-layer proved">
+          <strong>3. 细化 Refinement</strong>
+          <p>“这段字节码/程序”满足“这个规格”。可能是 Hoare triple，也可能是编译器正确性定理。</p>
+          <span class="pill green">被证明</span>
+        </div>
+        <div class="trust-layer proved">
+          <strong>4. 证明检查</strong>
+          <p>Lean kernel 检查证明项；<code>#print axioms</code> 可以列出依赖的公理。</p>
+          <span class="pill green">小内核</span>
+        </div>
+        <div class="trust-layer trusted">
+          <strong>5. 编译/运行</strong>
+          <p>Solc、LLVM、SBF 工具链、密码库、硬件。证明通常不覆盖这些，除非另有验证编译器。</p>
+          <span class="pill amber">仍需信任</span>
+        </div>
+      </div>
+
+      <div class="grid-2" style="margin-top:16px">
+        <div class="card reveal">
+          <h3>浅嵌入 vs 深嵌入</h3>
+          <p class="svg-sub">
+            <strong>浅嵌入</strong>：在 Lean 里直接写程序逻辑/状态机，证明容易，但和真实字节码之间有 gap。
+            <strong>深嵌入</strong>：把 EVM/sBPF 指令、内存、gas 都建模，能证明字节码，但模型和证明成本更高。
+          </p>
+        </div>
+        <div class="card reveal">
+          <h3>源码级 vs 字节码级</h3>
+          <p class="svg-sub">
+            源码级证明依赖编译器正确；字节码级证明绕开编译器，但必须信任 EVM/sBPF 语义。
+            Verity 选择“证明编译器到 Yul，信任 solc 到字节码”；Blanc 选择直接对部署字节码证明。
+          </p>
+        </div>
+      </div>
+
+      <div class="callout danger reveal">
+        <span class="icon">!</span>
+        <p>
+          <strong>“Proof of the wrong theorem”是最常见的失败。</strong>
+          证明通过只说明“Lean 接受了这个命题”；你还要问：这个命题是不是我真正想要的？
+          模型是不是链上真正跑的？字节码/源码是不是同一个版本？
+        </p>
+      </div>
+    </section>
+
+    <section class="section" id="ethereum">
+      <div class="section-head reveal">
+        <div>
+          <p class="section-kicker">04 · Practice on EVM / SVM</p>
+          <h2>从语义到字节码：两条链的实践</h2>
+        </div>
+        <p class="section-note">
+          以太坊的 Lean 生态分成 EVM/Yul 语义、共享原语、字节码验证栈和经过证明的编译器；Solana 则围绕账户模型、sBPF 与编译后的 .so。
+          选哪一层，决定了你还要信任什么。
+        </p>
+      </div>
+
+      <div class="chain-tabs reveal" role="tablist" aria-label="链上实践">
+        <button class="chain-tab active" type="button" data-chain-tab="eth">Ethereum</button>
+        <button class="chain-tab" type="button" data-chain-tab="sol">Solana</button>
+      </div>
+
+      <div class="chain-panel reveal" data-chain-panel="eth">
+        <div class="grid-3">
+          <div class="project-card">
+            <div class="head"><h3>LeanEVM</h3><span class="pill indigo">EVM 语义</span></div>
+            <p>Philogy 的 Lean 4 EVM 可执行模型（Cancun），用 Ethereum BlockchainTests 做 conformance。</p>
+            <ul>
+              <li>目标：给“编译到 EVM 的编译器”一个可引用的语义</li>
+              <li>256 位字用 8×32-bit limb，证明与 BitVec 256 等价</li>
+              <li>WIP；不是完整的主网客户端</li>
+            </ul>
+          </div>
+          <div class="project-card">
+            <div class="head"><h3>Jaune / Blanc</h3><span class="pill green">字节码</span></div>
+            <p>Jaune 是可执行 EVM 规范；Blanc 在其上做智能合约验证栈，直接针对部署字节码。</p>
+            <ul>
+              <li>Blanc 宣称覆盖 Curve 3pool/3Crv、USDC、Vyper nonreentrancy、EIP-7002</li>
+              <li>强调 exact gas、liveness、无额外公理（README 声称）</li>
+              <li>字节码从主网读取，不信任产生它的编译器</li>
+            </ul>
+          </div>
+          <div class="project-card">
+            <div class="head"><h3>EVMYulLean</h3><span class="pill indigo">EVM + Yul</span></div>
+            <p>Nethermind 的 EVM/Yul 形式模型；Yul 的 primops 尽量直接复用 EVM 语义。</p>
+            <ul>
+              <li>适合 Yul 级推理与编译器前端验证</li>
+              <li>有 conformance 与 Yul 语义测试</li>
+              <li>模型本身仍是信任边界</li>
+            </ul>
+          </div>
+          <div class="project-card">
+            <div class="head"><h3>EthLib</h3><span class="pill indigo">共享原语</span></div>
+            <p>Ethereum 官方的 Lean 原语库：U256、执行、共识、网络等分层定义与证明。</p>
+            <ul>
+              <li>让不同 Lean 项目共享同一套定义</li>
+              <li>部分原语可通过绑定给客户端用</li>
+              <li>仍在演进，不是完整执行层规范</li>
+            </ul>
+          </div>
+          <div class="project-card">
+            <div class="head"><h3>Verity</h3><span class="pill amber">编译器</span></div>
+            <p>Lean 4 写的智能合约 DSL/编译器，编译器各层有正确性证明；也可导入 Solidity。</p>
+            <ul>
+              <li>DSL → CompilationModel → IR → Yul 分层证明</li>
+              <li>Yul → 字节码交给 pinned solc，属于信任边界</li>
+              <li>README 声称编译器证明栈 0 公理、无 sorry</li>
+            </ul>
+          </div>
+          <div class="project-card">
+            <div class="head"><h3>EquiVM</h3><span class="pill green">细化</span></div>
+            <p>针对 EVM 字节码的 refinement 证明，基于 Stele 与 EVMLean 语义。</p>
+            <ul>
+              <li>把“字节码行为”与“规格”用 refinement relation 连接</li>
+              <li>示例包含 ERC20 正确性</li>
+              <li>TCB 包含 EVM 语义与 Lean 内核</li>
+            </ul>
+          </div>
+        </div>
+
+        <div class="table-wrap" style="margin-top:16px">
+          <table>
+            <thead><tr><th>项目</th><th>证明对象</th><th>绕开了什么</th><th>仍然信任什么</th></tr></thead>
+            <tbody>
+              <tr><td>LeanEVM</td><td>EVM 指令/调用/创建语义</td><td>无（它是语义基础）</td><td>模型忠实性、Lean 内核</td></tr>
+              <tr><td>Jaune / Blanc</td><td>部署字节码的性质</td><td>Solidity/Yul 编译器</td><td>EVM 语义、规格、gas 模型</td></tr>
+              <tr><td>EVMYulLean</td><td>EVM + Yul 语义</td><td>无（语义基础）</td><td>模型、conformance</td></tr>
+              <tr><td>Verity</td><td>DSL→Yul 编译器正确性</td><td>手写 Yul 的证明</td><td>solc 的 Yul→字节码</td></tr>
+              <tr><td>EquiVM</td><td>字节码 vs 规格的 refinement</td><td>源码级证明的编译器 gap</td><td>EVM 语义、spec、内核</td></tr>
+            </tbody>
+          </table>
+        </div>
+
+        <div class="callout warn" style="margin-top:16px">
+          <span class="icon">i</span>
+          <p>
+            <strong>实践顺序：</strong>
+            先决定你要证明“部署字节码”还是“编译器输出”。字节码级（Blanc/EquiVM）绕开编译器但模型更重；
+            编译器级（Verity）证明链更清晰，但 Yul→字节码仍要信任 solc。
+          </p>
+        </div>
+      </div>
+
+      <div class="chain-panel reveal" data-chain-panel="sol" id="solana" hidden>
+        <div class="grid-3">
+          <div class="project-card">
+            <div class="head"><h3>Solanalib</h3><span class="pill indigo">原语 / sBPF</span></div>
+            <p>Solana Foundation 的实验性 Lean 4 库：账户、指令、PDA、金融形状，以及 sBPF 指令语义。</p>
+            <ul>
+              <li>sBPF 语义是 OOPSLA 2025 Isabelle/HOL 形式化的 Lean 移植</li>
+              <li>用参考 VM 做验证；目标是“Solana 的 Mathlib”</li>
+              <li>README 明确标注 purely experimental</li>
+            </ul>
+          </div>
+          <div class="project-card">
+            <div class="head"><h3>qedsvm</h3><span class="pill green">编译后 .so</span></div>
+            <p>直接执行/验证编译后的 Solana sBPF 程序，而不是 Rust 源码；生成 Lean Hoare triple。</p>
+            <ul>
+              <li>对选定路径生成带 CU 上界的定理</li>
+              <li>Lean SVM 模型与 Mollusk/Agave 做差分测试</li>
+              <li>不自动证明任意整个程序；需要 IDL/overlay/trace</li>
+            </ul>
+          </div>
+          <div class="project-card">
+            <div class="head"><h3>Aeneas 提取</h3><span class="pill amber">Rust 源码</span></div>
+            <p>Verified-Privacy-Cash 用 Charon + Aeneas 把 Rust 程序提取成 Lean 模型，再写规格与证明。</p>
+            <ul>
+              <li>示例：transact 指令 12/12 函数透明、71/71 原语 opaque</li>
+              <li><code>check_public_amount</code> 的两个分支已证明</li>
+              <li>提取模型 ≠ 已证明整个程序；仍有 shim/未证明部分</li>
+            </ul>
+          </div>
+          <div class="project-card">
+            <div class="head"><h3>Sour / Kani</h3><span class="pill indigo">协议数学</span></div>
+            <p>Sour 的 Lean 4 + Kani 证明：池子守恒、LP 上限、OI 上限、正 PnL 守恒等。</p>
+            <ul>
+              <li>Lean 证明对 <code>Nat</code> 无界；Kani 对有界输入</li>
+              <li>账户认证、PDA、CPI 等运行时检查不在纯数学证明范围</li>
+              <li>适合“资金不变量”而不是“整程序正确”</li>
+            </ul>
+          </div>
+        </div>
+
+        <div class="table-wrap" style="margin-top:16px">
+          <table>
+            <thead><tr><th>项目</th><th>证明对象</th><th>起点</th><th>仍然信任什么</th></tr></thead>
+            <tbody>
+              <tr><td>Solanalib</td><td>账户/指令/金融原语、sBPF 语义</td><td>Lean 定义</td><td>实验性模型、参考 VM</td></tr>
+              <tr><td>qedsvm</td><td>选定字节码路径的 Hoare triple + CU</td><td>链上 <code>.so</code></td><td>SVM 模型、IDL/overlay、路径选择</td></tr>
+              <tr><td>Aeneas</td><td>Rust 函数提取后的模型与规格</td><td>Rust 源码</td><td>Charon/Aeneas、shim、未证明部分</td></tr>
+              <tr><td>Sour / Kani</td><td>协议资金不变量</td><td>数学/处理器</td><td>运行时/账户检查不在范围</td></tr>
+            </tbody>
+          </table>
+        </div>
+
+        <div class="callout danger" style="margin-top:16px">
+          <span class="icon">!</span>
+          <p>
+            <strong>Solana 的难点在账户，不只是算术。</strong>
+            一个“余额守恒”定理可能完全正确，但如果没有覆盖 owner 检查、PDA 派生、signer 权限、CPI 目标、
+            account aliasing 和序列化，它仍然不能说明程序安全。qedsvm 的 IDL/overlay 和 Aeneas 的 shim，
+            正是在补这些“模型与现实之间”的缝。
+          </p>
+        </div>
+      </div>
+    </section>
+
+    <section class="section" id="tools">
+      <div class="section-head reveal">
+        <div>
+          <p class="section-kicker">05 · Choose the Tool</p>
+          <h2>Lean 不是唯一答案</h2>
+        </div>
+        <p class="section-note">
+          Lean 适合“对所有输入成立”的定理和细化证明；有界模型检查、规则审计、模糊测试各有位置。
+          生产里通常是组合，而不是二选一。
+        </p>
+      </div>
+
+      <div class="table-wrap reveal">
+        <table>
+          <thead><tr><th>工具</th><th>方法</th><th>覆盖</th><th>成本</th><th>适合</th></tr></thead>
+          <tbody>
+            <tr><td>Lean 4</td><td>交互式定理证明</td><td>无界输入、细化、编译器正确性</td><td>高</td><td>核心协议、字节码、编译器</td></tr>
+            <tr><td>Kani</td><td>有界模型检查</td><td>Rust 函数、固定边界</td><td>中</td><td>快速 invariant、CI 门禁</td></tr>
+            <tr><td>Certora</td><td>规则/符号执行</td><td>EVM/Solana 合约</td><td>中</td><td>规则审计、持续集成</td></tr>
+            <tr><td>K Framework</td><td>可执行语义</td><td>语言/字节码</td><td>中高</td><td>语义定义、符号执行</td></tr>
+            <tr><td>Fuzzing / 审计</td><td>经验覆盖</td><td>未知模式、实现细节</td><td>低中</td><td>发现“你没想到的输入”</td></tr>
+          </tbody>
+        </table>
+      </div>
+
+      <div class="callout ok reveal">
+        <span class="icon">✓</span>
+        <p>
+          <strong>组合方式：</strong>
+          Kani/模糊测试快速扫不变量 → Lean 证明关键定理 → 字节码级验证/TEE 信任边界 → 独立审计。
+          Lean 证明不是“上线许可证”，它只是把某一部分的确定性提高了一个量级。
+        </p>
+      </div>
+    </section>
+
+    <section class="section" id="pitfalls">
+      <div class="section-head reveal">
+        <div>
+          <p class="section-kicker">06 · Trust Boundaries</p>
+          <h2>证明通过之后，还要问什么</h2>
+        </div>
+        <p class="section-note">
+          看到 <code>lake build</code> 通过，不等于可以上线。下面这些洞，任何一个都能让定理和真实系统脱节。
+        </p>
+      </div>
+
+      <div class="grid-2">
+        <div class="card reveal"><h4><code>sorry</code> / <code>admit</code></h4><p class="svg-sub">证明没写完，但 Lean 仍然接受文件；CI 必须禁止，或用 <code>#print axioms</code> 检查。</p></div>
+        <div class="card reveal"><h4><code>axiom</code></h4><p class="svg-sub">每加一个公理，TCB 就变大。Lean 自带 <code>propext</code>、<code>Classical.choice</code>、<code>Quot.sound</code>；额外的要逐条解释。</p></div>
+        <div class="card reveal"><h4><code>native_decide</code></h4><p class="svg-sub">把“具体计算”交给编译后的求值器；对字节码表、具体常量很方便，但会把求值器/编译器加入信任面。</p></div>
+        <div class="card reveal"><h4><code>unsafe</code> / FFI</h4><p class="svg-sub">逻辑层的证明不约束运行时的 <code>unsafe</code> 或外部函数；如果生产路径走 FFI，证明可能不适用。</p></div>
+        <div class="card reveal"><h4>规格写错</h4><p class="svg-sub">“余额守恒”可能没覆盖手续费、舍入、权限或暂停；定理只对你写的命题负责。</p></div>
+        <div class="card reveal"><h4>模型不忠实</h4><p class="svg-sub">EVM/sBPF 语义漏掉 gas、异常、调用深度、账户别名；conformance 测试是必要但不充分。</p></div>
+        <div class="card reveal"><h4>版本错位</h4><p class="svg-sub">证明针对 commit A，部署的是 commit B；字节码 hash、编译器版本、参数都要钉住。</p></div>
+        <div class="card reveal"><h4>可升级/管理员</h4><p class="svg-sub">代理、admin、治理可以改变行为；证明要覆盖升级路径，或明确“升级后定理失效”。</p></div>
+      </div>
+
+      <div class="code-block reveal">
+        <div class="code-head"><span>检查证明的“含金量”</span><span>Lean</span></div>
+        <pre><code><span class="cm">-- 1. 证明里是否还有 sorry？</span>
+<span class="cm">-- 2. 依赖了哪些公理？</span>
+#print axioms transfer_preserves_total
+
+<span class="cm">-- 3. 是否有 unsafe / implemented_by / FFI？</span>
+<span class="cm">-- 4. 定理的 statement 是否真的对应部署字节码？</span>
+<span class="cm">-- 5. 模型/编译器/参数版本是否钉住？</span></code></pre>
+      </div>
+
+      <div class="callout danger reveal">
+        <span class="icon">!</span>
+        <p>
+          <strong>一句话：</strong>
+          形式化验证把“所有输入”这件事变成了可检查的定理，但它也把“规格、模型、信任边界”放到了聚光灯下。
+          你需要的不只是证明，还需要能解释“这个定理到底说了什么”的人。
+        </p>
+      </div>
+    </section>
+
+    <section class="section" id="versions">
+      <div class="section-head reveal">
+        <div>
+          <p class="section-kicker">07 · Versions & Evidence</p>
+          <h2>按 2026-11-28 的仓库状态记录</h2>
+        </div>
+        <p class="section-note">
+          下面是本文引用项目的 HEAD 与 Lean toolchain（从仓库读取）。项目会变；数字/结论来自各项目 README，
+          本页没有独立复现它们的证明。
+        </p>
+      </div>
+
+      <div class="table-wrap reveal">
+        <table class="source-table">
+          <thead><tr><th>项目</th><th>HEAD</th><th>Lean</th><th>本文引用点</th></tr></thead>
+          <tbody>
+            <tr><td><a href="https://github.com/Philogy/LeanEVM" target="_blank" rel="noreferrer">Philogy/LeanEVM</a></td><td><a href="https://github.com/Philogy/LeanEVM/commit/ab5e33949f9053a494b05ab0143f9ca92567eb4a" target="_blank" rel="noreferrer">ab5e339</a></td><td>v4.30.0</td><td>EVM 可执行语义、Cancun、conformance</td></tr>
+            <tr><td><a href="https://github.com/skbaek/jaune" target="_blank" rel="noreferrer">skbaek/jaune</a></td><td><a href="https://github.com/skbaek/jaune/commit/c5d54363e101190dc2ef12d3f4e5a0e9d73284f9" target="_blank" rel="noreferrer">c5d5436</a></td><td>v4.35.0</td><td>可执行 EVM 规范、主网 conformance、WETH 案例</td></tr>
+            <tr><td><a href="https://github.com/skbaek/blanc" target="_blank" rel="noreferrer">skbaek/blanc</a></td><td><a href="https://github.com/skbaek/blanc/commit/251128de090c5b14c655d9be5dfbc7dd35076a92" target="_blank" rel="noreferrer">251128d</a></td><td>v4.35.0</td><td>部署字节码验证、Curve/USDC、exact gas</td></tr>
+            <tr><td><a href="https://github.com/NethermindEth/EVMYulLean" target="_blank" rel="noreferrer">NethermindEth/EVMYulLean</a></td><td><a href="https://github.com/NethermindEth/EVMYulLean/commit/047f63070309f436b66c61e276ab3b6d1169265a" target="_blank" rel="noreferrer">047f630</a></td><td>v4.22.0</td><td>EVM + Yul 语义、conformance</td></tr>
+            <tr><td><a href="https://github.com/ethereum/EthLib" target="_blank" rel="noreferrer">ethereum/EthLib</a></td><td><a href="https://github.com/ethereum/EthLib/commit/0c94ff3eecb022839a22615a00f8beb3cc0734ea" target="_blank" rel="noreferrer">0c94ff3</a></td><td>见仓库</td><td>共享 Ethereum 原语</td></tr>
+            <tr><td><a href="https://github.com/lfglabs-dev/verity" target="_blank" rel="noreferrer">lfglabs-dev/verity</a></td><td><a href="https://github.com/lfglabs-dev/verity/commit/49cd0808f694b1d683ca1a2bd18ef0629fe0985e" target="_blank" rel="noreferrer">49cd080</a></td><td>见仓库</td><td>经验证的合约编译器、DSL/Solidity 导入</td></tr>
+            <tr><td><a href="https://github.com/argotorg/EquiVM" target="_blank" rel="noreferrer">argotorg/EquiVM</a></td><td><a href="https://github.com/argotorg/EquiVM/commit/f40875a43ab59eade03bc515554f459549b16995" target="_blank" rel="noreferrer">f40875a</a></td><td>见仓库</td><td>EVM 字节码 refinement、ERC20</td></tr>
+            <tr><td><a href="https://github.com/solana-foundation/leanprover-solanalib" target="_blank" rel="noreferrer">solana-foundation/leanprover-solanalib</a></td><td><a href="https://github.com/solana-foundation/leanprover-solanalib/commit/8f3f5c6dcf4de6e175fecaefe6d589bdeb0b047e" target="_blank" rel="noreferrer">8f3f5c6</a></td><td>v4.34.0</td><td>Solana 原语、金融形状、sBPF 语义（实验）</td></tr>
+            <tr><td><a href="https://github.com/QEDGen/qedsvm" target="_blank" rel="noreferrer">QEDGen/qedsvm</a></td><td><a href="https://github.com/QEDGen/qedsvm/commit/898859599c83c436365c10ae1b0802ede014ca5b" target="_blank" rel="noreferrer">8988595</a></td><td>v4.30.0</td><td>编译后 <code>.so</code> 的 Lean Hoare triple</td></tr>
+            <tr><td><a href="https://github.com/hashcloak/Verified-Privacy-Cash" target="_blank" rel="noreferrer">hashcloak/Verified-Privacy-Cash</a></td><td><a href="https://github.com/hashcloak/Verified-Privacy-Cash/commit/50685abb46c57e6af3a5e62bf3e19444ad38ecd0" target="_blank" rel="noreferrer">50685ab</a></td><td>见仓库</td><td>Rust → Charon → Aeneas → Lean 提取</td></tr>
+          </tbody>
+        </table>
+      </div>
+
+      <div class="callout warn reveal">
+        <span class="icon">i</span>
+        <p>
+          <strong>证据边界：</strong>
+          本文没有在本地安装 Lean、没有复现这些仓库的 <code>lake build</code>；
+          “证明了多少”“0 公理”“conformance 通过”等描述均来自对应项目 README/文档。
+          生产使用前，请固定 commit、检查 <code>lean-toolchain</code>、<code>#print axioms</code> 和项目自己的 SECURITY/TRUST 文档。
+        </p>
+      </div>
+
+      <h3 style="margin-top:24px">最小检查清单</h3>
+      <ul class="checklist reveal">
+        <li><span><strong>规格</strong>：定理是否真的表达业务想要的性质？是否覆盖权限、费用、舍入、暂停、升级？</span></li>
+        <li><span><strong>模型</strong>：EVM/sBPF/程序语义是否与链上执行一致？有 conformance/差分测试吗？</span></li>
+        <li><span><strong>细化</strong>：定理是对源码、IR、Yul 还是部署字节码？中间信任了哪个编译器/汇编器？</span></li>
+        <li><span><strong>公理</strong>：<code>#print axioms</code> 是否只有 Lean 三条？有没有额外 <code>axiom</code>/<code>sorry</code>？</span></li>
+        <li><span><strong>运行时</strong>：<code>native_decide</code>、FFI、<code>unsafe</code>、<code>@[implemented_by]</code> 是否进入生产路径？</span></li>
+        <li><span><strong>版本</strong>：commit、toolchain、solc/SBF 工具链、链上字节码 hash 是否全部钉住？</span></li>
+        <li><span><strong>CI</strong>：<code>lake build</code> 是否在干净环境可复现？证明产物/报告是否随代码归档？</span></li>
+        <li><span><strong>人</strong>：是否有独立审阅规格与信任边界的人？证明不是审计的替代品。</span></li>
+      </ul>
+    </section>
+  </main>
+
+  <footer class="footer">
+    <p><strong>Lean Formal Verification · Ethereum / Solana</strong> · 页面核查 2026-11-28</p>
+    <p>本文是原理与实践导读，不是审计报告；项目数字与结论来自各自 README/文档，未在本地复现其证明。</p>
+    <p><a href="../../index.html">返回 HTML 索引</a> · <a href="https://lean-lang.org/" target="_blank" rel="noreferrer">Lean</a> · <a href="https://github.com/Philogy/LeanEVM" target="_blank" rel="noreferrer">LeanEVM</a> · <a href="https://github.com/solana-foundation/leanprover-solanalib" target="_blank" rel="noreferrer">Solanalib</a></p>
+  </footer>
+
+  <script>
+    (function () {
+      const bar = document.getElementById('progressBar');
+      const onScroll = () => {
+        const h = document.documentElement.scrollHeight - window.innerHeight;
+        bar.style.width = (h > 0 ? (window.scrollY / h) * 100 : 0) + '%';
+      };
+      window.addEventListener('scroll', onScroll, { passive: true });
+      onScroll();
+
+      const io = new IntersectionObserver((entries) => {
+        entries.forEach((entry) => {
+          if (entry.isIntersecting) {
+            entry.target.classList.add('is-visible');
+            io.unobserve(entry.target);
+          }
+        });
+      }, { threshold: 0.12 });
+      document.querySelectorAll('.reveal').forEach((el) => io.observe(el));
+
+      // Proof state explorer
+      const proofSteps = Array.from(document.querySelectorAll('[data-proof-step]'));
+      const proofGoal = document.getElementById('proofGoal');
+      const goals = [
+        '<span class="cm">-- 初始目标</span>\n⊢ (transfer s amt).a + (transfer s amt).b = s.a + s.b',
+        '<span class="cm">-- simp [transfer] 之后</span>\ns : State\namt : Nat\nh : amt ≤ s.a\n⊢ s.a - amt + (s.b + amt) = s.a + s.b',
+        '<span class="cm">-- omega 使用 h 关闭目标</span>\n<span class="ok">no goals</span>\n\n<span class="ok">QED</span>'
+      ];
+      function renderProof(i) {
+        const idx = Math.max(0, Math.min(goals.length - 1, i));
+        proofSteps.forEach((step, k) => step.classList.toggle('active', k === idx));
+        proofGoal.innerHTML = goals[idx];
+      }
+      proofSteps.forEach((step) => {
+        step.addEventListener('click', () => renderProof(Number(step.dataset.proofStep)));
+      });
+      renderProof(0);
+
+      // Chain tabs
+      document.querySelectorAll('[data-chain-tab]').forEach((btn) => {
+        btn.addEventListener('click', () => {
+          const key = btn.dataset.chainTab;
+          document.querySelectorAll('[data-chain-tab]').forEach((b) => {
+            b.classList.toggle('active', b === btn);
+          });
+          document.querySelectorAll('[data-chain-panel]').forEach((panel) => {
+            panel.hidden = panel.dataset.chainPanel !== key;
+          });
+          const hash = key === 'sol' ? '#solana' : '#ethereum';
+          history.replaceState(null, '', hash);
+        });
+      });
+
+      // Header anchors: switch the right chain tab before scrolling.
+      document.querySelectorAll('.site-nav a[href="#ethereum"], .site-nav a[href="#solana"]').forEach((a) => {
+        a.addEventListener('click', (e) => {
+          const href = a.getAttribute('href');
+          const key = href === '#solana' ? 'sol' : 'eth';
+          const tab = document.querySelector('[data-chain-tab="' + key + '"]');
+          if (tab) tab.click();
+          const target = document.querySelector(href);
+          if (target) {
+            e.preventDefault();
+            requestAnimationFrame(() => {
+              target.scrollIntoView({ behavior: 'smooth', block: 'start' });
+              history.replaceState(null, '', href);
+            });
+          }
+        });
+      });
+    })();
+  </script>
+</body>
+</html>
